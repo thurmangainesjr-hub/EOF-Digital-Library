@@ -1,0 +1,520 @@
+// EOF Digital Library - Database Schema
+// 14 Tables for complete library management
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================
+// USER & AUTH
+// =====================================
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  passwordHash      String
+  name              String
+  avatar            String?
+  role              UserRole  @default(READER)
+  emailVerified     Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  lastLoginAt       DateTime?
+
+  // Relations
+  membership        Membership?
+  creatorProfile    CreatorProfile?
+  orders            Order[]
+  readingSessions   ReadingSession[]
+  adaptationPrefs   AdaptationPreference[]
+  adaptationReqs    AdaptationRequest[]
+  legalAcceptances  LegalAcceptance[]
+  bookshelves       Bookshelf[]
+
+  @@index([email])
+  @@index([role])
+}
+
+enum UserRole {
+  READER
+  CREATOR
+  ADMIN
+  SUPER_ADMIN
+}
+
+// =====================================
+// MEMBERSHIP & BILLING
+// =====================================
+
+model Membership {
+  id                  String           @id @default(uuid())
+  userId              String           @unique
+  user                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tier                MembershipTier   @default(FREE)
+  status              MembershipStatus @default(ACTIVE)
+
+  stripeCustomerId    String?          @unique
+  stripeSubscriptionId String?         @unique
+
+  currentPeriodStart  DateTime?
+  currentPeriodEnd    DateTime?
+  cancelAtPeriodEnd   Boolean          @default(false)
+
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  @@index([stripeCustomerId])
+  @@index([status])
+}
+
+enum MembershipTier {
+  FREE
+  MEMBER
+  CREATOR
+}
+
+enum MembershipStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+// =====================================
+// CREATOR PROFILES
+// =====================================
+
+model CreatorProfile {
+  id                    String    @id @default(uuid())
+  userId                String    @unique
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  displayName           String
+  bio                   String?   @db.Text
+  website               String?
+  socialLinks           Json?     // { twitter, instagram, etc }
+
+  // Payout info
+  payoutMethod          String?   // stripe_connect, paypal, etc
+  payoutAccountId       String?
+
+  // Stats
+  totalEarnings         Decimal   @default(0) @db.Decimal(10, 2)
+  totalSales            Int       @default(0)
+
+  // Verification
+  verified              Boolean   @default(false)
+  verifiedAt            DateTime?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  products              Product[]
+  externalStores        ExternalStoreConnection[]
+
+  @@index([verified])
+}
+
+// =====================================
+// PRODUCTS (Books, Content)
+// =====================================
+
+model Product {
+  id                    String          @id @default(uuid())
+  creatorId             String
+  creator               CreatorProfile  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  title                 String
+  slug                  String          @unique
+  description           String?         @db.Text
+  coverImage            String?
+
+  // Pricing
+  price                 Decimal         @default(0) @db.Decimal(10, 2)
+  currency              String          @default("USD")
+  isFree                Boolean         @default(false)
+  memberIncluded        Boolean         @default(true) // Included in membership
+
+  // Content type
+  type                  ProductType     @default(EBOOK)
+  format                String?         // epub, pdf, etc
+  pageCount             Int?
+  wordCount             Int?
+
+  // Source
+  source                ProductSource   @default(ORIGINAL)
+  gutenbergId           String?         // Project Gutenberg ID if applicable
+  externalUrl           String?
+
+  // Status
+  status                ProductStatus   @default(DRAFT)
+  publishedAt           DateTime?
+
+  // Adaptation rights
+  adaptationAllowed     Boolean         @default(false)
+  adaptationTerms       String?         @db.Text
+  adaptationFee         Decimal?        @db.Decimal(10, 2)
+
+  // Stats
+  viewCount             Int             @default(0)
+  downloadCount         Int             @default(0)
+  averageRating         Decimal?        @db.Decimal(2, 1)
+  ratingCount           Int             @default(0)
+
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  // Relations
+  genres                ProductGenre[]
+  files                 ProductFile[]
+  orders                Order[]
+  readingSessions       ReadingSession[]
+  adaptationRequests    AdaptationRequest[]
+  bookshelfItems        BookshelfItem[]
+
+  @@index([slug])
+  @@index([creatorId])
+  @@index([status])
+  @@index([source])
+  @@index([adaptationAllowed])
+}
+
+enum ProductType {
+  EBOOK
+  AUDIOBOOK
+  ARTICLE
+  SHORT_STORY
+  NOVELLA
+  NOVEL
+  ANTHOLOGY
+  SCREENPLAY
+  GRAPHIC_NOVEL
+}
+
+enum ProductSource {
+  ORIGINAL        // Creator's original work
+  GUTENBERG       // Project Gutenberg public domain
+  PUBLIC_DOMAIN   // Other public domain
+  LICENSED        // Licensed from external source
+}
+
+enum ProductStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  ARCHIVED
+  REJECTED
+}
+
+// =====================================
+// GENRES
+// =====================================
+
+model Genre {
+  id          String         @id @default(uuid())
+  name        String         @unique
+  slug        String         @unique
+  description String?
+  icon        String?
+  parentId    String?
+  parent      Genre?         @relation("GenreHierarchy", fields: [parentId], references: [id])
+  children    Genre[]        @relation("GenreHierarchy")
+
+  products    ProductGenre[]
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model ProductGenre {
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  genreId     String
+  genre       Genre    @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([productId, genreId])
+}
+
+// =====================================
+// PRODUCT FILES
+// =====================================
+
+model ProductFile {
+  id          String    @id @default(uuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  filename    String
+  fileUrl     String
+  fileSize    Int       // bytes
+  mimeType    String
+  format      String    // epub, pdf, mobi, mp3, etc
+
+  isPrimary   Boolean   @default(false)
+
+  createdAt   DateTime  @default(now())
+
+  @@index([productId])
+  @@index([format])
+}
+
+// =====================================
+// EXTERNAL STORE CONNECTIONS
+// =====================================
+
+model ExternalStoreConnection {
+  id            String          @id @default(uuid())
+  creatorId     String
+  creator       CreatorProfile  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  storeName     String          // amazon, apple_books, kobo, etc
+  storeUrl      String?
+  apiKey        String?
+  apiSecret     String?
+
+  isActive      Boolean         @default(true)
+  lastSyncAt    DateTime?
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@unique([creatorId, storeName])
+  @@index([storeName])
+}
+
+// =====================================
+// ORDERS & PURCHASES
+// =====================================
+
+model Order {
+  id                  String       @id @default(uuid())
+  userId              String
+  user                User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId           String
+  product             Product      @relation(fields: [productId], references: [id])
+
+  amount              Decimal      @db.Decimal(10, 2)
+  currency            String       @default("USD")
+  status              OrderStatus  @default(PENDING)
+
+  stripePaymentId     String?      @unique
+  stripeInvoiceId     String?
+
+  // Creator payout tracking
+  creatorAmount       Decimal?     @db.Decimal(10, 2)
+  platformFee         Decimal?     @db.Decimal(10, 2)
+  payoutStatus        PayoutStatus @default(PENDING)
+  paidOutAt           DateTime?
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([productId])
+  @@index([status])
+  @@index([payoutStatus])
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+}
+
+// =====================================
+// READING SESSIONS
+// =====================================
+
+model ReadingSession {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // Progress tracking
+  currentPage     Int       @default(0)
+  totalPages      Int?
+  percentComplete Decimal   @default(0) @db.Decimal(5, 2)
+
+  // Time tracking
+  totalReadTime   Int       @default(0) // seconds
+  lastReadAt      DateTime  @default(now())
+
+  // Bookmarks and notes
+  bookmarks       Json?     // [{ page, note, createdAt }]
+  highlights      Json?     // [{ page, text, color, createdAt }]
+
+  startedAt       DateTime  @default(now())
+  finishedAt      DateTime?
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+  @@index([lastReadAt])
+}
+
+// =====================================
+// ADAPTATION (Griot AI Integration)
+// =====================================
+
+model AdaptationPreference {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  preferredFormat String    // film, tv_series, game, etc
+  targetAudience  String?   // adult, young_adult, children
+  tonePreference  String?   // dark, light, balanced
+
+  // Griot AI settings
+  griotProjectId  String?   // Linked Griot project ID
+  autoSync        Boolean   @default(false)
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model AdaptationRequest {
+  id              String              @id @default(uuid())
+  userId          String
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product             @relation(fields: [productId], references: [id])
+
+  // Request details
+  targetFormat    String              // film, game, etc
+  notes           String?             @db.Text
+
+  // Status
+  status          AdaptationStatus    @default(PENDING)
+  reviewedAt      DateTime?
+  reviewedBy      String?
+  reviewNotes     String?             @db.Text
+
+  // Payment
+  feeAmount       Decimal?            @db.Decimal(10, 2)
+  feePaid         Boolean             @default(false)
+  paidAt          DateTime?
+
+  // Griot AI integration
+  griotProjectId  String?
+  griotExportUrl  String?
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@index([userId])
+  @@index([productId])
+  @@index([status])
+}
+
+enum AdaptationStatus {
+  PENDING
+  APPROVED
+  DENIED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+// =====================================
+// LEGAL & COMPLIANCE
+// =====================================
+
+model LegalAcceptance {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  documentType  String    // tos, privacy, creator_agreement, adaptation_rights
+  documentVersion String
+
+  acceptedAt    DateTime  @default(now())
+  ipAddress     String?
+  userAgent     String?
+
+  @@unique([userId, documentType])
+  @@index([documentType])
+}
+
+// =====================================
+// ADMIN
+// =====================================
+
+model AdminReview {
+  id            String       @id @default(uuid())
+
+  entityType    String       // product, creator, adaptation_request
+  entityId      String
+
+  reviewerId    String
+  action        ReviewAction
+  notes         String?      @db.Text
+
+  createdAt     DateTime     @default(now())
+
+  @@index([entityType, entityId])
+  @@index([reviewerId])
+}
+
+enum ReviewAction {
+  APPROVED
+  REJECTED
+  FLAGGED
+  UNFLAGGED
+}
+
+// =====================================
+// BOOKSHELVES
+// =====================================
+
+model Bookshelf {
+  id          String          @id @default(uuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  description String?
+  isPublic    Boolean         @default(false)
+  isDefault   Boolean         @default(false) // "My Books" default shelf
+
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  items       BookshelfItem[]
+
+  @@index([userId])
+  @@index([isPublic])
+}
+
+model BookshelfItem {
+  id          String    @id @default(uuid())
+  bookshelfId String
+  bookshelf   Bookshelf @relation(fields: [bookshelfId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  addedAt     DateTime  @default(now())
+  sortOrder   Int       @default(0)
+
+  @@unique([bookshelfId, productId])
+  @@index([bookshelfId])
+}

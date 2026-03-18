@@ -2,18 +2,23 @@
  * Membership Routes
  *
  * Handles Stripe subscriptions for $5/month membership
+ * Uses Stripe Checkout Sessions for secure payment flow
  */
 
 import express from 'express';
 import Stripe from 'stripe';
 import { requireAuth } from '../middleware/auth.js';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Initialize Stripe (handle missing key gracefully)
+const stripe = process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes('placeholder')
+  ? new Stripe(process.env.STRIPE_SECRET_KEY)
+  : null;
 
 const MEMBERSHIP_PRICE_ID = process.env.STRIPE_PRICE_ID;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5174';
 
 // Get current membership
 router.get('/me', requireAuth, async (req, res) => {
@@ -34,53 +39,132 @@ router.get('/me', requireAuth, async (req, res) => {
   }
 });
 
-// Subscribe to membership
-router.post('/subscribe', requireAuth, async (req, res) => {
-  try {
-    const { paymentMethodId } = req.body;
+// Get Stripe config (publishable key for frontend)
+router.get('/config', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
+      isConfigured: stripe !== null
+    }
+  });
+});
 
-    let membership = await prisma.membership.findUnique({
-      where: { userId: req.user.id }
+// Create Checkout Session for subscription
+router.post('/create-checkout-session', requireAuth, async (req, res) => {
+  try {
+    if (!stripe) {
+      return res.status(503).json({
+        success: false,
+        error: 'Stripe is not configured. Please set up Stripe API keys.'
+      });
+    }
+
+    const user = req.user;
+
+    // Check if user already has active membership
+    const existingMembership = await prisma.membership.findUnique({
+      where: { userId: user.id }
     });
 
-    // Create or get Stripe customer
-    let customerId = membership?.stripeCustomerId;
+    if (existingMembership?.status === 'ACTIVE') {
+      return res.status(400).json({
+        success: false,
+        error: 'You already have an active membership'
+      });
+    }
+
+    // Get or create Stripe customer
+    let customerId = existingMembership?.stripeCustomerId;
 
     if (!customerId) {
       const customer = await stripe.customers.create({
-        email: req.user.email,
-        name: req.user.name,
-        payment_method: paymentMethodId,
-        invoice_settings: {
-          default_payment_method: paymentMethodId
+        email: user.email,
+        name: user.displayName || user.name,
+        metadata: {
+          userId: user.id
         }
       });
       customerId = customer.id;
-    } else {
-      await stripe.paymentMethods.attach(paymentMethodId, {
-        customer: customerId
-      });
-      await stripe.customers.update(customerId, {
-        invoice_settings: {
-          default_payment_method: paymentMethodId
+
+      // Update membership with customer ID
+      await prisma.membership.upsert({
+        where: { userId: user.id },
+        update: { stripeCustomerId: customerId },
+        create: {
+          userId: user.id,
+          tier: 'FREE',
+          status: 'INACTIVE',
+          stripeCustomerId: customerId
         }
       });
     }
 
-    // Create subscription
-    const subscription = await stripe.subscriptions.create({
+    // Create Checkout Session
+    const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      items: [{ price: MEMBERSHIP_PRICE_ID }],
-      expand: ['latest_invoice.payment_intent']
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: MEMBERSHIP_PRICE_ID,
+          quantity: 1
+        }
+      ],
+      mode: 'subscription',
+      success_url: `${FRONTEND_URL}/membership?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${FRONTEND_URL}/membership?canceled=true`,
+      metadata: {
+        userId: user.id
+      }
     });
 
-    // Update membership in database
-    membership = await prisma.membership.update({
+    res.json({
+      success: true,
+      data: {
+        sessionId: session.id,
+        url: session.url
+      }
+    });
+  } catch (error) {
+    console.error('Checkout session error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to create checkout session'
+    });
+  }
+});
+
+// Verify checkout session and activate membership
+router.post('/verify-session', requireAuth, async (req, res) => {
+  try {
+    if (!stripe) {
+      return res.status(503).json({
+        success: false,
+        error: 'Stripe is not configured'
+      });
+    }
+
+    const { sessionId } = req.body;
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['subscription']
+    });
+
+    if (session.payment_status !== 'paid') {
+      return res.status(400).json({
+        success: false,
+        error: 'Payment not completed'
+      });
+    }
+
+    const subscription = session.subscription;
+
+    // Update membership
+    const membership = await prisma.membership.update({
       where: { userId: req.user.id },
       data: {
         tier: 'MEMBER',
         status: 'ACTIVE',
-        stripeCustomerId: customerId,
         stripeSubscriptionId: subscription.id,
         currentPeriodStart: new Date(subscription.current_period_start * 1000),
         currentPeriodEnd: new Date(subscription.current_period_end * 1000)
@@ -89,16 +173,52 @@ router.post('/subscribe', requireAuth, async (req, res) => {
 
     res.json({
       success: true,
-      data: {
-        membership,
-        subscriptionId: subscription.id
-      }
+      data: { membership }
     });
   } catch (error) {
-    console.error('Subscription error:', error);
+    console.error('Verify session error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Subscription failed'
+      error: 'Failed to verify session'
+    });
+  }
+});
+
+// Create billing portal session (for managing subscription)
+router.post('/create-portal-session', requireAuth, async (req, res) => {
+  try {
+    if (!stripe) {
+      return res.status(503).json({
+        success: false,
+        error: 'Stripe is not configured'
+      });
+    }
+
+    const membership = await prisma.membership.findUnique({
+      where: { userId: req.user.id }
+    });
+
+    if (!membership?.stripeCustomerId) {
+      return res.status(400).json({
+        success: false,
+        error: 'No customer found'
+      });
+    }
+
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: membership.stripeCustomerId,
+      return_url: `${FRONTEND_URL}/membership`
+    });
+
+    res.json({
+      success: true,
+      data: { url: portalSession.url }
+    });
+  } catch (error) {
+    console.error('Portal session error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create portal session'
     });
   }
 });
@@ -106,6 +226,13 @@ router.post('/subscribe', requireAuth, async (req, res) => {
 // Cancel subscription
 router.post('/cancel', requireAuth, async (req, res) => {
   try {
+    if (!stripe) {
+      return res.status(503).json({
+        success: false,
+        error: 'Stripe is not configured'
+      });
+    }
+
     const membership = await prisma.membership.findUnique({
       where: { userId: req.user.id }
     });
@@ -134,6 +261,7 @@ router.post('/cancel', requireAuth, async (req, res) => {
       message: 'Subscription will cancel at period end'
     });
   } catch (error) {
+    console.error('Cancel error:', error);
     res.status(500).json({
       success: false,
       error: 'Cancellation failed'
@@ -141,37 +269,73 @@ router.post('/cancel', requireAuth, async (req, res) => {
   }
 });
 
-// Stripe webhook
-router.post('/webhook',
-  express.raw({ type: 'application/json' }),
-  async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-    let event;
+// Stripe webhook (called by Stripe servers)
+router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  if (!stripe) {
+    return res.status(503).send('Stripe not configured');
+  }
 
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.STRIPE_WEBHOOK_SECRET
-      );
-    } catch (err) {
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
+  const sig = req.headers['stripe-signature'];
+  let event;
 
-    // Handle events
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    console.error('Webhook signature error:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  console.log('Webhook event:', event.type);
+
+  // Handle events
+  try {
     switch (event.type) {
+      case 'checkout.session.completed':
+        await handleCheckoutComplete(event.data.object);
+        break;
       case 'customer.subscription.updated':
-      case 'customer.subscription.deleted':
         await handleSubscriptionChange(event.data.object);
+        break;
+      case 'customer.subscription.deleted':
+        await handleSubscriptionDeleted(event.data.object);
         break;
       case 'invoice.payment_failed':
         await handlePaymentFailed(event.data.object);
         break;
+      case 'invoice.payment_succeeded':
+        await handlePaymentSucceeded(event.data.object);
+        break;
     }
-
-    res.json({ received: true });
+  } catch (error) {
+    console.error('Webhook handler error:', error);
   }
-);
+
+  res.json({ received: true });
+});
+
+async function handleCheckoutComplete(session) {
+  const userId = session.metadata?.userId;
+  if (!userId) return;
+
+  const subscription = await stripe.subscriptions.retrieve(session.subscription);
+
+  await prisma.membership.update({
+    where: { userId },
+    data: {
+      tier: 'MEMBER',
+      status: 'ACTIVE',
+      stripeSubscriptionId: subscription.id,
+      currentPeriodStart: new Date(subscription.current_period_start * 1000),
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000)
+    }
+  });
+
+  console.log(`Membership activated for user ${userId}`);
+}
 
 async function handleSubscriptionChange(subscription) {
   const membership = await prisma.membership.findFirst({
@@ -183,8 +347,27 @@ async function handleSubscriptionChange(subscription) {
   await prisma.membership.update({
     where: { id: membership.id },
     data: {
-      status: subscription.status === 'active' ? 'ACTIVE' : 'CANCELED',
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000)
+      status: subscription.status === 'active' ? 'ACTIVE' :
+              subscription.status === 'past_due' ? 'PAST_DUE' : 'INACTIVE',
+      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      cancelAtPeriodEnd: subscription.cancel_at_period_end
+    }
+  });
+}
+
+async function handleSubscriptionDeleted(subscription) {
+  const membership = await prisma.membership.findFirst({
+    where: { stripeSubscriptionId: subscription.id }
+  });
+
+  if (!membership) return;
+
+  await prisma.membership.update({
+    where: { id: membership.id },
+    data: {
+      tier: 'FREE',
+      status: 'CANCELED',
+      stripeSubscriptionId: null
     }
   });
 }
@@ -199,6 +382,24 @@ async function handlePaymentFailed(invoice) {
   await prisma.membership.update({
     where: { id: membership.id },
     data: { status: 'PAST_DUE' }
+  });
+}
+
+async function handlePaymentSucceeded(invoice) {
+  if (invoice.billing_reason !== 'subscription_cycle') return;
+
+  const membership = await prisma.membership.findFirst({
+    where: { stripeCustomerId: invoice.customer }
+  });
+
+  if (!membership) return;
+
+  await prisma.membership.update({
+    where: { id: membership.id },
+    data: {
+      status: 'ACTIVE',
+      currentPeriodEnd: new Date(invoice.lines.data[0]?.period?.end * 1000)
+    }
   });
 }
 

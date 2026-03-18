@@ -13,6 +13,7 @@ import CreatorStudio from './pages/CreatorStudio';
 import Membership from './pages/Membership';
 import StoryTime from './pages/StoryTime';
 import Gutenberg from './pages/Gutenberg';
+import GutenbergReader from './pages/GutenbergReader';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -34,6 +35,7 @@ function App() {
             <Route path="membership" element={<Membership />} />
             <Route path="story-time" element={<StoryTime />} />
             <Route path="gutenberg" element={<Gutenberg />} />
+            <Route path="gutenberg/read/:id" element={<GutenbergReader />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

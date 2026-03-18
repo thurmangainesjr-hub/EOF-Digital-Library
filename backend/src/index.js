@@ -22,6 +22,8 @@ import bookshelfRoutes from './routes/bookshelves.js';
 import readingRoutes from './routes/reading.js';
 import adaptationRoutes from './routes/adaptations.js';
 import adminRoutes from './routes/admin.js';
+import gutenbergRoutes from './routes/gutenberg.js';
+import aiRoutes from './routes/ai.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -82,6 +84,8 @@ app.use('/api/bookshelves', bookshelfRoutes);
 app.use('/api/reading', readingRoutes);
 app.use('/api/adaptations', adaptationRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/gutenberg', gutenbergRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Error handler
 app.use(errorHandler);

@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useMutation } from '@tanstack/react-query';
+import api from '../services/api';
 import {
   FiMessageCircle, FiSend, FiX, FiMinimize2, FiMaximize2,
-  FiBook, FiHeadphones, FiZap, FiHelpCircle, FiUser
+  FiBook, FiHeadphones, FiZap, FiHelpCircle, FiUser, FiRefreshCw
 } from 'react-icons/fi';
 
 // AI Agent personalities
@@ -14,7 +16,12 @@ const AGENTS = {
     avatar: '📚',
     color: 'from-blue-500 to-blue-600',
     greeting: "Hello! I'm Sage, your library assistant. I can help you discover books, provide summaries, and answer questions about our collection. How can I assist you today?",
-    capabilities: ['Book recommendations', 'Plot summaries', 'Author info', 'Genre exploration']
+    capabilities: ['Book recommendations', 'Plot summaries', 'Author info', 'Genre exploration'],
+    quickActions: [
+      { label: 'Recommend books', action: 'recommend', query: 'popular classics' },
+      { label: 'Find similar', action: 'similar', query: '' },
+      { label: 'Explain a book', action: 'explain', query: '' }
+    ]
   },
   storyteller: {
     id: 'storyteller',
@@ -23,7 +30,12 @@ const AGENTS = {
     avatar: '🎭',
     color: 'from-pink-500 to-purple-600',
     greeting: "Welcome! I'm Aurora, your Story Time guide. I can recommend narrations, help you find live readings, and even give you a preview of what's playing. What would you like to explore?",
-    capabilities: ['Narration recommendations', 'Live schedule', 'Preview clips', 'Narrator info']
+    capabilities: ['Narration recommendations', 'Live schedule', 'Preview clips', 'Narrator info'],
+    quickActions: [
+      { label: 'Suggest audiobooks', action: 'suggest-audio', query: 'relaxing' },
+      { label: 'Narration tips', action: 'narration-tips', query: '' },
+      { label: 'Live preview', action: 'live-preview', query: '' }
+    ]
   },
   adapter: {
     id: 'adapter',
@@ -32,7 +44,12 @@ const AGENTS = {
     avatar: '✨',
     color: 'from-yellow-500 to-orange-500',
     greeting: "Hi there! I'm Prism, your Griot AI specialist. I help transform books into audiobooks, screenplays, games, and more. Ready to create something amazing?",
-    capabilities: ['Adaptation guidance', 'Format selection', 'Griot AI tips', 'Export help']
+    capabilities: ['Adaptation guidance', 'Format selection', 'Griot AI tips', 'Export help'],
+    quickActions: [
+      { label: 'Adaptation ideas', action: 'adaptation-ideas', query: '' },
+      { label: 'Format advice', action: 'format-advice', query: '' },
+      { label: 'Rights info', action: 'rights-info', query: '' }
+    ]
   }
 };
 
@@ -42,8 +59,8 @@ function AIAgent({ agentType = 'librarian', context = {}, onClose, minimized = f
     { role: 'assistant', content: agent.greeting, timestamp: new Date() }
   ]);
   const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const [isMinimized, setIsMinimized] = useState(minimized);
+  const [conversationHistory, setConversationHistory] = useState([]);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -54,50 +71,64 @@ function AIAgent({ agentType = 'librarian', context = {}, onClose, minimized = f
     scrollToBottom();
   }, [messages]);
 
-  // Simulate AI response based on agent type and input
-  const generateResponse = async (userMessage) => {
-    setIsTyping(true);
+  // Chat mutation
+  const chatMutation = useMutation({
+    mutationFn: async (message) => {
+      const res = await api.post('/ai/chat', {
+        agentType,
+        message,
+        conversationHistory
+      });
+      return res.data.data;
+    },
+    onSuccess: (data) => {
+      // Add AI response
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: data.response,
+        timestamp: new Date(),
+        isAI: data.isAI
+      }]);
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
-
-    let response = '';
-    const lowerMessage = userMessage.toLowerCase();
-
-    if (agentType === 'librarian') {
-      if (lowerMessage.includes('recommend') || lowerMessage.includes('suggest')) {
-        response = "Based on our collection, I'd recommend:\n\n📖 **Pride and Prejudice** - A timeless romance\n📖 **Frankenstein** - Gothic horror classic\n📖 **The Time Machine** - Pioneering sci-fi\n\nWould you like me to tell you more about any of these?";
-      } else if (lowerMessage.includes('summary') || lowerMessage.includes('about')) {
-        response = "I'd be happy to provide a summary! Which book would you like to learn about? You can ask about any title in our library.";
-      } else if (lowerMessage.includes('dracula')) {
-        response = "**Dracula** by Bram Stoker (1897)\n\nA Gothic horror novel told through letters and diary entries. It follows Jonathan Harker's visit to Count Dracula's castle and the subsequent battle against the vampire in England.\n\n⭐ Available for free (Public Domain)\n🎭 Adaptation-ready for Griot AI";
-      } else {
-        response = "I can help you with:\n• Finding specific books\n• Getting plot summaries\n• Discovering similar titles\n• Learning about authors\n\nWhat would you like to explore?";
-      }
-    } else if (agentType === 'storyteller') {
-      if (lowerMessage.includes('live') || lowerMessage.includes('schedule')) {
-        response = "📺 **Upcoming Live Sessions:**\n\n🔴 **NOW LIVE** - Story Time with Kids: Peter Pan\n⏰ In 1 hour - Dracula Chapter 5 with Elena\n⏰ Tomorrow - Horror Night: The Raven\n\nWould you like me to set a reminder?";
-      } else if (lowerMessage.includes('audiobook') || lowerMessage.includes('listen')) {
-        response = "🎧 **Popular Audiobooks:**\n\n1. Sherlock Holmes - Narrated by David Williams (45 min)\n2. Frankenstein - Narrated by James Anderson (35 min)\n3. Pride and Prejudice - Narrated by Sarah Mitchell (28 min)\n\nShall I play a preview?";
-      } else {
-        response = "I can help you discover:\n• Live reading schedules\n• Audiobook recommendations\n• Narrator information\n• Preview clips\n\nWhat sounds interesting?";
-      }
-    } else if (agentType === 'adapter') {
-      if (lowerMessage.includes('audiobook') || lowerMessage.includes('audio')) {
-        response = "🎙️ **Creating an Audiobook:**\n\n1. Select your book in the Library\n2. Click 'Export to Griot AI'\n3. Choose 'Audiobook' format\n4. Select voice and style\n5. Generate!\n\nWant me to guide you through the process?";
-      } else if (lowerMessage.includes('screenplay') || lowerMessage.includes('film')) {
-        response = "🎬 **Screenplay Adaptation:**\n\nGriot AI can transform any book into a professional screenplay with:\n• Scene breakdowns\n• Character dialogue\n• Stage directions\n• Format options (Film, TV, Stage)\n\nShall I help you get started?";
-      } else {
-        response = "✨ **Adaptation Options:**\n\n🎙️ Audiobook - Full narration with voice acting\n🎬 Screenplay - Film/TV/Stage formats\n🎮 Game Narrative - Interactive storytelling\n📱 Interactive - Choose-your-own-adventure\n\nWhich format interests you?";
-      }
+      // Update conversation history
+      setConversationHistory(prev => [
+        ...prev,
+        { role: 'user', content: input },
+        { role: 'assistant', content: data.response }
+      ].slice(-10)); // Keep last 10 messages
+    },
+    onError: (error) => {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "I'm having trouble connecting right now. Please try again in a moment.",
+        timestamp: new Date(),
+        isError: true
+      }]);
     }
+  });
 
-    setIsTyping(false);
-    return response;
-  };
+  // Quick action mutation
+  const quickActionMutation = useMutation({
+    mutationFn: async ({ action, context }) => {
+      const res = await api.post('/ai/quick-action', {
+        agentType,
+        action,
+        context
+      });
+      return res.data.data;
+    },
+    onSuccess: (data) => {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: data.response,
+        timestamp: new Date(),
+        isAI: data.isAI
+      }]);
+    }
+  });
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || chatMutation.isPending) return;
 
     const userMessage = input.trim();
     setInput('');
@@ -109,13 +140,24 @@ function AIAgent({ agentType = 'librarian', context = {}, onClose, minimized = f
       timestamp: new Date()
     }]);
 
-    // Generate and add AI response
-    const response = await generateResponse(userMessage);
+    // Send to API
+    chatMutation.mutate(userMessage);
+  };
+
+  const handleQuickAction = (action) => {
+    // Add user message showing the action
     setMessages(prev => [...prev, {
-      role: 'assistant',
-      content: response,
-      timestamp: new Date()
+      role: 'user',
+      content: `[${action.label}]`,
+      timestamp: new Date(),
+      isQuickAction: true
     }]);
+
+    // Execute quick action
+    quickActionMutation.mutate({
+      action: action.action,
+      context: { query: action.query, ...context }
+    });
   };
 
   const handleKeyPress = (e) => {
@@ -124,6 +166,8 @@ function AIAgent({ agentType = 'librarian', context = {}, onClose, minimized = f
       handleSend();
     }
   };
+
+  const isTyping = chatMutation.isPending || quickActionMutation.isPending;
 
   if (isMinimized) {
     return (
@@ -158,6 +202,16 @@ function AIAgent({ agentType = 'librarian', context = {}, onClose, minimized = f
           </div>
           <div className="flex items-center gap-2">
             <button
+              onClick={() => {
+                setMessages([{ role: 'assistant', content: agent.greeting, timestamp: new Date() }]);
+                setConversationHistory([]);
+              }}
+              className="p-1.5 rounded-full hover:bg-white/20 text-white/80"
+              title="Reset conversation"
+            >
+              <FiRefreshCw size={14} />
+            </button>
+            <button
               onClick={() => setIsMinimized(true)}
               className="p-1.5 rounded-full hover:bg-white/20 text-white/80"
             >
@@ -185,11 +239,20 @@ function AIAgent({ agentType = 'librarian', context = {}, onClose, minimized = f
             <div
               className={`max-w-[80%] rounded-2xl px-4 py-2 ${
                 msg.role === 'user'
-                  ? 'bg-yellow-500 text-black'
-                  : 'bg-gray-800 text-white'
+                  ? msg.isQuickAction
+                    ? 'bg-gray-700 text-gray-300'
+                    : 'bg-yellow-500 text-black'
+                  : msg.isError
+                    ? 'bg-red-900/50 text-red-300 border border-red-700'
+                    : 'bg-gray-800 text-white'
               }`}
             >
               <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+              {msg.isAI === false && msg.role === 'assistant' && !msg.isError && (
+                <p className="text-xs text-gray-500 mt-1">
+                  (Offline mode - connect API for full AI)
+                </p>
+              )}
             </div>
           </div>
         ))}
@@ -209,13 +272,14 @@ function AIAgent({ agentType = 'librarian', context = {}, onClose, minimized = f
 
       {/* Quick actions */}
       <div className="px-4 py-2 border-t border-gray-800 flex gap-2 overflow-x-auto">
-        {agent.capabilities.slice(0, 3).map((cap, i) => (
+        {agent.quickActions.map((action, i) => (
           <button
             key={i}
-            onClick={() => setInput(cap)}
-            className="px-3 py-1 rounded-full bg-gray-800 text-gray-400 text-xs whitespace-nowrap hover:bg-gray-700 hover:text-white transition-colors"
+            onClick={() => handleQuickAction(action)}
+            disabled={isTyping}
+            className="px-3 py-1 rounded-full bg-gray-800 text-gray-400 text-xs whitespace-nowrap hover:bg-gray-700 hover:text-white transition-colors disabled:opacity-50"
           >
-            {cap}
+            {action.label}
           </button>
         ))}
       </div>
@@ -229,11 +293,12 @@ function AIAgent({ agentType = 'librarian', context = {}, onClose, minimized = f
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={`Ask ${agent.name}...`}
-            className="flex-1 px-4 py-2 rounded-full bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+            disabled={isTyping}
+            className="flex-1 px-4 py-2 rounded-full bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 disabled:opacity-50"
           />
           <button
             onClick={handleSend}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isTyping}
             className="w-10 h-10 rounded-full bg-yellow-500 text-black flex items-center justify-center hover:bg-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <FiSend size={18} />

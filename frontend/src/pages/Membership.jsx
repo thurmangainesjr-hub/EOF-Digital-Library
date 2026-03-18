@@ -1,111 +1,99 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import api from '../services/api';
 import {
   FiCheck, FiStar, FiZap, FiBook, FiUsers,
-  FiCreditCard, FiLock
+  FiCreditCard, FiLock, FiExternalLink, FiSettings,
+  FiAlertCircle, FiCheckCircle
 } from 'react-icons/fi';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
+function Membership() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { user, isAuthenticated, refreshUser } = useAuth();
+  const [message, setMessage] = useState(null);
 
-function CheckoutForm({ onSuccess }) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [error, setError] = useState(null);
-  const [processing, setProcessing] = useState(false);
+  // Check for success/cancel from Stripe redirect
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id');
+    const canceled = searchParams.get('canceled');
 
-  const subscribeMutation = useMutation({
-    mutationFn: async () => {
-      const res = await api.post('/memberships/subscribe');
+    if (sessionId) {
+      // Verify the session and activate membership
+      verifySession(sessionId);
+    } else if (canceled) {
+      setMessage({ type: 'info', text: 'Checkout was canceled. You can try again anytime.' });
+    }
+  }, [searchParams]);
+
+  // Verify checkout session
+  const verifySession = async (sessionId) => {
+    try {
+      await api.post('/memberships/verify-session', { sessionId });
+      setMessage({ type: 'success', text: 'Welcome! Your membership is now active.' });
+      if (refreshUser) refreshUser();
+      // Clear the URL params
+      navigate('/membership', { replace: true });
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to verify payment. Please contact support.' });
+    }
+  };
+
+  // Get current membership status
+  const { data: membershipData } = useQuery({
+    queryKey: ['membership'],
+    queryFn: async () => {
+      const res = await api.get('/memberships/me');
+      return res.data.data?.membership;
+    },
+    enabled: isAuthenticated
+  });
+
+  // Get Stripe config
+  const { data: stripeConfig } = useQuery({
+    queryKey: ['stripe-config'],
+    queryFn: async () => {
+      const res = await api.get('/memberships/config');
       return res.data.data;
     }
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!stripe || !elements) return;
-
-    setProcessing(true);
-    setError(null);
-
-    try {
-      const { clientSecret } = await subscribeMutation.mutateAsync();
-
-      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
-        clientSecret,
-        {
-          payment_method: {
-            card: elements.getElement(CardElement)
-          }
-        }
-      );
-
-      if (stripeError) {
-        setError(stripeError.message);
-      } else if (paymentIntent.status === 'succeeded') {
-        onSuccess();
-      }
-    } catch (err) {
-      setError(err.response?.data?.error || 'Payment failed');
-    } finally {
-      setProcessing(false);
+  // Create checkout session
+  const checkoutMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.post('/memberships/create-checkout-session');
+      return res.data.data;
+    },
+    onSuccess: (data) => {
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+    },
+    onError: (error) => {
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.error || 'Failed to start checkout'
+      });
     }
-  };
+  });
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="p-4 rounded-lg bg-black/30 border border-yellow-600/20">
-        <CardElement
-          options={{
-            style: {
-              base: {
-                fontSize: '16px',
-                color: '#ffffff',
-                '::placeholder': {
-                  color: '#6b7280'
-                }
-              }
-            }
-          }}
-        />
-      </div>
+  // Create portal session (manage subscription)
+  const portalMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.post('/memberships/create-portal-session');
+      return res.data.data;
+    },
+    onSuccess: (data) => {
+      window.location.href = data.url;
+    }
+  });
 
-      {error && (
-        <p className="text-red-400 text-sm">{error}</p>
-      )}
-
-      <button
-        type="submit"
-        disabled={!stripe || processing}
-        className="w-full btn-primary flex items-center justify-center gap-2"
-      >
-        {processing ? (
-          'Processing...'
-        ) : (
-          <>
-            <FiCreditCard /> Subscribe - $5/month
-          </>
-        )}
-      </button>
-
-      <p className="text-center text-sm text-gray-500 flex items-center justify-center gap-2">
-        <FiLock size={14} /> Secure payment powered by Stripe
-      </p>
-    </form>
-  );
-}
-
-function Membership() {
-  const navigate = useNavigate();
-  const { user, isMember, isCreator, isAuthenticated } = useAuth();
-  const [showPayment, setShowPayment] = useState(false);
-
-  const currentTier = user?.membership?.tier || 'FREE';
+  const currentTier = membershipData?.tier || user?.membership?.tier || 'FREE';
+  const isActive = membershipData?.status === 'ACTIVE';
+  const isMember = currentTier === 'MEMBER' && isActive;
+  const isCreator = currentTier === 'CREATOR';
 
   const tiers = [
     {
@@ -119,7 +107,7 @@ function Membership() {
         'Track reading progress'
       ],
       color: 'from-gray-600 to-gray-700',
-      current: currentTier === 'FREE'
+      current: currentTier === 'FREE' || !isActive
     },
     {
       id: 'MEMBER',
@@ -135,7 +123,7 @@ function Membership() {
       ],
       color: 'from-yellow-600 to-yellow-700',
       highlight: true,
-      current: currentTier === 'MEMBER'
+      current: isMember
     },
     {
       id: 'CREATOR',
@@ -150,16 +138,20 @@ function Membership() {
         'Creator badge'
       ],
       color: 'from-purple-600 to-purple-700',
-      current: currentTier === 'CREATOR'
+      current: isCreator
     }
   ];
 
   const handleSubscribe = () => {
     if (!isAuthenticated) {
-      navigate('/login');
+      navigate('/login?redirect=/membership');
       return;
     }
-    setShowPayment(true);
+    checkoutMutation.mutate();
+  };
+
+  const handleManageSubscription = () => {
+    portalMutation.mutate();
   };
 
   return (
@@ -175,6 +167,71 @@ function Membership() {
           Unlock the full potential of EOF Digital Library and Griot AI integration
         </p>
       </motion.div>
+
+      {/* Messages */}
+      {message && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`max-w-xl mx-auto mb-8 p-4 rounded-lg flex items-center gap-3 ${
+            message.type === 'success' ? 'bg-green-500/20 text-green-400' :
+            message.type === 'error' ? 'bg-red-500/20 text-red-400' :
+            'bg-blue-500/20 text-blue-400'
+          }`}
+        >
+          {message.type === 'success' ? <FiCheckCircle size={20} /> : <FiAlertCircle size={20} />}
+          {message.text}
+        </motion.div>
+      )}
+
+      {/* Stripe not configured warning */}
+      {stripeConfig && !stripeConfig.isConfigured && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="max-w-xl mx-auto mb-8 p-4 rounded-lg bg-yellow-500/20 text-yellow-400 flex items-center gap-3"
+        >
+          <FiAlertCircle size={20} />
+          <span>Payment system is in test mode. Configure Stripe API keys to enable payments.</span>
+        </motion.div>
+      )}
+
+      {/* Current Membership Status */}
+      {isAuthenticated && membershipData && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-xl mx-auto mb-8 card"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-gray-400 text-sm">Current Plan</p>
+              <p className="text-xl text-white font-medium">
+                {membershipData.tier} {isActive && <span className="text-green-400">(Active)</span>}
+              </p>
+              {membershipData.currentPeriodEnd && isActive && (
+                <p className="text-sm text-gray-500">
+                  Renews {new Date(membershipData.currentPeriodEnd).toLocaleDateString()}
+                </p>
+              )}
+              {membershipData.cancelAtPeriodEnd && (
+                <p className="text-sm text-yellow-500">
+                  Cancels at end of period
+                </p>
+              )}
+            </div>
+            {isMember && (
+              <button
+                onClick={handleManageSubscription}
+                disabled={portalMutation.isPending}
+                className="btn-secondary flex items-center gap-2"
+              >
+                <FiSettings /> Manage
+              </button>
+            )}
+          </div>
+        </motion.div>
+      )}
 
       {/* Tiers */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-12">
@@ -239,49 +296,39 @@ function Membership() {
             ) : tier.id === 'MEMBER' && !isMember ? (
               <button
                 onClick={handleSubscribe}
-                className="w-full btn-primary"
+                disabled={checkoutMutation.isPending}
+                className="w-full btn-primary flex items-center justify-center gap-2"
               >
-                Subscribe Now
+                {checkoutMutation.isPending ? (
+                  'Redirecting...'
+                ) : (
+                  <>
+                    <FiCreditCard /> Subscribe Now
+                  </>
+                )}
               </button>
             ) : tier.id === 'CREATOR' && !isCreator ? (
-              <button className="w-full btn-secondary">
+              <button className="w-full btn-secondary flex items-center justify-center gap-2">
                 Apply to Become Creator
               </button>
-            ) : tier.id === 'FREE' && currentTier !== 'FREE' ? (
-              <button className="w-full btn-secondary">
-                Downgrade
+            ) : tier.id === 'FREE' && isMember ? (
+              <button
+                onClick={handleManageSubscription}
+                className="w-full btn-secondary"
+              >
+                Manage Subscription
               </button>
             ) : null}
           </motion.div>
         ))}
       </div>
 
-      {/* Payment Modal */}
-      {showPayment && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="card max-w-md w-full m-4"
-          >
-            <h2 className="font-serif text-2xl text-white mb-6">Subscribe to Member</h2>
-            <Elements stripe={stripePromise}>
-              <CheckoutForm
-                onSuccess={() => {
-                  setShowPayment(false);
-                  window.location.reload();
-                }}
-              />
-            </Elements>
-            <button
-              onClick={() => setShowPayment(false)}
-              className="w-full mt-4 text-gray-400 hover:text-white transition-colors"
-            >
-              Cancel
-            </button>
-          </motion.div>
-        </div>
-      )}
+      {/* Security Note */}
+      <div className="text-center mb-12">
+        <p className="text-gray-500 text-sm flex items-center justify-center gap-2">
+          <FiLock /> Payments secured by Stripe. We never store your card details.
+        </p>
+      </div>
 
       {/* FAQ */}
       <motion.div
@@ -305,7 +352,7 @@ function Membership() {
             <h3 className="text-white font-medium mb-2">Can I cancel anytime?</h3>
             <p className="text-gray-400">
               Yes, you can cancel your membership at any time. You'll retain access until the end of
-              your current billing period.
+              your current billing period. Use the "Manage" button to cancel or update payment.
             </p>
           </div>
           <div className="card">
@@ -313,6 +360,13 @@ function Membership() {
             <p className="text-gray-400">
               Apply through the Creator application process. We review each application to ensure
               quality content. Approved creators can publish books and earn from adaptations.
+            </p>
+          </div>
+          <div className="card">
+            <h3 className="text-white font-medium mb-2">Is my payment information secure?</h3>
+            <p className="text-gray-400">
+              Absolutely. All payments are processed by Stripe, a PCI-compliant payment processor.
+              We never have access to your full card details.
             </p>
           </div>
         </div>

@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --eof-gold: #D4AF37;
+  --eof-gold-light: #E8C558;
+  --eof-purple: #4A0E4E;
+  --eof-purple-light: #6B2C6F;
+  --eof-dark: #0D0D0D;
+  --eof-dark-lighter: #1A1A1A;
+  --eof-cream: #FDF5E6;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, var(--eof-dark) 0%, var(--eof-purple) 100%);
+  min-height: 100vh;
+  color: var(--eof-cream);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--eof-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--eof-gold);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--eof-gold-light);
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.glass-dark {
+  background: rgba(13, 13, 13, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+/* Gold glow effect */
+.gold-glow {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.gold-glow:hover {
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+}
+
+/* Button styles */
+.btn-primary {
+  @apply px-6 py-3 bg-gradient-to-r from-yellow-600 to-yellow-500 text-black font-semibold rounded-lg transition-all duration-300;
+}
+
+.btn-primary:hover {
+  @apply transform scale-105;
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+}
+
+.btn-secondary {
+  @apply px-6 py-3 border-2 border-yellow-600 text-yellow-500 font-semibold rounded-lg transition-all duration-300;
+}
+
+.btn-secondary:hover {
+  @apply bg-yellow-600 text-black;
+}
+
+/* Card styles */
+.card {
+  @apply rounded-xl p-6 transition-all duration-300;
+  background: rgba(26, 26, 26, 0.9);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.card:hover {
+  border-color: rgba(212, 175, 55, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(212, 175, 55, 0.6); }
+}
+
+.animate-pulse-gold {
+  animation: pulse-gold 2s infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Terminal styles */
+.terminal {
+  background: #0D0D0D;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+}
+
+.terminal-line {
+  @apply py-1;
+}
+
+.terminal-prompt {
+  color: var(--eof-gold);
+}
+
+.terminal-output {
+  color: #9CA3AF;
+}
+
+.terminal-success {
+  color: #10B981;
+}
+
+.terminal-error {
+  color: #EF4444;
+}

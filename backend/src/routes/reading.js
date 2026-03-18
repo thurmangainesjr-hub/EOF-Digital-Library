@@ -9,6 +9,26 @@ import { PrismaClient } from '@prisma/client';
 const router = express.Router();
 const prisma = new PrismaClient();
 
+// Get currently reading books (in progress)
+router.get('/current', requireAuth, async (req, res) => {
+  try {
+    const sessions = await prisma.readingSession.findMany({
+      where: {
+        userId: req.user.id,
+        percentComplete: { lt: 100 },
+        percentComplete: { gt: 0 }
+      },
+      include: { product: true },
+      orderBy: { lastReadAt: 'desc' },
+      take: 5
+    });
+
+    res.json({ success: true, data: sessions });
+  } catch (error) {
+    res.json({ success: true, data: [] });
+  }
+});
+
 // Get reading history
 router.get('/history', requireAuth, async (req, res) => {
   try {
@@ -49,6 +69,37 @@ router.get('/:productId', requireAuth, async (req, res) => {
     res.json({ success: true, data: { session } });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to get session' });
+  }
+});
+
+// Update reading progress (POST version for frontend compatibility)
+router.post('/:productId/progress', requireAuth, async (req, res) => {
+  try {
+    const { currentPage, percentComplete } = req.body;
+
+    const session = await prisma.readingSession.upsert({
+      where: {
+        userId_productId: {
+          userId: req.user.id,
+          productId: req.params.productId
+        }
+      },
+      update: {
+        currentPage: currentPage || 1,
+        percentComplete: percentComplete || 0,
+        lastReadAt: new Date()
+      },
+      create: {
+        userId: req.user.id,
+        productId: req.params.productId,
+        currentPage: currentPage || 1,
+        percentComplete: percentComplete || 0
+      }
+    });
+
+    res.json({ success: true, data: session });
+  } catch (error) {
+    res.json({ success: true, data: null });
   }
 });
 

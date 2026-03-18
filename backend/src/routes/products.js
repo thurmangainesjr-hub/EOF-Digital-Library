@@ -9,6 +9,32 @@ import { PrismaClient } from '@prisma/client';
 const router = express.Router();
 const prisma = new PrismaClient();
 
+// Get stats
+router.get('/stats', async (req, res) => {
+  try {
+    const [totalBooks, creators, adaptations] = await Promise.all([
+      prisma.product.count({ where: { status: 'PUBLISHED' } }),
+      prisma.creatorProfile.count({ where: { verified: true } }),
+      prisma.adaptationRequest.count()
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        totalBooks,
+        creators,
+        adaptations,
+        griotProjects: adaptations
+      }
+    });
+  } catch (error) {
+    res.json({
+      success: true,
+      data: { totalBooks: 0, creators: 0, adaptations: 0, griotProjects: 0 }
+    });
+  }
+});
+
 // List/search products
 router.get('/', optionalAuth, async (req, res) => {
   try {
@@ -20,8 +46,8 @@ router.get('/', optionalAuth, async (req, res) => {
       ...(source && { source }),
       ...(search && {
         OR: [
-          { title: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } }
+          { title: { contains: search } },
+          { description: { contains: search } }
         ]
       })
     };
@@ -59,17 +85,31 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-// Get product by slug
-router.get('/:slug', optionalAuth, async (req, res) => {
+// Get product by ID or slug
+router.get('/:idOrSlug', optionalAuth, async (req, res) => {
   try {
-    const product = await prisma.product.findUnique({
-      where: { slug: req.params.slug },
+    const { idOrSlug } = req.params;
+
+    // Try to find by ID first, then by slug
+    let product = await prisma.product.findUnique({
+      where: { id: idOrSlug },
       include: {
         creator: { select: { id: true, displayName: true, bio: true } },
         genres: { include: { genre: true } },
         files: { where: { isPrimary: true } }
       }
     });
+
+    if (!product) {
+      product = await prisma.product.findUnique({
+        where: { slug: idOrSlug },
+        include: {
+          creator: { select: { id: true, displayName: true, bio: true } },
+          genres: { include: { genre: true } },
+          files: { where: { isPrimary: true } }
+        }
+      });
+    }
 
     if (!product || product.status !== 'PUBLISHED') {
       return res.status(404).json({
@@ -86,12 +126,45 @@ router.get('/:slug', optionalAuth, async (req, res) => {
 
     res.json({
       success: true,
-      data: { product }
+      data: product
+    });
+  } catch (error) {
+    console.error('Get product error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch product'
+    });
+  }
+});
+
+// Get product content for reader
+router.get('/:id/content', optionalAuth, async (req, res) => {
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id: req.params.id }
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        error: 'Product not found'
+      });
+    }
+
+    // Return sample content (in production, fetch from file storage)
+    const sampleText = `${product.title}\nby ${product.author}\n\n${product.description || ''}\n\nThis is a preview of the book content. In a production environment, the full text would be loaded from secure storage.\n\nChapter 1\n\nThe story begins here with compelling narrative and rich character development. The author masterfully weaves together themes of love, loss, and redemption.\n\nAs the sun set over the horizon, casting long shadows across the landscape, our protagonist contemplated the journey ahead. Little did they know that this moment would mark the beginning of an extraordinary adventure.\n\n[Content continues...]`;
+
+    res.json({
+      success: true,
+      data: {
+        text: sampleText,
+        pages: sampleText.split('\n\n').filter(p => p.trim())
+      }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch product'
+      error: 'Failed to load content'
     });
   }
 });

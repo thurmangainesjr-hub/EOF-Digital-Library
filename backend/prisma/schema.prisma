@@ -1,12 +1,13 @@
 // EOF Digital Library - Database Schema
 // 14 Tables for complete library management
+// Using SQLite for local development
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -18,9 +19,9 @@ model User {
   id                String    @id @default(uuid())
   email             String    @unique
   passwordHash      String
-  name              String
+  displayName       String
   avatar            String?
-  role              UserRole  @default(READER)
+  role              String    @default("READER") // READER, CREATOR, ADMIN, SUPER_ADMIN
   emailVerified     Boolean   @default(false)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -40,50 +41,30 @@ model User {
   @@index([role])
 }
 
-enum UserRole {
-  READER
-  CREATOR
-  ADMIN
-  SUPER_ADMIN
-}
-
 // =====================================
 // MEMBERSHIP & BILLING
 // =====================================
 
 model Membership {
-  id                  String           @id @default(uuid())
-  userId              String           @unique
-  user                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String   @id @default(uuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  tier                MembershipTier   @default(FREE)
-  status              MembershipStatus @default(ACTIVE)
+  tier                String   @default("FREE") // FREE, MEMBER, CREATOR
+  status              String   @default("ACTIVE") // ACTIVE, PAST_DUE, CANCELED, EXPIRED
 
-  stripeCustomerId    String?          @unique
-  stripeSubscriptionId String?         @unique
+  stripeCustomerId    String?  @unique
+  stripeSubscriptionId String? @unique
 
   currentPeriodStart  DateTime?
   currentPeriodEnd    DateTime?
-  cancelAtPeriodEnd   Boolean          @default(false)
+  cancelAtPeriodEnd   Boolean  @default(false)
 
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   @@index([stripeCustomerId])
   @@index([status])
-}
-
-enum MembershipTier {
-  FREE
-  MEMBER
-  CREATOR
-}
-
-enum MembershipStatus {
-  ACTIVE
-  PAST_DUE
-  CANCELED
-  EXPIRED
 }
 
 // =====================================
@@ -96,16 +77,16 @@ model CreatorProfile {
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   displayName           String
-  bio                   String?   @db.Text
+  bio                   String?
   website               String?
-  socialLinks           Json?     // { twitter, instagram, etc }
+  socialLinks           String?   // JSON string
 
   // Payout info
-  payoutMethod          String?   // stripe_connect, paypal, etc
+  payoutMethod          String?
   payoutAccountId       String?
 
   // Stats
-  totalEarnings         Decimal   @default(0) @db.Decimal(10, 2)
+  totalEarnings         Float     @default(0)
   totalSales            Int       @default(0)
 
   // Verification
@@ -128,44 +109,45 @@ model CreatorProfile {
 
 model Product {
   id                    String          @id @default(uuid())
-  creatorId             String
-  creator               CreatorProfile  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId             String?
+  creator               CreatorProfile? @relation(fields: [creatorId], references: [id], onDelete: SetNull)
 
   title                 String
+  author                String
   slug                  String          @unique
-  description           String?         @db.Text
+  description           String?
   coverImage            String?
 
   // Pricing
-  price                 Decimal         @default(0) @db.Decimal(10, 2)
+  price                 Float           @default(0)
   currency              String          @default("USD")
   isFree                Boolean         @default(false)
-  memberIncluded        Boolean         @default(true) // Included in membership
+  memberIncluded        Boolean         @default(true)
 
   // Content type
-  type                  ProductType     @default(EBOOK)
-  format                String?         // epub, pdf, etc
+  type                  String          @default("EBOOK") // EBOOK, AUDIOBOOK, etc
+  format                String?
   pageCount             Int?
   wordCount             Int?
 
   // Source
-  source                ProductSource   @default(ORIGINAL)
-  gutenbergId           String?         // Project Gutenberg ID if applicable
+  source                String          @default("ORIGINAL") // ORIGINAL, GUTENBERG, PUBLIC_DOMAIN, LICENSED
+  gutenbergId           String?
   externalUrl           String?
 
   // Status
-  status                ProductStatus   @default(DRAFT)
+  status                String          @default("DRAFT") // DRAFT, PENDING_REVIEW, PUBLISHED, ARCHIVED, REJECTED
   publishedAt           DateTime?
 
   // Adaptation rights
   adaptationAllowed     Boolean         @default(false)
-  adaptationTerms       String?         @db.Text
-  adaptationFee         Decimal?        @db.Decimal(10, 2)
+  adaptationTerms       String?
+  adaptationFee         Float?
 
   // Stats
   viewCount             Int             @default(0)
   downloadCount         Int             @default(0)
-  averageRating         Decimal?        @db.Decimal(2, 1)
+  averageRating         Float?
   ratingCount           Int             @default(0)
 
   createdAt             DateTime        @default(now())
@@ -184,33 +166,6 @@ model Product {
   @@index([status])
   @@index([source])
   @@index([adaptationAllowed])
-}
-
-enum ProductType {
-  EBOOK
-  AUDIOBOOK
-  ARTICLE
-  SHORT_STORY
-  NOVELLA
-  NOVEL
-  ANTHOLOGY
-  SCREENPLAY
-  GRAPHIC_NOVEL
-}
-
-enum ProductSource {
-  ORIGINAL        // Creator's original work
-  GUTENBERG       // Project Gutenberg public domain
-  PUBLIC_DOMAIN   // Other public domain
-  LICENSED        // Licensed from external source
-}
-
-enum ProductStatus {
-  DRAFT
-  PENDING_REVIEW
-  PUBLISHED
-  ARCHIVED
-  REJECTED
 }
 
 // =====================================
@@ -253,9 +208,9 @@ model ProductFile {
 
   filename    String
   fileUrl     String
-  fileSize    Int       // bytes
+  fileSize    Int
   mimeType    String
-  format      String    // epub, pdf, mobi, mp3, etc
+  format      String
 
   isPrimary   Boolean   @default(false)
 
@@ -274,7 +229,7 @@ model ExternalStoreConnection {
   creatorId     String
   creator       CreatorProfile  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
-  storeName     String          // amazon, apple_books, kobo, etc
+  storeName     String
   storeUrl      String?
   apiKey        String?
   apiSecret     String?
@@ -294,46 +249,32 @@ model ExternalStoreConnection {
 // =====================================
 
 model Order {
-  id                  String       @id @default(uuid())
+  id                  String   @id @default(uuid())
   userId              String
-  user                User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   productId           String
-  product             Product      @relation(fields: [productId], references: [id])
+  product             Product  @relation(fields: [productId], references: [id])
 
-  amount              Decimal      @db.Decimal(10, 2)
-  currency            String       @default("USD")
-  status              OrderStatus  @default(PENDING)
+  amount              Float
+  currency            String   @default("USD")
+  status              String   @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
 
-  stripePaymentId     String?      @unique
+  stripePaymentId     String?  @unique
   stripeInvoiceId     String?
 
   // Creator payout tracking
-  creatorAmount       Decimal?     @db.Decimal(10, 2)
-  platformFee         Decimal?     @db.Decimal(10, 2)
-  payoutStatus        PayoutStatus @default(PENDING)
+  creatorAmount       Float?
+  platformFee         Float?
+  payoutStatus        String   @default("PENDING") // PENDING, PROCESSING, PAID, FAILED
   paidOutAt           DateTime?
 
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   @@index([userId])
   @@index([productId])
   @@index([status])
   @@index([payoutStatus])
-}
-
-enum OrderStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
-}
-
-enum PayoutStatus {
-  PENDING
-  PROCESSING
-  PAID
-  FAILED
 }
 
 // =====================================
@@ -350,15 +291,15 @@ model ReadingSession {
   // Progress tracking
   currentPage     Int       @default(0)
   totalPages      Int?
-  percentComplete Decimal   @default(0) @db.Decimal(5, 2)
+  percentComplete Float     @default(0)
 
   // Time tracking
-  totalReadTime   Int       @default(0) // seconds
+  totalReadTime   Int       @default(0)
   lastReadAt      DateTime  @default(now())
 
-  // Bookmarks and notes
-  bookmarks       Json?     // [{ page, note, createdAt }]
-  highlights      Json?     // [{ page, text, color, createdAt }]
+  // Bookmarks and notes (JSON strings)
+  bookmarks       String?
+  highlights      String?
 
   startedAt       DateTime  @default(now())
   finishedAt      DateTime?
@@ -378,12 +319,11 @@ model AdaptationPreference {
   userId          String
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  preferredFormat String    // film, tv_series, game, etc
-  targetAudience  String?   // adult, young_adult, children
-  tonePreference  String?   // dark, light, balanced
+  preferredFormat String
+  targetAudience  String?
+  tonePreference  String?
 
-  // Griot AI settings
-  griotProjectId  String?   // Linked Griot project ID
+  griotProjectId  String?
   autoSync        Boolean   @default(false)
 
   createdAt       DateTime  @default(now())
@@ -393,46 +333,33 @@ model AdaptationPreference {
 }
 
 model AdaptationRequest {
-  id              String              @id @default(uuid())
+  id              String    @id @default(uuid())
   userId          String
-  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   productId       String
-  product         Product             @relation(fields: [productId], references: [id])
+  product         Product   @relation(fields: [productId], references: [id])
 
-  // Request details
-  targetFormat    String              // film, game, etc
-  notes           String?             @db.Text
+  targetFormat    String
+  notes           String?
 
-  // Status
-  status          AdaptationStatus    @default(PENDING)
+  status          String    @default("PENDING") // PENDING, APPROVED, DENIED, IN_PROGRESS, COMPLETED, CANCELLED
   reviewedAt      DateTime?
   reviewedBy      String?
-  reviewNotes     String?             @db.Text
+  reviewNotes     String?
 
-  // Payment
-  feeAmount       Decimal?            @db.Decimal(10, 2)
-  feePaid         Boolean             @default(false)
+  feeAmount       Float?
+  feePaid         Boolean   @default(false)
   paidAt          DateTime?
 
-  // Griot AI integration
   griotProjectId  String?
   griotExportUrl  String?
 
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([userId])
   @@index([productId])
   @@index([status])
-}
-
-enum AdaptationStatus {
-  PENDING
-  APPROVED
-  DENIED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
 }
 
 // =====================================
@@ -440,16 +367,16 @@ enum AdaptationStatus {
 // =====================================
 
 model LegalAcceptance {
-  id            String    @id @default(uuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  documentType  String    // tos, privacy, creator_agreement, adaptation_rights
+  documentType    String
   documentVersion String
 
-  acceptedAt    DateTime  @default(now())
-  ipAddress     String?
-  userAgent     String?
+  acceptedAt      DateTime  @default(now())
+  ipAddress       String?
+  userAgent       String?
 
   @@unique([userId, documentType])
   @@index([documentType])
@@ -460,26 +387,19 @@ model LegalAcceptance {
 // =====================================
 
 model AdminReview {
-  id            String       @id @default(uuid())
+  id            String    @id @default(uuid())
 
-  entityType    String       // product, creator, adaptation_request
+  entityType    String
   entityId      String
 
   reviewerId    String
-  action        ReviewAction
-  notes         String?      @db.Text
+  action        String    // APPROVED, REJECTED, FLAGGED, UNFLAGGED
+  notes         String?
 
-  createdAt     DateTime     @default(now())
+  createdAt     DateTime  @default(now())
 
   @@index([entityType, entityId])
   @@index([reviewerId])
-}
-
-enum ReviewAction {
-  APPROVED
-  REJECTED
-  FLAGGED
-  UNFLAGGED
 }
 
 // =====================================
@@ -494,7 +414,7 @@ model Bookshelf {
   name        String
   description String?
   isPublic    Boolean         @default(false)
-  isDefault   Boolean         @default(false) // "My Books" default shelf
+  isDefault   Boolean         @default(false)
 
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt

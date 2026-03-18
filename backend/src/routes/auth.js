@@ -21,12 +21,14 @@ router.post('/register',
   [
     body('email').isEmail().normalizeEmail(),
     body('password').isLength({ min: 8 }),
-    body('name').trim().isLength({ min: 2, max: 100 }),
+    body('displayName').optional().trim().isLength({ min: 2, max: 100 }),
+    body('name').optional().trim().isLength({ min: 2, max: 100 }),
     handleValidation
   ],
   async (req, res) => {
     try {
-      const { email, password, name } = req.body;
+      const { email, password, displayName, name } = req.body;
+      const userName = displayName || name || email.split('@')[0];
 
       // Check if user exists
       const existing = await prisma.user.findUnique({ where: { email } });
@@ -46,7 +48,7 @@ router.post('/register',
           id: uuidv4(),
           email,
           passwordHash,
-          name,
+          displayName: userName,
           membership: {
             create: {
               id: uuidv4(),
@@ -180,6 +182,44 @@ router.post('/refresh', async (req, res) => {
     res.status(401).json({
       success: false,
       error: 'Invalid refresh token'
+    });
+  }
+});
+
+// Get current user
+router.get('/me', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        success: false,
+        error: 'No token provided'
+      });
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      include: { membership: true, creatorProfile: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: sanitizeUser(user)
+    });
+  } catch (error) {
+    res.status(401).json({
+      success: false,
+      error: 'Invalid token'
     });
   }
 });

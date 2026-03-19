@@ -101,6 +101,44 @@ const CLAUDE_MODEL = 'claude-3-haiku-20240307'; // Using Haiku for fast, cost-ef
 // Check if Claude API is configured
 const isClaudeConfigured = ANTHROPIC_API_KEY && !ANTHROPIC_API_KEY.includes('placeholder');
 
+// Get AI configuration status
+router.get('/status', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      isConfigured: isClaudeConfigured,
+      model: CLAUDE_MODEL,
+      agents: Object.keys(AGENTS),
+      instructions: !isClaudeConfigured ? {
+        steps: [
+          {
+            step: 1,
+            title: 'Get Anthropic API Key',
+            description: 'Go to https://console.anthropic.com and create an account'
+          },
+          {
+            step: 2,
+            title: 'Generate API Key',
+            description: 'Navigate to API Keys section and create a new key'
+          },
+          {
+            step: 3,
+            title: 'Update .env File',
+            description: 'Add your key to backend/.env',
+            example: 'ANTHROPIC_API_KEY=sk-ant-api03-...'
+          },
+          {
+            step: 4,
+            title: 'Restart Server',
+            description: 'Restart the backend server to load the new key'
+          }
+        ],
+        note: 'The AI agents work in fallback mode without an API key, providing pre-written responses.'
+      } : null
+    }
+  });
+});
+
 // Get agent info
 router.get('/agents', (req, res) => {
   const agentList = Object.entries(AGENTS).map(([id, agent]) => ({

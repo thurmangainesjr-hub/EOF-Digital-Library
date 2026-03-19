@@ -24,6 +24,8 @@ import adaptationRoutes from './routes/adaptations.js';
 import adminRoutes from './routes/admin.js';
 import gutenbergRoutes from './routes/gutenberg.js';
 import aiRoutes from './routes/ai.js';
+import stripeSetupRoutes from './routes/stripe-setup.js';
+import griotRoutes from './routes/griot.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -86,6 +88,8 @@ app.use('/api/adaptations', adaptationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/gutenberg', gutenbergRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/stripe-setup', stripeSetupRoutes);
+app.use('/api/griot', griotRoutes);
 
 // Error handler
 app.use(errorHandler);

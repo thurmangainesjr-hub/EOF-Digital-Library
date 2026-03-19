@@ -14,6 +14,8 @@ import Membership from './pages/Membership';
 import StoryTime from './pages/StoryTime';
 import Gutenberg from './pages/Gutenberg';
 import GutenbergReader from './pages/GutenbergReader';
+import Setup from './pages/Setup';
+import Adapt from './pages/Adapt';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
@@ -36,6 +38,8 @@ function App() {
             <Route path="story-time" element={<StoryTime />} />
             <Route path="gutenberg" element={<Gutenberg />} />
             <Route path="gutenberg/read/:id" element={<GutenbergReader />} />
+            <Route path="setup" element={<Setup />} />
+            <Route path="adapt/:source/:bookId" element={<Adapt />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

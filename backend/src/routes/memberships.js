@@ -50,13 +50,56 @@ router.get('/config', (req, res) => {
   });
 });
 
+// Demo mode subscription (when Stripe not configured)
+router.post('/demo-subscribe', requireAuth, async (req, res) => {
+  try {
+    // Update membership to MEMBER in demo mode
+    const membership = await prisma.membership.upsert({
+      where: { userId: req.user.id },
+      update: {
+        tier: 'MEMBER',
+        status: 'ACTIVE',
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+      },
+      create: {
+        userId: req.user.id,
+        tier: 'MEMBER',
+        status: 'ACTIVE',
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        membership,
+        isDemo: true,
+        message: 'Demo membership activated! Configure Stripe for real payments.'
+      }
+    });
+  } catch (error) {
+    console.error('Demo subscribe error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to activate demo membership'
+    });
+  }
+});
+
 // Create Checkout Session for subscription
 router.post('/create-checkout-session', requireAuth, async (req, res) => {
   try {
     if (!stripe) {
-      return res.status(503).json({
-        success: false,
-        error: 'Stripe is not configured. Please set up Stripe API keys.'
+      // Return demo mode info instead of error
+      return res.status(200).json({
+        success: true,
+        data: {
+          demoMode: true,
+          message: 'Stripe not configured. Use demo mode or configure Stripe.',
+          demoUrl: '/api/memberships/demo-subscribe'
+        }
       });
     }
 

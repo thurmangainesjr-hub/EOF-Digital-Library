@@ -68,13 +68,41 @@ function Membership() {
       return res.data.data;
     },
     onSuccess: (data) => {
-      // Redirect to Stripe Checkout
-      window.location.href = data.url;
+      if (data.demoMode) {
+        // Stripe not configured - offer demo mode
+        if (window.confirm('Stripe is not configured. Would you like to activate a demo membership instead?')) {
+          demoMutation.mutate();
+        }
+      } else if (data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      }
     },
     onError: (error) => {
       setMessage({
         type: 'error',
         text: error.response?.data?.error || 'Failed to start checkout'
+      });
+    }
+  });
+
+  // Demo mode subscription
+  const demoMutation = useMutation({
+    mutationFn: async () => {
+      const res = await api.post('/memberships/demo-subscribe');
+      return res.data.data;
+    },
+    onSuccess: (data) => {
+      setMessage({
+        type: 'success',
+        text: data.message || 'Demo membership activated!'
+      });
+      if (refreshUser) refreshUser();
+    },
+    onError: (error) => {
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.error || 'Failed to activate demo'
       });
     }
   });

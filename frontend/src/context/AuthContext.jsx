@@ -46,12 +46,24 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const refreshUser = async () => {
+    try {
+      const res = await api.get('/auth/me');
+      setUser(res.data.data);
+      return res.data.data;
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      return null;
+    }
+  };
+
   const value = {
     user,
     loading,
     login,
     register,
     logout,
+    refreshUser,
     isAuthenticated: !!user,
     isMember: user?.membership?.tier === 'MEMBER' || user?.membership?.tier === 'CREATOR',
     isCreator: user?.membership?.tier === 'CREATOR'

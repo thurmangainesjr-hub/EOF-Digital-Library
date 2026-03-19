@@ -144,9 +144,9 @@ function Membership() {
       features: [
         'Everything in Free',
         'Access creator content',
-        'Export to Griot AI',
-        'Create audiobook adaptations',
-        'Create screenplay adaptations',
+        'Unlimited book downloads',
+        'Ad-free reading experience',
+        'Reading statistics & insights',
         'Priority support'
       ],
       color: 'from-yellow-600 to-yellow-700',
@@ -159,8 +159,11 @@ function Membership() {
       price: 'Apply',
       features: [
         'Everything in Member',
+        'Export to Griot AI Studio',
+        'Create audiobook & screenplay adaptations',
+        'Creator Community chat room',
+        'Adaptation placement list',
         'Publish your books',
-        'Set adaptation prices',
         'Earn from adaptations',
         'Analytics dashboard',
         'Creator badge'

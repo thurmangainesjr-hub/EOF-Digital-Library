@@ -10,6 +10,7 @@ import ProductDetail from './pages/ProductDetail';
 import Bookshelves from './pages/Bookshelves';
 import Reader from './pages/Reader';
 import CreatorStudio from './pages/CreatorStudio';
+import CreatorCommunity from './pages/CreatorCommunity';
 import Membership from './pages/Membership';
 import StoryTime from './pages/StoryTime';
 import Gutenberg from './pages/Gutenberg';
@@ -34,6 +35,7 @@ function App() {
             <Route path="bookshelves" element={<Bookshelves />} />
             <Route path="reader/:productId" element={<Reader />} />
             <Route path="creator" element={<CreatorStudio />} />
+            <Route path="creator-community" element={<CreatorCommunity />} />
             <Route path="membership" element={<Membership />} />
             <Route path="story-time" element={<StoryTime />} />
             <Route path="gutenberg" element={<Gutenberg />} />

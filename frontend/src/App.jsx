@@ -19,6 +19,8 @@ import Setup from './pages/Setup';
 import Adapt from './pages/Adapt';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ThermalMonitor from './components/ThermalMonitor/ThermalMonitor';
+import AppPreview from './pages/AppPreview';
 
 function App() {
   return (
@@ -42,6 +44,8 @@ function App() {
             <Route path="gutenberg/read/:id" element={<GutenbergReader />} />
             <Route path="setup" element={<Setup />} />
             <Route path="adapt/:source/:bookId" element={<Adapt />} />
+            <Route path="thermal"  element={<ThermalMonitor />} />
+            <Route path="preview"  element={<AppPreview />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

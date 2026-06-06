@@ -27,6 +27,7 @@ import gutenbergRoutes from './routes/gutenberg.js';
 import aiRoutes from './routes/ai.js';
 import stripeSetupRoutes from './routes/stripe-setup.js';
 import griotRoutes from './routes/griot.js';
+import systemRoutes from './routes/system.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -77,6 +78,7 @@ app.get('/api/health/db', async (req, res) => {
 });
 
 // API Routes
+app.use('/api/system', systemRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/memberships', membershipRoutes);

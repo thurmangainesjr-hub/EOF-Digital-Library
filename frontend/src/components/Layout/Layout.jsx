@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   FiHome, FiBook, FiFolder, FiEdit3, FiStar, FiUser,
   FiLogOut, FiMenu, FiX, FiCommand, FiGlobe, FiPlay,
-  FiBell, FiChevronRight
+  FiBell, FiChevronRight, FiThermometer, FiSmartphone
 } from 'react-icons/fi';
 
 const NAV_ITEMS = [
@@ -15,7 +15,9 @@ const NAV_ITEMS = [
   { path: '/story-time',     icon: FiPlay,    label: 'Story Time',     group: 'main' },
   { path: '/gutenberg',      icon: FiGlobe,   label: 'Gutenberg',      group: 'explore' },
   { path: '/command-center', icon: FiCommand, label: 'Command Center', group: 'explore' },
-  { path: '/membership',     icon: FiStar,    label: 'Membership',     group: 'account' },
+  { path: '/membership',     icon: FiStar,       label: 'Membership',     group: 'account' },
+  { path: '/thermal',        icon: FiThermometer, label: 'Thermal Monitor', group: 'account' },
+  { path: '/preview',        icon: FiSmartphone,  label: 'Test Lab',        group: 'account' },
 ];
 
 const CREATOR_ITEM = { path: '/creator', icon: FiEdit3, label: 'Creator Studio', group: 'explore' };

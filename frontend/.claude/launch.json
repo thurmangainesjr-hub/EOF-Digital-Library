@@ -5,15 +5,19 @@
       "name": "Frontend (Vite)",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "port": 5174,
-      "cwd": "${workspaceRoot}/frontend"
+      "port": 5174
     },
     {
       "name": "Backend (Express API)",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "port": 3002,
-      "cwd": "${workspaceRoot}/backend"
+      "port": 3002
+    },
+    {
+      "name": "story-engine",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "C:/Users/dhous/GriotAI/story-engine", "run", "dev"],
+      "port": 3000
     }
   ]
 }

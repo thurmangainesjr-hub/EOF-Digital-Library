@@ -6,12 +6,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import BookCoverArt, { THEMES } from '../components/BookCoverArt';
 import UploadModal from '../components/UploadModal';
+import AgentAvatarCard from '../components/AgentAvatarCard';
+import AgentFullPanel from '../components/AgentFullPanel';
+import { AGENT_SYSTEMS } from '../data/agentData';
+import { LargeGroitWidget, MediumGroitWidget } from '../components/Widget/GroitAppWidget';
 import {
   FiBook, FiUsers, FiTrendingUp, FiStar, FiUpload,
   FiPlay, FiBookOpen, FiGlobe, FiRadio, FiCommand,
   FiChevronLeft, FiChevronRight, FiPlus, FiCheck,
-  FiBookmark, FiHeart, FiInfo, FiZap
+  FiBookmark, FiHeart, FiInfo, FiZap, FiArrowRight
 } from 'react-icons/fi';
+
+const LIBRARY_SYSTEM = AGENT_SYSTEMS.find(s => s.id === 'library');
 
 // ─── Featured hero books (for when API has no data) ──────────
 const FEATURED = [
@@ -315,6 +321,7 @@ export default function Dashboard() {
   const { user, isAuthenticated, isMember } = useAuth();
   const [showUpload, setShowUpload] = useState(false);
   const [uploadedBooks, setUploadedBooks] = useState([]);
+  const [openAgent, setOpenAgent] = useState(null);
   const toast = useToast();
 
   const { data: stats } = useQuery({
@@ -459,22 +466,136 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* ── Griot AI strip ────────────────────────────────── */}
-      <div className="mx-6 mb-8 rounded-2xl overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #1a0a2e 0%, #0d051f 100%)', border: '1px solid rgba(155,89,182,0.25)' }}>
-        <div className="flex items-center justify-between gap-4 p-5">
+      {/* ── Library AI Team ───────────────────────────────── */}
+      <section className="px-6 mb-10">
+        <div className="flex items-end justify-between mb-5">
           <div>
-            <p className="text-xs font-black uppercase tracking-widest text-purple-400 mb-1">Powered by AI</p>
-            <h3 className="font-serif text-lg font-bold text-white mb-1">Griot AI Studio</h3>
-            <p className="text-xs text-gray-500">Transform any book into audiobooks, films, games, and interactive experiences.</p>
+            <h2 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
+              <span>📚</span> Meet the Library Team
+            </h2>
+            <p className="text-xs text-gray-500">Four permanent AI agents. Click any character to open their workspace.</p>
           </div>
-          <a href="http://localhost:5173" target="_blank" rel="noopener noreferrer"
-            className="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:brightness-110"
-            style={{ background: 'rgba(155,89,182,0.3)', border: '1px solid rgba(155,89,182,0.4)' }}>
-            Open Studio
-          </a>
+          <span className="text-[10px] text-gray-600 hidden sm:block">{LIBRARY_SYSTEM?.agents.length} core agents</span>
         </div>
-      </div>
+        <div className="flex flex-wrap gap-4">
+          {LIBRARY_SYSTEM?.agents.map((agent, i) => (
+            <AgentAvatarCard
+              key={agent.id}
+              agent={agent}
+              systemId="library"
+              system={LIBRARY_SYSTEM}
+              minTier={LIBRARY_SYSTEM.minTier}
+              index={i}
+              onClick={() => setOpenAgent(agent)}
+            />
+          ))}
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-semibold tracking-widest uppercase text-gray-600 mr-1">Spawnable helpers:</span>
+          {LIBRARY_SYSTEM?.helpers.map(h => (
+            <span key={h} className="text-[10px] px-2.5 py-1 rounded-full bg-white/4 border border-white/8 text-gray-500">
+              ⚡ {h}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Griot AI Studio widget section ───────────────── */}
+      <section className="px-6 mb-10">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center text-sm"
+              style={{ background: 'linear-gradient(135deg, #7C3AED, #4A0E4E)' }}>🌀</div>
+            <h2 className="text-sm font-bold text-white">Griot AI Studio</h2>
+            <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md"
+              style={{ background: 'rgba(16,185,129,0.12)', color: '#10B981', border: '1px solid rgba(16,185,129,0.2)' }}>
+              Live
+            </span>
+          </div>
+          <Link to="/griot" className="flex items-center gap-1 text-xs font-medium hover:underline"
+            style={{ color: '#7C3AED' }}>
+            Open Studio <FiArrowRight size={11}/>
+          </Link>
+        </div>
+
+        {/* Widget row — large on the left, two mediums stacked right */}
+        <div className="flex flex-wrap gap-4 items-start">
+          {/* Large widget */}
+          <Link to="/griot" className="flex-shrink-0 block hover:brightness-110 transition-all">
+            <LargeGroitWidget/>
+          </Link>
+
+          {/* Two medium widgets stacked */}
+          <div className="flex flex-col gap-4 flex-shrink-0">
+            <Link to="/griot" className="block hover:brightness-110 transition-all">
+              <MediumGroitWidget
+                stats={{
+                  currentProject: { title: 'The Freedom Blueprint', type: 'Audiobook', icon: '🎧', status: 'In Progress' },
+                  recentProjects: [
+                    { title: 'Black Excellence Doc', icon: '📽️', status: 'In Progress' },
+                    { title: 'Afrofuture Rising',    icon: '🎮', status: 'Complete'    },
+                    { title: 'Sound of the South',   icon: '🎙️', status: 'In Progress' },
+                  ],
+                  progress: 72,
+                }}
+              />
+            </Link>
+            <Link to="/film-studio" className="block hover:brightness-110 transition-all">
+              <MediumGroitWidget
+                stats={{
+                  currentProject: { title: 'Black Excellence Doc', type: 'Documentary', icon: '📽️', status: 'In Progress' },
+                  recentProjects: [
+                    { title: 'The Freedom Blueprint', icon: '🎧', status: 'Complete'    },
+                    { title: 'Afrofuture Rising',     icon: '🎮', status: 'Complete'    },
+                    { title: 'Sound of the South',    icon: '🎙️', status: 'In Progress' },
+                  ],
+                  progress: 45,
+                }}
+              />
+            </Link>
+          </div>
+
+          {/* Info panel */}
+          <div className="flex-1 min-w-[220px] flex flex-col gap-3">
+            <div className="rounded-2xl border p-4"
+              style={{ background: 'rgba(124,58,237,0.06)', borderColor: 'rgba(124,58,237,0.2)' }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: '#7C3AED' }}>
+                What is Griot AI?
+              </p>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                Griot AI transforms books and stories into 6 output formats — audiobooks, screenplays, games, podcasts, graphic novels, and documentaries — using AI agents.
+              </p>
+            </div>
+            {[
+              { emoji: '🎧', label: 'Audiobook Studio',  path: '/griot',      count: '247 made' },
+              { emoji: '🎬', label: 'Film Studio',        path: '/film-studio',count: '89 scripts' },
+              { emoji: '🎵', label: 'Music Studio',       path: '/music-studio',count: '12 sessions' },
+            ].map(item => (
+              <Link key={item.label} to={item.path}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl border transition-all hover:bg-white/5"
+                style={{ borderColor: 'rgba(124,58,237,0.18)', background: 'rgba(124,58,237,0.04)' }}>
+                <span className="text-xl">{item.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-white">{item.label}</p>
+                  <p className="text-[10px] text-gray-600">{item.count}</p>
+                </div>
+                <FiArrowRight size={12} className="text-gray-600"/>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Library agent full panel ──────────────────────── */}
+      {openAgent && (
+        <AgentFullPanel
+          agent={openAgent}
+          systemId="library"
+          system={LIBRARY_SYSTEM}
+          minTier={LIBRARY_SYSTEM?.minTier || 'free'}
+          onClose={() => setOpenAgent(null)}
+        />
+      )}
 
       {/* ── Upload modal ──────────────────────────────────── */}
       <AnimatePresence>

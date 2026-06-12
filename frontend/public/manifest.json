@@ -1,7 +1,7 @@
 {
   "name": "EOF Digital Library",
   "short_name": "EOF Library",
-  "description": "Your gateway to knowledge, culture, and community. Explore curated books, courses, and exclusive EOF originals.",
+  "description": "Your complete EOF ecosystem — Library, Griot AI, DIY University, Creator Academy, Streaming & Radio. Learn, create, publish, distribute, earn.",
   "start_url": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
@@ -10,7 +10,7 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en-US",
-  "categories": ["books", "education", "entertainment"],
+  "categories": ["books", "education", "entertainment", "music"],
   "screenshots": [
     {
       "src": "/screenshots/library.png",
@@ -46,6 +46,13 @@
   ],
   "shortcuts": [
     {
+      "name": "EOF Ecosystem",
+      "short_name": "Ecosystem",
+      "description": "See all 6 connected EOF apps",
+      "url": "/ecosystem",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
       "name": "Browse Library",
       "short_name": "Library",
       "description": "Go directly to the book library",
@@ -53,17 +60,38 @@
       "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
     },
     {
-      "name": "My Bookshelves",
-      "short_name": "Bookshelves",
-      "description": "View your personal reading collections",
-      "url": "/bookshelves",
+      "name": "Griot AI",
+      "short_name": "Griot AI",
+      "description": "AI-powered story adaptation and creation",
+      "url": "/griot",
       "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
     },
     {
-      "name": "Story Time",
-      "short_name": "Story Time",
-      "description": "Listen to audiobooks and stories",
-      "url": "/story-time",
+      "name": "DIY University",
+      "short_name": "University",
+      "description": "Learn from 24+ AI professors across 8 schools",
+      "url": "/university",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Creator Academy",
+      "short_name": "Academy",
+      "description": "Apply your skills and publish real content",
+      "url": "/creator-academy",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "EOF Streaming",
+      "short_name": "Streaming",
+      "description": "Watch original series, films, and live events",
+      "url": "/streaming",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "EOF Radio",
+      "short_name": "Radio",
+      "description": "Live internet radio — talk, music, spoken word",
+      "url": "/radio",
       "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
     }
   ],

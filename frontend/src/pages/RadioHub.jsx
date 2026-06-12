@@ -43,15 +43,34 @@ export default function RadioHub() {
   const [openAgent, setOpenAgent] = useState(null);
 
   return (
-    <div className="min-h-screen bg-eof-dark px-4 md:px-6 py-8">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs text-gray-500 mb-6">
-        <Link to="/" className="hover:text-eof-gold transition-colors">Home</Link>
-        <FiChevronRight size={12} />
-        <Link to="/ecosystem" className="hover:text-eof-gold transition-colors">Ecosystem</Link>
-        <FiChevronRight size={12} />
-        <span style={{ color: '#0891B2' }}>EOF Radio</span>
-      </div>
+    <div className="min-h-screen flex flex-col" style={{ background: '#07090c' }}>
+      {/* Standalone Top Bar */}
+      <header className="flex-shrink-0 sticky top-0 z-50 flex items-center justify-between px-5 py-3 border-b border-white/8"
+        style={{ background: 'rgba(10,10,10,0.96)', backdropFilter: 'blur(12px)' }}>
+        <div className="flex items-center gap-3">
+          <span className="text-xl">📻</span>
+          <div className="leading-none">
+            <p className="text-xl font-black text-white leading-none" style={{ letterSpacing: '0.12em' }}>E.O.F</p>
+            <p className="text-[8px] font-bold tracking-[0.22em] uppercase mt-0.5" style={{ color: '#22D3EE' }}>Radio</p>
+          </div>
+          <span className="ml-2 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-red-500/30 bg-red-500/10 text-red-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" /> ON AIR 24/7
+          </span>
+        </div>
+        <div className="hidden md:flex items-center gap-2">
+          {STATIONS.filter(s => s.isLive).map(s => (
+            <button key={s.id} onClick={() => setActiveStation(s.id)}
+              className="text-[11px] px-3 py-1 rounded-full border transition-colors"
+              style={activeStation === s.id
+                ? { background: `${s.color}20`, borderColor: `${s.color}50`, color: s.color }
+                : { borderColor: 'rgba(255,255,255,0.1)', color: '#6B7280' }}>
+              {s.icon} {s.name}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-8">
 
       {/* Hero */}
       <motion.div
@@ -262,6 +281,8 @@ export default function RadioHub() {
           onClose={() => setOpenAgent(null)}
         />
       )}
+
+      </div>{/* end scrollable content */}
     </div>
   );
 }

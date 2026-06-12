@@ -305,7 +305,7 @@ export default function StreamingHub() {
     setMyList(prev => prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title]);
 
   return (
-    <div className="relative min-h-full" style={{ background: '#080808', paddingBottom: channel ? 88 : 0 }}>
+    <div className="relative min-h-full" style={{ background: '#08080f', paddingBottom: channel ? 88 : 0 }}>
 
       {/* ── Side Channel Nav ──────────────────────────────────────────────── */}
       <div className="fixed left-0 top-0 bottom-0 z-40 flex flex-col items-center py-24 gap-1"
@@ -347,7 +347,10 @@ export default function StreamingHub() {
           {/* Logo mark */}
           <div className="flex items-center gap-2 mr-4 flex-shrink-0">
             <span className="text-xl">📺</span>
-            <span className="text-xs font-black tracking-widest text-white">EOF<span style={{ color: '#6366F1' }}>+</span></span>
+            <div className="leading-none">
+              <p className="text-xl font-black text-white leading-none" style={{ letterSpacing: '0.14em' }}>E.O.F</p>
+              <p className="text-[8px] font-bold tracking-[0.22em] uppercase mt-0.5" style={{ color: '#818CF8' }}>Streaming Hub</p>
+            </div>
           </div>
           {NAV_LINKS.map(link => (
             <button key={link} onClick={() => setActiveNav(link)}

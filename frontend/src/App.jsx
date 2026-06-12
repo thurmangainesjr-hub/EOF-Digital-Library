@@ -8,6 +8,7 @@ import FHHLAppLayout from './layouts/FHHLAppLayout';
 import BACAppLayout from './layouts/BACAppLayout';
 import LegacyVaultAppLayout from './layouts/LegacyVaultAppLayout';
 import Dashboard from './pages/Dashboard';
+import LibraryDashboard from './pages/LibraryDashboard';
 import CommandCenter from './pages/CommandCenter';
 import Library from './pages/Library';
 import ProductDetail from './pages/ProductDetail';
@@ -66,6 +67,7 @@ import MusicStudioWidgetPage from './pages/MusicStudioWidgetPage';
 import ProjectsWidgetPage from './pages/ProjectsWidgetPage';
 import GriotCentralWidgetPage from './pages/GriotCentralWidgetPage';
 import AllWidgetsHub from './pages/AllWidgetsHub';
+import TheBListApp from './pages/TheBListApp';
 
 function App() {
   return (
@@ -95,24 +97,28 @@ function App() {
             <Route path="preview" element={<AppPreview />} />
             <Route path="widgets" element={<LibraryWidgetPage />} />
             <Route path="ecosystem" element={<EcosystemHub />} />
-            <Route path="streaming" element={<StreamingHub />} />
-            <Route path="streaming/widgets" element={<StreamingWidgetPage />} />
-            <Route path="radio" element={<RadioHub />} />
-            <Route path="radio/widgets" element={<RadioWidgetPage />} />
+            {/* streaming + radio moved to standalone below */}
             <Route path="creator-academy" element={<CreatorAcademyHub />} />
-            <Route path="akashic" element={<AkashicHub />} />
-            <Route path="akashic/widgets" element={<AkashicWidgetPage />} />
+            {/* akashic moved to standalone below */}
             <Route path="griot-central" element={<GriotCentralHub />} />
             <Route path="griot-architecture" element={<GriotArchitectureDoc />} />
             <Route path="projects" element={<UniversalProjectHub />} />
             <Route path="projects/widgets" element={<ProjectsWidgetPage />} />
             <Route path="griot-central/widgets" element={<GriotCentralWidgetPage />} />
             <Route path="widgets/all" element={<AllWidgetsHub />} />
+            <Route path="library-dashboard" element={<LibraryDashboard />} />
           </Route>
 
-          {/* Standalone full-screen creator apps (no sidebar/nav) */}
+          {/* Standalone full-screen apps (no sidebar/nav) */}
           <Route path="/film-editor" element={<FilmEditorApp />} />
           <Route path="/music-recorder" element={<MusicRecorderApp />} />
+          <Route path="/streaming" element={<StreamingHub />} />
+          <Route path="/streaming/widgets" element={<StreamingWidgetPage />} />
+          <Route path="/the-b-list" element={<TheBListApp />} />
+          <Route path="/radio" element={<RadioHub />} />
+          <Route path="/radio/widgets" element={<RadioWidgetPage />} />
+          <Route path="/akashic" element={<AkashicHub />} />
+          <Route path="/akashic/widgets" element={<AkashicWidgetPage />} />
 
           {/* Film Studio — part of Griot AI (same layout, same purple) */}
           <Route path="/film-studio" element={<GroitAppLayout />}>

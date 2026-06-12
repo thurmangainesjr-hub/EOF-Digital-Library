@@ -37,15 +37,29 @@ export default function AkashicHub() {
   const [openAgent, setOpenAgent] = useState(null);
 
   return (
-    <div className="min-h-screen bg-eof-dark px-4 md:px-6 py-8">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs text-gray-500 mb-6">
-        <Link to="/" className="hover:text-eof-gold transition-colors">Home</Link>
-        <FiChevronRight size={12} />
-        <Link to="/ecosystem" className="hover:text-eof-gold transition-colors">Ecosystem</Link>
-        <FiChevronRight size={12} />
-        <span style={{ color: '#0D9488' }}>Akashic Records</span>
-      </div>
+    <div className="min-h-screen flex flex-col" style={{ background: '#070b09' }}>
+      {/* Standalone Top Bar */}
+      <header className="flex-shrink-0 sticky top-0 z-50 flex items-center justify-between px-5 py-3 border-b border-white/8"
+        style={{ background: 'rgba(8,8,8,0.97)', backdropFilter: 'blur(12px)' }}>
+        <div className="flex items-center gap-3">
+          <span className="text-xl">🌌</span>
+          <div className="leading-none">
+            <p className="text-xl font-black text-white leading-none" style={{ letterSpacing: '0.12em' }}>E.O.F</p>
+            <p className="text-[8px] font-bold tracking-[0.22em] uppercase mt-0.5" style={{ color: '#2DD4BF' }}>Akashic Records</p>
+          </div>
+          <span className="ml-2 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border"
+            style={{ borderColor: 'rgba(212,175,55,0.35)', background: 'rgba(212,175,55,0.08)', color: '#D4AF37' }}>
+            <FiLock size={9} /> Premium
+          </span>
+        </div>
+        <div className="hidden md:flex items-center gap-2 text-[11px] text-gray-500">
+          <span style={{ color: '#0D9488' }}>400yrs</span> of history ·&nbsp;
+          <span style={{ color: '#0D9488' }}>6</span> research layers ·&nbsp;
+          <span style={{ color: '#0D9488' }}>∞</span> generations
+        </div>
+      </header>
+
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-8">
 
       {/* Hero */}
       <motion.div
@@ -234,6 +248,8 @@ export default function AkashicHub() {
           onClose={() => setOpenAgent(null)}
         />
       )}
+
+      </div>{/* end scrollable content */}
     </div>
   );
 }

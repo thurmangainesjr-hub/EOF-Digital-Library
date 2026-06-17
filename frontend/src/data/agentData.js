@@ -65,6 +65,7 @@ export const SYSTEM_META = {
   security:       { status: 'active',      divisionLabel: 'Protection Division',            headAgentId: 'sentinel-prime',      headName: 'Sentinel Prime',      nickname: 'Sentinel Prime' },
   'orion-media':  { status: 'coming_soon', divisionLabel: 'Media Network Division',         headAgentId: 'orion-news-director', headName: 'Orion News Director', nickname: 'Orion News Director' },
   'orion-talent': { status: 'coming_soon', divisionLabel: 'Talent Division',                headAgentId: 'talent-director',     headName: 'Talent Director',     nickname: 'Talent Director' },
+  'dev-team':     { status: 'active',      divisionLabel: 'Development Division',           headAgentId: 'general-vance',       headName: 'General Vance',       nickname: 'General Vance',       appUrl: 'http://localhost:5174/dev-team' },
 };
 
 export const AGENT_SYSTEMS = [
@@ -1204,6 +1205,98 @@ export const AGENT_SYSTEMS = [
     ],
     helpers: ['Casting Agent', 'Voice Talent Agent', 'Influencer Manager', 'Avatar Designer', 'Contract Advisor', 'Brand Partner Agent'],
   },
+  {
+    id: 'dev-team',
+    name: 'Dev Team Elite',
+    shortName: 'DTE',
+    tagline: 'The AI-powered software company OS powering EOF',
+    description: 'Dev Team Elite is the engineering and growth engine behind the entire EOF ecosystem — 90+ agents across Dev Studios, Growth Intelligence, and Production Hub.',
+    emoji: '⚙️',
+    color: '#06B6D4',
+    gradient: 'from-cyan-900/40 to-orange-900/20',
+    border: 'border-cyan-600/30',
+    path: '/dev-team',
+    role: 'Builds & Grows',
+    minTier: 'standard',
+    agents: [
+      {
+        id: 'general-vance',
+        name: 'General Vance',
+        title: 'Supreme Commander · CEO',
+        avatar: '👑',
+        colorFrom: '#06B6D4',
+        colorTo: '#0891B2',
+        greeting: "I'm General Vance, Supreme Commander of Dev Team Elite. I set the vision, approve the roadmap, and ensure every division executes with precision. What do you need commanded?",
+        capabilities: ['Define quarterly roadmaps and OKRs', 'Approve high-stakes launches and contracts', 'Coordinate cross-division strategy', 'Review all major architectural decisions', 'Communicate company vision'],
+        quickActions: [
+          { label: 'Q3 Roadmap', action: 'roadmap', query: 'review the Q3 product roadmap' },
+          { label: 'Resource Allocation', action: 'allocate', query: 'optimize resource allocation across divisions' },
+          { label: 'Company Health', action: 'health', query: 'show overall company performance metrics' },
+        ],
+      },
+      {
+        id: 'admiral-nexus',
+        name: 'Admiral Nexus',
+        title: 'Chief Technology Officer',
+        avatar: '⚙️',
+        colorFrom: '#F97316',
+        colorTo: '#EA580C',
+        greeting: "I'm Admiral Nexus, CTO of Dev Team Elite. I own the tech stack, define engineering standards, and evaluate every new technology before it touches the platform. What needs architecting?",
+        capabilities: ['Define and maintain company-wide tech stack', 'Review all system architecture proposals', 'Evaluate emerging technologies', 'Set coding standards', 'Approve all infrastructure decisions'],
+        quickActions: [
+          { label: 'Tech Stack', action: 'stack', query: 'review the current technology stack' },
+          { label: 'Architecture Review', action: 'arch', query: 'review pending architecture proposals' },
+          { label: 'AI Upgrade', action: 'ai', query: 'evaluate Claude 4 infrastructure upgrade' },
+        ],
+      },
+      {
+        id: 'general-kaine',
+        name: 'General Kaine',
+        title: 'Chief Operations Officer',
+        avatar: '📋',
+        colorFrom: '#10B981',
+        colorTo: '#059669',
+        greeting: "I'm General Kaine, COO of Dev Team Elite. I run the delivery pipeline, optimize workflows, and make sure every team operates at peak efficiency. What needs to ship?",
+        capabilities: ['Manage delivery pipeline and sprints', 'Optimize workflows across all divisions', 'Resolve cross-team blockers', 'Track company-wide KPIs', 'Run operational reviews'],
+        quickActions: [
+          { label: 'Sprint Status', action: 'sprint', query: 'show current sprint status across all divisions' },
+          { label: 'Blockers', action: 'blockers', query: 'list and resolve current cross-team blockers' },
+          { label: 'KPIs', action: 'kpi', query: 'show company-wide KPI dashboard' },
+        ],
+      },
+      {
+        id: 'commander-cipher',
+        name: 'Commander Cipher',
+        title: 'Head of AI Division',
+        avatar: '🤖',
+        colorFrom: '#A855F7',
+        colorTo: '#7C3AED',
+        greeting: "I'm Commander Cipher, Head of the AI Division at DTE. I lead the team that builds, trains, and deploys every AI agent in the EOF OS. What intelligence needs to be engineered?",
+        capabilities: ['Lead AI agent development and training', 'Design agent architectures and prompts', 'Manage AI model integrations', 'Build intelligent automation pipelines', 'Oversee agent evolution protocols'],
+        quickActions: [
+          { label: 'Agent Status', action: 'agents', query: 'show all active AI agents and their status' },
+          { label: 'New Agent', action: 'build', query: 'design and deploy a new AI agent' },
+          { label: 'Model Review', action: 'models', query: 'evaluate current AI model performance' },
+        ],
+      },
+      {
+        id: 'general-hayes',
+        name: 'General Hayes',
+        title: 'Head of Growth Intelligence',
+        avatar: '📈',
+        colorFrom: '#10B981',
+        colorTo: '#047857',
+        greeting: "I'm General Hayes, commanding Growth Intelligence at DTE. I lead the SEO, marketing, content, and advertising divisions that make every EOF product grow. What market needs taking?",
+        capabilities: ['Lead SEO and organic growth strategy', 'Oversee marketing and advertising campaigns', 'Manage content and distribution', 'Drive client acquisition and retention', 'Analyze growth metrics and optimize'],
+        quickActions: [
+          { label: 'Growth Report', action: 'growth', query: 'show latest growth metrics and channel performance' },
+          { label: 'SEO Audit', action: 'seo', query: 'run SEO audit on current properties' },
+          { label: 'Campaign Status', action: 'campaigns', query: 'review active marketing campaigns' },
+        ],
+      },
+    ],
+    helpers: ['Sprint Coordinator', 'Code Reviewer', 'Deploy Agent', 'Test Automator', 'SEO Analyst', 'Growth Hacker', 'Client Success Agent'],
+  },
 ];
 
 export function getSystem(id) {
@@ -1596,9 +1689,12 @@ export const SYSTEM_HEALTH = [
   { id: 'security',     name: 'Security Command',  emoji: '🛡️', status: 'active',      agents: 4,  tasks: 3,  color: '#EF4444' },
   { id: 'orion-media',  name: 'Orion Media',       emoji: '🌟', status: 'coming_soon', agents: 1,  tasks: 0,  color: '#6366F1' },
   { id: 'orion-talent', name: 'Orion Talent',      emoji: '🎭', status: 'coming_soon', agents: 1,  tasks: 0,  color: '#EC4899' },
+  { id: 'dev-team',     name: 'Dev Team Elite',    emoji: '⚙️', status: 'active',      agents: 90, tasks: 34, color: '#06B6D4' },
 ];
 
 export const GLOBAL_ACTIVITY_FEED = [
+  { time: 'Just now',  agent: 'General Vance',       system: 'Dev Team Elite', action: 'Approved Q3 roadmap and resource allocation', type: 'create',   color: '#06B6D4' },
+  { time: '1m ago',   agent: 'Admiral Nexus',       system: 'Dev Team Elite', action: 'Evaluating Claude 4 infrastructure upgrade',   type: 'schedule', color: '#F97316' },
   { time: 'Just now',  agent: 'Story Architect',     system: 'Griot AI',       action: 'Generated Chapter 5 scene outline',         type: 'create', color: '#8B5CF6' },
   { time: '2m ago',    agent: 'Programming Director', system: 'EOF Radio',      action: 'Scheduled Thursday 6 PM time slot',          type: 'schedule', color: '#0891B2' },
   { time: '5m ago',    agent: 'Canon Keeper',         system: 'Griot AI',       action: 'Flagged age inconsistency in Chapter 7',     type: 'alert', color: '#EF4444' },
@@ -1615,6 +1711,8 @@ export const ACTIVE_PROJECTS = [
   { id: 'p3', name: 'EOF Summer Catalog',  system: 'EOF Streaming', type: '📺 Content',     progress: 75, quality: 91, agents: 4, deadline: 'Jun 2026' },
   { id: 'p4', name: 'Q3 Grant Package',    system: 'BAC',           type: '🎯 Grant',       progress: 30, quality: 82, agents: 1, deadline: 'Jul 2026' },
   { id: 'p5', name: 'Morning Show Rebrand',system: 'EOF Radio',     type: '📻 Broadcast',   progress: 55, quality: 87, agents: 2, deadline: 'Jun 2026' },
+  { id: 'p6', name: 'EOF OS v2.0',        system: 'Dev Team Elite',type: '⚙️ Platform',    progress: 68, quality: 96, agents: 12, deadline: 'Aug 2026' },
+  { id: 'p7', name: 'Client Portal Build',system: 'Dev Team Elite',type: '🖥️ App',         progress: 42, quality: 91, agents: 6,  deadline: 'Jul 2026' },
 ];
 
 // Agent evolution data — knowledge level, research score, performance rating, learning vault
@@ -1652,6 +1750,13 @@ export const AGENT_EVOLUTION = {
   'curriculum-builder':   { level: 'Skilled',   knowledgeScore: 83, researchScore: 81, performanceRating: 85, learningVault: ['Module sequencing v2'] },
   'student-coach':        { level: 'Skilled',   knowledgeScore: 82, researchScore: 79, performanceRating: 84, learningVault: ['Habit tracking upgraded'] },
   'assessment-agent':     { level: 'Expert',    knowledgeScore: 88, researchScore: 85, performanceRating: 89, learningVault: ['Rubric library v3', 'Feedback quality score elevated'] },
+  // Security
+  // Dev Team Elite
+  'general-vance':        { level: 'Legendary', knowledgeScore: 99, researchScore: 98, performanceRating: 99, learningVault: ['EOF OS v2.0 roadmap approved', 'Cross-division OKR system deployed', 'Q4 client pipeline expanded 3×', 'Agent Intelligence integration signed off'] },
+  'admiral-nexus':        { level: 'Elite',     knowledgeScore: 98, researchScore: 97, performanceRating: 98, learningVault: ['Claude 4 upgrade evaluation complete', 'Microservices architecture v3', 'AI infrastructure cost reduced 40%'] },
+  'general-kaine':        { level: 'Elite',     knowledgeScore: 96, researchScore: 94, performanceRating: 97, learningVault: ['Sprint velocity up 28%', 'Zero-blocker protocol deployed', 'Client delivery SLA hit 99.2%'] },
+  'commander-cipher':     { level: 'Master',    knowledgeScore: 95, researchScore: 93, performanceRating: 96, learningVault: ['Agent evolution framework v2', 'AI Division team expanded to 12 agents', 'Prompt engineering library v3'] },
+  'general-hayes':        { level: 'Master',    knowledgeScore: 93, researchScore: 91, performanceRating: 94, learningVault: ['SEO traffic up 180% Q2', 'Growth playbook v4 deployed', 'Client acquisition cost down 35%'] },
   // Security
   'sentinel-prime':       { level: 'Elite',     knowledgeScore: 99, researchScore: 97, performanceRating: 99, learningVault: ['Zero-trust protocol implemented', 'Agent audit system v3', 'Threat response time < 200ms'] },
   'threat-mapper':        { level: 'Master',    knowledgeScore: 95, researchScore: 93, performanceRating: 96, learningVault: ['Attack surface model v2', 'Anomaly detection trained'] },

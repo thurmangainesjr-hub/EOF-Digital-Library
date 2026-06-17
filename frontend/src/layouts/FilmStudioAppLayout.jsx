@@ -6,9 +6,10 @@ import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiMenu, FiX, FiChevronDown, FiChevronLeft,
-  FiGrid, FiFilm, FiFolder, FiImage, FiSend, FiSettings, FiEdit3,
+  FiGrid, FiFilm, FiFolder, FiImage, FiSend, FiSettings, FiEdit3, FiUsers,
 } from 'react-icons/fi';
 import EOFTopNav from '../components/EOFTopNav';
+import FilmIntro, { hasSeenFilmIntro } from '../components/FilmIntro';
 
 const ACCENT        = '#EF4444';
 const ACCENT_SOFT   = 'rgba(239,68,68,0.10)';
@@ -44,11 +45,20 @@ const SIDEBAR_NAV = [
     ],
   },
   {
+    id: 'crew', label: 'Crew', icon: FiUsers,
+    children: [
+      { label: 'Crew Roster',    path: '/film-studio/hub/roster', icon: '🎬' },
+      { label: 'Direction',      path: '/film-studio/hub/roster', icon: '📽️' },
+      { label: 'Cinematography', path: '/film-studio/hub/roster', icon: '📷' },
+      { label: 'Editing',        path: '/film-studio/hub/roster', icon: '✂️' },
+    ],
+  },
+  {
     id: 'distribution', label: 'Distribution', icon: FiSend,
     children: [
-      { label: 'Streaming',      path: '/streaming',           icon: '📺' },
-      { label: 'Download',       path: '/film-studio',         icon: '⬇️' },
-      { label: 'Griot AI',       path: '/griot',               icon: '🌀' },
+      { label: 'Streaming',  path: '/streaming',  icon: '📺' },
+      { label: 'Download',   path: '/film-studio', icon: '⬇️' },
+      { label: 'Griot AI',   path: '/griot',       icon: '🌀' },
     ],
   },
 ];
@@ -150,7 +160,7 @@ function DesktopSidebar({ collapsed, setCollapsed }) {
         ))}
       </nav>
       <div className="px-2 pb-3 pt-2 border-t border-white/6 space-y-0.5">
-        <NavLink to="/film-studio/widgets"
+        <NavLink to="/film-studio/hub/widgets"
           className={({ isActive }) =>
             `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all ${collapsed ? 'justify-center' : ''} ${
               isActive ? 'text-red-300 bg-red-900/20' : 'text-gray-600 hover:text-gray-400 hover:bg-white/5'
@@ -199,8 +209,10 @@ function MobileDrawer({ open, onClose }) {
 export default function FilmStudioAppLayout() {
   const [drawerOpen, setDrawerOpen]       = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [introSeen, setIntroSeen] = useState(() => hasSeenFilmIntro());
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#0d0d0d' }}>
+      {!introSeen && <FilmIntro onDone={() => setIntroSeen(true)} />}
       <EOFTopNav accentColor={ACCENT} systemName="Film Studio" systemEmoji="🎬"/>
       <div className="flex flex-1 min-h-0">
         <button onClick={() => setDrawerOpen(true)}

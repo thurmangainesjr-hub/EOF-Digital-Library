@@ -9,6 +9,7 @@ import {
   FiGrid, FiStar, FiUsers, FiTrendingUp, FiAward, FiSettings,
 } from 'react-icons/fi';
 import EOFTopNav from '../components/EOFTopNav';
+import BACIntro, { hasSeenBACIntro } from '../components/BACIntro';
 
 const ACCENT        = '#FBBF24';
 const ACCENT_SOFT   = 'rgba(251,191,36,0.10)';
@@ -19,6 +20,7 @@ const SIDEBAR_NAV = [
   {
     id: 'community', label: 'Community', icon: FiUsers,
     children: [
+      { label: 'Agent Roster', path: '/bac/roster', icon: '⭐' },
       { label: 'Members',      path: '/bac', icon: '👥' },
       { label: 'Events',       path: '/bac', icon: '📅' },
       { label: 'Forums',       path: '/bac', icon: '💬' },
@@ -189,8 +191,10 @@ function MobileDrawer({ open, onClose }) {
 export default function BACAppLayout() {
   const [drawerOpen, setDrawerOpen]           = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [introSeen, setIntroSeen] = useState(() => hasSeenBACIntro());
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#0d0d0d' }}>
+      {!introSeen && <BACIntro onDone={() => setIntroSeen(true)} />}
       <EOFTopNav accentColor={ACCENT} systemName="BAC" systemEmoji="⭐"/>
       <div className="flex flex-1 min-h-0">
         <button onClick={() => setDrawerOpen(true)}

@@ -7,6 +7,7 @@ import {
   FiEdit3, FiStar
 } from 'react-icons/fi';
 import EOFTopNav from '../components/EOFTopNav';
+import LibraryIntro, { hasSeenLibraryIntro } from '../components/LibraryIntro';
 
 const LIBRARY_NAV = [
   { path: '/',               icon: FiHome,    label: 'Dashboard',      end: true },
@@ -18,8 +19,9 @@ const LIBRARY_NAV = [
 ];
 
 const ACCOUNT_NAV = [
-  { path: '/creator',    icon: FiEdit3, label: 'Creator Studio' },
-  { path: '/membership', icon: FiStar,  label: 'Membership'     },
+  { path: '/creator',      icon: FiEdit3, label: 'Creator Studio' },
+  { path: '/membership',   icon: FiStar,  label: 'Membership'     },
+  { path: '/library-team', icon: FiUser,  label: 'Library Staff'  },
 ];
 
 // ── Library logo ──────────────────────────────────────────────────────────────
@@ -215,11 +217,13 @@ function TopBar({ onMenu }) {
 // ── Root layout ───────────────────────────────────────────────────────────────
 export default function LibraryAppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [introSeen, setIntroSeen] = useState(() => hasSeenLibraryIntro());
   const location = useLocation();
   useEffect(() => { setDrawerOpen(false); }, [location.pathname]);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#0d0d0d' }}>
+      {!introSeen && <LibraryIntro onDone={() => setIntroSeen(true)} />}
       <EOFTopNav accentColor="#D4AF37" systemName="EOF Library" systemEmoji="📚"/>
       <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <div className="flex flex-1 min-h-0">

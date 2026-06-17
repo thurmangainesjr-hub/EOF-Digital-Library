@@ -10,6 +10,7 @@ import EcosystemStrip from '../components/EcosystemStrip';
 import AgentAvatarCard from '../components/AgentAvatarCard';
 import AgentFullPanel from '../components/AgentFullPanel';
 import { AGENT_SYSTEMS } from '../data/agentData';
+import StreamingIntro, { hasSeenStreamingIntro } from '../components/StreamingIntro';
 
 const STREAMING_SYSTEM = AGENT_SYSTEMS.find(s => s.id === 'streaming');
 
@@ -258,6 +259,7 @@ function ContentRow({ row, myList, onToggleList }) {
 
 // ── Main Component ───────────────────────────────────────────────────────────
 export default function StreamingHub() {
+  const [introSeen, setIntroSeen] = useState(() => hasSeenStreamingIntro());
   const [activeFeatured, setActiveFeatured] = useState(0);
   const [activeNav, setActiveNav]           = useState('Home');
   const [activeChannel, setActiveChannel]   = useState(null);
@@ -303,6 +305,8 @@ export default function StreamingHub() {
 
   const toggleList = (title) =>
     setMyList(prev => prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title]);
+
+  if (!introSeen) return <StreamingIntro onDone={() => setIntroSeen(true)} />;
 
   return (
     <div className="relative min-h-full" style={{ background: '#08080f', paddingBottom: channel ? 88 : 0 }}>

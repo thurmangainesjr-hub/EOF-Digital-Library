@@ -11,6 +11,7 @@ import {
   FiBarChart2, FiSettings, FiTrendingUp,
 } from 'react-icons/fi';
 import EOFTopNav from '../components/EOFTopNav';
+import FHHLIntro, { hasSeenFHHLIntro } from '../components/FHHLIntro';
 
 const ACCENT = '#F59E0B';
 const ACCENT_SOFT   = 'rgba(245,158,11,0.10)';
@@ -84,6 +85,7 @@ const SIDEBAR_NAV = [
     label: 'Management',
     icon: FiTrendingUp,
     children: [
+      { label: 'Agent Roster',    path: '/fhhl/roster', icon: '🏆' },
       { label: 'Season Settings', path: '/fhhl', icon: '⚙️' },
       { label: 'League Rules',    path: '/fhhl', icon: '📋' },
       { label: 'Notifications',   path: '/fhhl', icon: '🔔' },
@@ -286,9 +288,11 @@ function MobileDrawer({ open, onClose }) {
 export default function FHHLAppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [introSeen, setIntroSeen] = useState(() => hasSeenFHHLIntro());
 
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#0d0d0d' }}>
+      {!introSeen && <FHHLIntro onDone={() => setIntroSeen(true)} />}
       <EOFTopNav accentColor={ACCENT} systemName="FHHL" systemEmoji="🏆"/>
 
       <div className="flex flex-1 min-h-0">

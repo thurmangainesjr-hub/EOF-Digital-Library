@@ -9,6 +9,7 @@ import {
   FiGrid, FiArchive, FiBook, FiFolder, FiSearch, FiSettings,
 } from 'react-icons/fi';
 import EOFTopNav from '../components/EOFTopNav';
+import VaultIntro, { hasSeenVaultIntro } from '../components/VaultIntro';
 
 const ACCENT        = '#A78BFA';
 const ACCENT_SOFT   = 'rgba(167,139,250,0.10)';
@@ -19,7 +20,8 @@ const SIDEBAR_NAV = [
   {
     id: 'archives', label: 'Archives', icon: FiArchive,
     children: [
-      { label: 'All Archives',    path: '/legacy-vault', icon: '🏛️' },
+      { label: 'Agent Roster',    path: '/legacy-vault/roster', icon: '🏛️' },
+      { label: 'All Archives',    path: '/legacy-vault', icon: '📂' },
       { label: 'Music Archives',  path: '/legacy-vault', icon: '🎵' },
       { label: 'Film Archives',   path: '/legacy-vault', icon: '🎬' },
       { label: 'Literature',      path: '/legacy-vault', icon: '📚' },
@@ -197,8 +199,10 @@ function MobileDrawer({ open, onClose }) {
 export default function LegacyVaultAppLayout() {
   const [drawerOpen, setDrawerOpen]           = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [introSeen, setIntroSeen] = useState(() => hasSeenVaultIntro());
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#0d0d0d' }}>
+      {!introSeen && <VaultIntro onDone={() => setIntroSeen(true)} />}
       <EOFTopNav accentColor={ACCENT} systemName="Legacy Vault" systemEmoji="🏛️"/>
       <div className="flex flex-1 min-h-0">
         <button onClick={() => setDrawerOpen(true)}

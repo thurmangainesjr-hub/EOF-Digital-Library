@@ -6,6 +6,7 @@ import EcosystemStrip from '../components/EcosystemStrip';
 import AgentAvatarCard from '../components/AgentAvatarCard';
 import AgentFullPanel from '../components/AgentFullPanel';
 import { AGENT_SYSTEMS } from '../data/agentData';
+import AkashicIntro, { hasSeenAkashicIntro } from '../components/AkashicIntro';
 
 const AKASHIC_SYSTEM = AGENT_SYSTEMS.find(s => s.id === 'akashic');
 
@@ -34,7 +35,10 @@ const DISCOVERY_EXAMPLES = [
 ];
 
 export default function AkashicHub() {
+  const [introSeen, setIntroSeen] = useState(() => hasSeenAkashicIntro());
   const [openAgent, setOpenAgent] = useState(null);
+
+  if (!introSeen) return <AkashicIntro onDone={() => setIntroSeen(true)} />;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#070b09' }}>

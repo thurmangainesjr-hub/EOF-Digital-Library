@@ -6,6 +6,7 @@ import EcosystemStrip from '../components/EcosystemStrip';
 import AgentAvatarCard from '../components/AgentAvatarCard';
 import AgentFullPanel from '../components/AgentFullPanel';
 import { AGENT_SYSTEMS } from '../data/agentData';
+import RadioIntro, { hasSeenRadioIntro } from '../components/RadioIntro';
 
 const RADIO_SYSTEM = AGENT_SYSTEMS.find(s => s.id === 'radio');
 
@@ -38,9 +39,12 @@ const PODCASTS = [
 ];
 
 export default function RadioHub() {
+  const [introSeen, setIntroSeen] = useState(() => hasSeenRadioIntro());
   const [activeStation, setActiveStation] = useState('culture');
   const station = STATIONS.find(s => s.id === activeStation) || STATIONS[0];
   const [openAgent, setOpenAgent] = useState(null);
+
+  if (!introSeen) return <RadioIntro onDone={() => setIntroSeen(true)} />;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#07090c' }}>

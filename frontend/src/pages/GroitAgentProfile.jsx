@@ -1,0 +1,314 @@
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiArrowLeft, FiZap, FiUsers, FiTool, FiBookOpen, FiChevronRight } from 'react-icons/fi';
+import { AGENTS, getDivisionMeta, getStatusMeta, getRankTitle } from '../data/griotAgentData';
+
+const TABS = [
+  { id: 'overview',       label: 'Overview',       icon: FiBookOpen },
+  { id: 'tools',          label: 'Tools',          icon: FiTool },
+  { id: 'responsibilities', label: 'Responsibilities', icon: FiZap },
+  { id: 'spawn',          label: 'Spawn Agents',   icon: FiUsers },
+];
+
+export default function GroitAgentProfile() {
+  const { agentId } = useParams();
+  const navigate    = useNavigate();
+  const [tab, setTab] = useState('overview');
+
+  const agent = AGENTS.find(a => a.id === agentId);
+
+  if (!agent) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#080810', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff', gap: 16 }}>
+        <div style={{ fontSize: 48 }}>🌀</div>
+        <h2 style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>Agent Not Found</h2>
+        <p style={{ color: '#6B7280', margin: 0 }}>This agent does not exist in the Story Engine.</p>
+        <button onClick={() => navigate('/griot/roster')} style={{ marginTop: 8, padding: '10px 24px', borderRadius: 10, background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.3)', color: '#A78BFA', cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
+          ← Back to Roster
+        </button>
+      </div>
+    );
+  }
+
+  const div    = getDivisionMeta(agent.division);
+  const status = getStatusMeta(agent.status);
+  const rank   = getRankTitle(agent.rank);
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#07050F', color: '#fff', fontFamily: 'system-ui, sans-serif' }}>
+
+      {/* Background glow */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none', zIndex: 0,
+        background: `radial-gradient(ellipse 60% 40% at 50% 0%, ${div.color}18 0%, transparent 70%)`,
+      }}/>
+
+      {/* Top bar */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 20,
+        background: 'rgba(7,5,15,0.92)', backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(124,58,237,0.12)',
+        padding: '0 20px',
+        height: 56,
+        display: 'flex', alignItems: 'center', gap: 12,
+      }}>
+        <button onClick={() => navigate(-1)} style={{
+          display: 'flex', alignItems: 'center', gap: 6,
+          background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 8, padding: '6px 12px', color: '#9CA3AF', cursor: 'pointer',
+          fontSize: 12, fontWeight: 600, transition: 'all 0.15s',
+        }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.09)'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#9CA3AF'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+        >
+          <FiArrowLeft size={13}/> Back
+        </button>
+        <div style={{ fontSize: 12, color: '#4B5563', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ color: '#6B7280' }}>Griot AI</span>
+          <FiChevronRight size={11}/>
+          <span style={{ color: '#6B7280' }}>Agents</span>
+          <FiChevronRight size={11}/>
+          <span style={{ color: '#A78BFA' }}>{agent.name}</span>
+        </div>
+      </div>
+
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 860, margin: '0 auto', padding: '32px 20px 80px' }}>
+
+        {/* Hero card */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: `1px solid rgba(124,58,237,0.2)`,
+            borderRadius: 20,
+            padding: 28,
+            marginBottom: 28,
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+
+          {/* Glow border top */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 2,
+            background: `linear-gradient(90deg, transparent 0%, ${div.color} 30%, rgba(124,58,237,0.8) 70%, transparent 100%)`,
+          }}/>
+
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+
+            {/* Icon block */}
+            <div style={{
+              width: 96, height: 96, borderRadius: 24, flexShrink: 0,
+              background: `linear-gradient(135deg, rgba(124,58,237,0.15), rgba(124,58,237,0.05))`,
+              border: `2px solid rgba(124,58,237,0.3)`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 48,
+              boxShadow: `0 0 40px ${div.color}30`,
+            }}>{agent.icon}</div>
+
+            {/* Identity */}
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
+                <div style={{
+                  fontSize: 9, fontWeight: 700, padding: '3px 9px', borderRadius: 999, letterSpacing: '0.1em', textTransform: 'uppercase',
+                  background: status.bg, color: status.color, border: `1px solid ${status.color}40`,
+                }}>
+                  {status.label}
+                </div>
+                <div style={{
+                  fontSize: 9, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
+                  background: `${div.color}18`, color: div.color, border: `1px solid ${div.color}40`,
+                }}>
+                  {div.icon} {div.label}
+                </div>
+              </div>
+
+              <h1 style={{ fontSize: 28, fontWeight: 900, margin: '0 0 4px', color: '#fff' }}>{agent.name}</h1>
+              <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.16em', color: div.color, textTransform: 'uppercase', marginBottom: 10 }}>
+                {agent.codename}
+              </div>
+              <p style={{ fontSize: 13, color: '#9CA3AF', lineHeight: 1.6, margin: 0 }}>{agent.specialty}</p>
+            </div>
+
+            {/* Stats column */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 120 }}>
+              <div style={{ textAlign: 'center', padding: '12px 16px', borderRadius: 12, background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.2)' }}>
+                <div style={{ fontSize: 28, fontWeight: 900, color: '#fff' }}>{agent.rank}</div>
+                <div style={{ fontSize: 9, color: '#7C3AED', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Level</div>
+                <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 2 }}>{rank}</div>
+              </div>
+              <div style={{ textAlign: 'center', padding: '10px 16px', borderRadius: 12, background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.15)' }}>
+                <div style={{ fontSize: 22, fontWeight: 900, color: div.color }}>{agent.powerLevel}%</div>
+                <div style={{ fontSize: 9, color: '#6B7280', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Power</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Power bar */}
+          <div style={{ marginTop: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ fontSize: 10, color: '#6B7280', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Power Level</span>
+              <span style={{ fontSize: 10, color: div.color, fontWeight: 700 }}>{agent.powerLevel} / 100</span>
+            </div>
+            <div style={{ height: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 999, overflow: 'hidden' }}>
+              <motion.div initial={{ width: 0 }} animate={{ width: `${agent.powerLevel}%` }} transition={{ delay: 0.3, duration: 0.8, ease: 'easeOut' }}
+                style={{
+                  height: '100%',
+                  background: `linear-gradient(90deg, ${div.color}, #7C3AED)`,
+                  borderRadius: 999,
+                  boxShadow: `0 0 8px ${div.color}80`,
+                }}/>
+            </div>
+          </div>
+
+          {/* Badge */}
+          <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 10, color: '#6B7280', fontWeight: 600 }}>BADGE:</span>
+            <span style={{ fontSize: 11, color: '#C4B5FD', fontWeight: 600, fontStyle: 'italic' }}>{agent.badge}</span>
+          </div>
+        </motion.div>
+
+        {/* Tabs */}
+        <div style={{
+          display: 'flex', gap: 4, marginBottom: 24,
+          background: 'rgba(255,255,255,0.02)', borderRadius: 12, padding: 4,
+          border: '1px solid rgba(255,255,255,0.06)',
+        }}>
+          {TABS.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)} style={{
+              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
+              padding: '8px 12px', borderRadius: 9, border: 'none', cursor: 'pointer',
+              fontSize: 11, fontWeight: 600, transition: 'all 0.15s',
+              background: tab === t.id ? 'rgba(124,58,237,0.18)' : 'transparent',
+              color: tab === t.id ? '#C4B5FD' : '#6B7280',
+              borderBottom: tab === t.id ? '1px solid rgba(124,58,237,0.4)' : '1px solid transparent',
+            }}>
+              <t.icon size={12}/>
+              <span style={{ display: 'none' }}>{t.label}</span>
+              <span>{t.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Tab panels */}
+        <AnimatePresence mode="wait">
+          <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.18 }}>
+
+            {/* OVERVIEW */}
+            {tab === 'overview' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.14)', borderRadius: 16, padding: 22 }}>
+                  <h3 style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', color: '#6B7280', textTransform: 'uppercase', margin: '0 0 14px' }}>Definition</h3>
+                  <p style={{ fontSize: 13, color: '#D1D5DB', lineHeight: 1.75, margin: 0 }}>{agent.definition}</p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+                  <InfoTile label="Division" value={div.label} accent={div.color} icon={div.icon}/>
+                  <InfoTile label="Rank" value={`Level ${agent.rank} — ${rank}`} accent="#A78BFA" icon="🏅"/>
+                  <InfoTile label="Status" value={status.label} accent={status.color} icon="⚡"/>
+                  <InfoTile label="Power Level" value={`${agent.powerLevel} / 100`} accent={div.color} icon="💫"/>
+                  <InfoTile label="Tools" value={`${agent.tools.length} active tools`} accent="#38BDF8" icon="🔧"/>
+                  <InfoTile label="Spawn Agents" value={`${agent.spawnAgents.length} agents`} accent="#34D399" icon="👥"/>
+                </div>
+              </div>
+            )}
+
+            {/* TOOLS */}
+            {tab === 'tools' && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+                {agent.tools.map((tool, i) => (
+                  <motion.div key={tool} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                    style={{
+                      background: 'rgba(124,58,237,0.06)', border: '1px solid rgba(124,58,237,0.18)',
+                      borderRadius: 12, padding: '14px 16px',
+                      display: 'flex', alignItems: 'center', gap: 10,
+                    }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                      background: 'rgba(124,58,237,0.15)', border: '1px solid rgba(124,58,237,0.25)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
+                    }}>🔧</div>
+                    <span style={{ fontSize: 12, color: '#C4B5FD', fontWeight: 600 }}>{tool}</span>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+
+            {/* RESPONSIBILITIES */}
+            {tab === 'responsibilities' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {agent.responsibilities.map((resp, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}
+                    style={{
+                      background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.12)',
+                      borderRadius: 12, padding: '16px 18px',
+                      display: 'flex', alignItems: 'flex-start', gap: 12,
+                    }}>
+                    <div style={{
+                      width: 26, height: 26, borderRadius: 7, flexShrink: 0,
+                      background: `rgba(124,58,237,0.15)`, border: `1px solid rgba(124,58,237,0.3)`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 11, fontWeight: 800, color: '#A78BFA',
+                    }}>{String(i + 1).padStart(2, '0')}</div>
+                    <p style={{ fontSize: 13, color: '#D1D5DB', lineHeight: 1.6, margin: 0, flex: 1 }}>{resp}</p>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+
+            {/* SPAWN AGENTS */}
+            {tab === 'spawn' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 8px', lineHeight: 1.6 }}>
+                  {agent.name} can spawn the following specialized sub-agents to handle discrete tasks within its domain.
+                </p>
+                {agent.spawnAgents.map((name, i) => (
+                  <motion.div key={name} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
+                    style={{
+                      background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.14)',
+                      borderRadius: 12, padding: '14px 18px',
+                      display: 'flex', alignItems: 'center', gap: 12,
+                    }}>
+                    <div style={{
+                      width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                      background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.25)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16,
+                    }}>🤖</div>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{name}</div>
+                      <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2 }}>
+                        Sub-agent spawned by {agent.name}
+                      </div>
+                    </div>
+                    <div style={{ marginLeft: 'auto', fontSize: 9, padding: '3px 9px', borderRadius: 999, background: 'rgba(52,211,153,0.1)', color: '#34D399', border: '1px solid rgba(52,211,153,0.3)', fontWeight: 700 }}>
+                      SPAWN-READY
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+function InfoTile({ label, value, accent, icon }) {
+  return (
+    <div style={{
+      background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(124,58,237,0.12)',
+      borderRadius: 12, padding: '14px 16px',
+      display: 'flex', alignItems: 'center', gap: 12,
+    }}>
+      <div style={{
+        width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+        background: `${accent}18`, border: `1px solid ${accent}35`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
+      }}>{icon}</div>
+      <div>
+        <div style={{ fontSize: 9, color: '#4B5563', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>{label}</div>
+        <div style={{ fontSize: 12, color: '#fff', fontWeight: 700 }}>{value}</div>
+      </div>
+    </div>
+  );
+}

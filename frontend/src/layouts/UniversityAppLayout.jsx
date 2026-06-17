@@ -10,11 +10,12 @@ import {
   FiGrid, FiBook, FiUsers, FiUser, FiAward, FiSettings,
 } from 'react-icons/fi';
 import EOFTopNav from '../components/EOFTopNav';
+import DIYUniversitySplash from '../components/DIYUniversitySplash';
 import { SCHOOLS } from '../data/universityData';
 
-const ACCENT = '#7C3AED';
-const ACCENT_SOFT   = 'rgba(124,58,237,0.10)';
-const ACCENT_BORDER = 'rgba(124,58,237,0.28)';
+const ACCENT = '#2563EB';
+const ACCENT_SOFT   = 'rgba(37,99,235,0.10)';
+const ACCENT_BORDER = 'rgba(37,99,235,0.28)';
 
 // Build schools submenu from data
 const schoolChildren = SCHOOLS.map(s => ({
@@ -66,9 +67,9 @@ const SIDEBAR_NAV = [
     label: 'Faculty',
     icon: FiUser,
     children: [
-      { label: 'Professors',    path: '/university', icon: '👨‍🏫' },
-      { label: 'AI Agents',     path: '/university', icon: '🤖' },
-      { label: 'Mentors',       path: '/university', icon: '🧑‍🏫' },
+      { label: 'Faculty Directory', path: '/university/roster',    icon: '🎓' },
+      { label: 'Professors',        path: '/university/roster',    icon: '👨‍🏫' },
+      { label: 'Chancellor AI',     path: '/university/agent/chancellor', icon: '🏛️' },
     ],
   },
   {
@@ -92,7 +93,7 @@ function UniversityLogo({ collapsed }) {
           style={{ background: 'linear-gradient(135deg, #60A5FA, #1E40AF)', boxShadow: '0 0 12px rgba(96,165,250,0.3)' }}>
           🎓
         </div>
-        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2"
+        <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 animate-pulse"
           style={{ background: ACCENT, borderColor: '#0a0a0a' }} />
       </div>
       {!collapsed && (
@@ -278,8 +279,11 @@ function MobileDrawer({ open, onClose }) {
 export default function UniversityAppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [introReady, setIntroReady] = useState(false);
 
   return (
+    <>
+      {!introReady && <DIYUniversitySplash onDone={() => setIntroReady(true)} />}
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#0d0d0d' }}>
       <EOFTopNav accentColor="#2563EB" systemName="DIY University" systemEmoji="🎓"/>
 
@@ -298,5 +302,6 @@ export default function UniversityAppLayout() {
         </main>
       </div>
     </div>
+    </>
   );
 }

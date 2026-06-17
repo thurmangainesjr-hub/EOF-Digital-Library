@@ -225,7 +225,7 @@ export default function MusicRecorderApp() {
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 px-4 h-12 flex-shrink-0 border-b"
         style={{ background:'#111', borderColor:'rgba(255,255,255,0.08)' }}>
-        <Link to="/music-studio"
+        <Link to="/music-studio/hub"
           className="flex items-center gap-1.5 text-yellow-400 hover:text-yellow-300 transition-colors flex-shrink-0">
           <FiChevronLeft size={14} />
           <span className="text-xs font-bold hidden sm:block">Music Studio</span>
@@ -631,10 +631,10 @@ export default function MusicRecorderApp() {
 
           {/* CTA */}
           <div className="p-3 border-t flex-shrink-0" style={{ borderColor:'rgba(255,255,255,0.07)' }}>
-            <Link to="/music-studio"
+            <Link to="/music-studio/hub"
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all hover:brightness-110"
               style={{ background:'linear-gradient(135deg, #D4AF37, #92400E)', color:'#fff', boxShadow:'0 4px 16px rgba(212,175,55,0.3)' }}>
-              🎵 Open Music Studio
+              🎵 Music Studio Hub
             </Link>
           </div>
         </div>

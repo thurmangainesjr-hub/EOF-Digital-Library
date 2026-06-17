@@ -18,7 +18,7 @@ const RECENT_PROJECTS = [
 ];
 
 const TOOLS = [
-  { id:'recorder',  label:'Music Recorder', icon:'🎵', desc:'Multi-track DAW recorder',       path:'/music-recorder', color:'#D4AF37' },
+  { id:'recorder',  label:'Music Recorder', icon:'🎵', desc:'Multi-track DAW recorder',       path:'/music-studio', color:'#D4AF37' },
   { id:'beat',      label:'Beat Builder',   icon:'🥁', desc:'Pattern-based beat creation',    path:'#',              color:'#F97316' },
   { id:'mix',       label:'Mix & Master',   icon:'🎛️', desc:'Mixing and mastering assistant', path:'#',              color:'#10B981' },
   { id:'release',   label:'Release Planner',icon:'🚀', desc:'Distribution & rollout strategy',path:'#',              color:'#60A5FA' },
@@ -78,7 +78,7 @@ export default function MusicStudioHub() {
 
         {/* ── Open Recorder CTA ───────────────────────────────────────── */}
         <motion.div initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.1 }}>
-          <Link to="/music-recorder"
+          <Link to="/music-studio"
             className="flex items-center justify-between px-6 py-5 rounded-2xl border transition-all hover:brightness-110 group"
             style={{ background:'linear-gradient(135deg, rgba(212,175,55,0.15), rgba(146,64,14,0.15))', borderColor:'rgba(212,175,55,0.35)' }}>
             <div className="flex items-center gap-4">
@@ -160,7 +160,7 @@ export default function MusicStudioHub() {
                     <p className="text-[9px] text-gray-700">No tracks yet</p>
                   )}
                 </div>
-                <Link to="/music-recorder"
+                <Link to="/music-studio"
                   className="flex-shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-bold border border-yellow-500/25 text-yellow-400 hover:brightness-110 transition-all">
                   Open →
                 </Link>

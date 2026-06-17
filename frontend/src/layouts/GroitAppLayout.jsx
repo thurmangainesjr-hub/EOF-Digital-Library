@@ -11,6 +11,7 @@ import {
   FiUsers, FiFilm, FiMusic, FiEdit3, FiBook,
   FiCpu, FiFeather, FiSend,
 } from 'react-icons/fi';
+import GroitIntro, { hasSeenGroitIntro } from '../components/GroitIntro';
 
 const ACCENT = '#7C3AED';
 const ACCENT_SOFT = 'rgba(124,58,237,0.12)';
@@ -68,14 +69,13 @@ const SIDEBAR_NAV = [
     label: 'Agents',
     icon: FiCpu,
     children: [
+      { label: 'Agent Roster',     path: '/griot/roster',         icon: '🌀' },
       { label: 'Griot Central',    path: '/griot-central',        icon: '⚡' },
       { label: 'Canon Keeper',     path: '/griot/canon-keeper',   icon: '🔒' },
       { label: 'Story Architect',  path: '/griot/story-architect',icon: '🏗️' },
       { label: 'Research Agent',   path: '/griot',                icon: '🔬' },
       { label: 'Film Agent',       path: '/film-studio',          icon: '🎬' },
       { label: 'Music Agent',      path: '/music-studio',         icon: '🎵' },
-      { label: 'Business Agent',   path: '/griot',                icon: '💼' },
-      { label: 'Marketing Agent',  path: '/griot',                icon: '📣' },
     ],
   },
   {
@@ -295,9 +295,11 @@ function MobileDrawer({ open, onClose }) {
 export default function GroitAppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [introSeen, setIntroSeen] = useState(() => hasSeenGroitIntro());
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: '#0d0d0d' }}>
+      {!introSeen && <GroitIntro onDone={() => setIntroSeen(true)} />}
       {/* Mobile menu button */}
       <button onClick={() => setDrawerOpen(true)}
         className="lg:hidden fixed bottom-6 left-4 z-30 w-11 h-11 rounded-full flex items-center justify-center shadow-xl border"

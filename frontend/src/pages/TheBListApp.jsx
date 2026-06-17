@@ -6,6 +6,7 @@ import {
   FiSearch, FiBell, FiChevronLeft, FiChevronRight,
   FiX, FiVolume2, FiSkipForward, FiList,
 } from 'react-icons/fi';
+import BListIntro, { hasSeenBListIntro } from '../components/BListIntro';
 
 // ── Brand ────────────────────────────────────────────────────────────────────
 
@@ -320,6 +321,7 @@ function ContentRow({ row, myList, onToggleList }) {
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function TheBListApp() {
+  const [introSeen, setIntroSeen] = useState(() => hasSeenBListIntro());
   const [activeFeatured, setActiveFeatured]   = useState(0);
   const [activeNav, setActiveNav]             = useState('Home');
   const [activeChannel, setActiveChannel]     = useState(null);
@@ -362,6 +364,8 @@ export default function TheBListApp() {
 
   const toggleList = (title) =>
     setMyList(prev => prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title]);
+
+  if (!introSeen) return <BListIntro onDone={() => setIntroSeen(true)} />;
 
   return (
     <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ background: '#080808', color: '#fff' }}>

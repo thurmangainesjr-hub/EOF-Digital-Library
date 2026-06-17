@@ -6,9 +6,10 @@ import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiMenu, FiX, FiChevronDown, FiChevronLeft,
-  FiGrid, FiMusic, FiMic, FiFolder, FiSend, FiSettings, FiHeadphones,
+  FiGrid, FiMusic, FiMic, FiFolder, FiSend, FiSettings, FiHeadphones, FiUsers,
 } from 'react-icons/fi';
 import EOFTopNav from '../components/EOFTopNav';
+import MusicIntro, { hasSeenMusicIntro } from '../components/MusicIntro';
 
 const ACCENT        = '#8B5CF6';
 const ACCENT_SOFT   = 'rgba(139,92,246,0.10)';
@@ -41,6 +42,15 @@ const SIDEBAR_NAV = [
       { label: 'Beats',           path: '/music-studio',   icon: '🥁' },
       { label: 'Loops',           path: '/music-studio',   icon: '🔄' },
       { label: 'Plugins',         path: '/music-studio',   icon: '🔌' },
+    ],
+  },
+  {
+    id: 'team', label: 'Team', icon: FiUsers,
+    children: [
+      { label: 'Team Roster',    path: '/music-studio/hub/roster', icon: '🎵' },
+      { label: 'Production',     path: '/music-studio/hub/roster', icon: '🎛️' },
+      { label: 'Songwriting',    path: '/music-studio/hub/roster', icon: '✍️' },
+      { label: 'Recording',      path: '/music-studio/hub/roster', icon: '🎙️' },
     ],
   },
   {
@@ -150,7 +160,7 @@ function DesktopSidebar({ collapsed, setCollapsed }) {
         ))}
       </nav>
       <div className="px-2 pb-3 pt-2 border-t border-white/6 space-y-0.5">
-        <NavLink to="/music-studio/widgets"
+        <NavLink to="/music-studio/hub/widgets"
           className={({ isActive }) =>
             `flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs transition-all ${collapsed ? 'justify-center' : ''} ${
               isActive ? 'text-purple-300 bg-purple-900/20' : 'text-gray-600 hover:text-gray-400 hover:bg-white/5'
@@ -199,8 +209,10 @@ function MobileDrawer({ open, onClose }) {
 export default function MusicStudioAppLayout() {
   const [drawerOpen, setDrawerOpen]           = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [introSeen, setIntroSeen] = useState(() => hasSeenMusicIntro());
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#0d0d0d' }}>
+      {!introSeen && <MusicIntro onDone={() => setIntroSeen(true)} />}
       <EOFTopNav accentColor={ACCENT} systemName="Music Studio" systemEmoji="🎵"/>
       <div className="flex flex-1 min-h-0">
         <button onClick={() => setDrawerOpen(true)}

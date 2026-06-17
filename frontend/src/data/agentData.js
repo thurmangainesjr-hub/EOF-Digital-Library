@@ -1,4 +1,4 @@
-// EOF Central AI Hub — master agent registry for all 10 systems
+// EOF Central AI Hub — master agent registry for all divisions of the EOF OS
 
 export const MEMBERSHIP_TIERS = [
   {
@@ -38,6 +38,34 @@ export const MEMBERSHIP_TIERS = [
     agentAccess: 'White-label + custom agents',
   },
 ];
+
+export const KNOWLEDGE_LEVELS = [
+  { id: 'beginner',  label: 'Beginner',  color: '#9CA3AF', xpMin: 0    },
+  { id: 'skilled',   label: 'Skilled',   color: '#60A5FA', xpMin: 100  },
+  { id: 'expert',    label: 'Expert',    color: '#10B981', xpMin: 300  },
+  { id: 'master',    label: 'Master',    color: '#D4AF37', xpMin: 700  },
+  { id: 'elite',     label: 'Elite',     color: '#A78BFA', xpMin: 1500 },
+  { id: 'legendary', label: 'Legendary', color: '#EC4899', xpMin: 3000 },
+];
+
+// Division metadata — status, label, head agent per system
+export const SYSTEM_META = {
+  central:        { status: 'active',      divisionLabel: 'Intelligence Layer',            headAgentId: 'eof-central-agent',   headName: 'The Conductor',       nickname: 'The Conductor' },
+  griot:          { status: 'active',      divisionLabel: 'Creative Development Division',  headAgentId: 'griot-central',       headName: 'Griot Central',       nickname: null,            appUrl: 'http://localhost:3000' },
+  library:        { status: 'active',      divisionLabel: 'Knowledge Division',             headAgentId: 'library-curator',     headName: 'The Archivist',       nickname: 'The Archivist' },
+  fhhl:           { status: 'active',      divisionLabel: 'Entertainment Division',         headAgentId: 'league-commissioner', headName: 'Commissioner AI',     nickname: 'Commissioner AI' },
+  university:     { status: 'active',      divisionLabel: 'Education Division',             headAgentId: 'chancellor',          headName: 'Chancellor AI',       nickname: 'Chancellor AI' },
+  bac:            { status: 'active',      divisionLabel: 'Business Development Division',  headAgentId: 'bac-coach',           headName: 'Business Coach',      nickname: null },
+  'legacy-vault': { status: 'active',      divisionLabel: 'Preservation Division',          headAgentId: 'legacy-planner',      headName: 'The Keeper',          nickname: 'The Keeper' },
+  akashic:        { status: 'active',      divisionLabel: 'Generational Research Division', headAgentId: 'akashic-archivist',   headName: 'The Archivist',       nickname: null },
+  radio:          { status: 'active',      divisionLabel: 'Broadcast Division',             headAgentId: 'programming-director',headName: 'Programming Director',nickname: null },
+  'film-studio':  { status: 'active',      divisionLabel: 'Production Division',            headAgentId: 'the-director',        headName: 'Director Prime',      nickname: 'Director Prime' },
+  'music-studio': { status: 'active',      divisionLabel: 'Audio Division',                 headAgentId: 'the-architect',       headName: 'The Architect',       nickname: 'The Architect' },
+  streaming:      { status: 'active',      divisionLabel: 'Media Division',                 headAgentId: 'channel-manager',     headName: 'Channel Manager',     nickname: null },
+  security:       { status: 'active',      divisionLabel: 'Protection Division',            headAgentId: 'sentinel-prime',      headName: 'Sentinel Prime',      nickname: 'Sentinel Prime' },
+  'orion-media':  { status: 'coming_soon', divisionLabel: 'Media Network Division',         headAgentId: 'orion-news-director', headName: 'Orion News Director', nickname: 'Orion News Director' },
+  'orion-talent': { status: 'coming_soon', divisionLabel: 'Talent Division',                headAgentId: 'talent-director',     headName: 'Talent Director',     nickname: 'Talent Director' },
+};
 
 export const AGENT_SYSTEMS = [
   {
@@ -1024,6 +1052,158 @@ export const AGENT_SYSTEMS = [
     ],
     helpers: ['Trailer Assistant', 'Metadata Writer', 'Clip Selector', 'Episode Summary Agent'],
   },
+
+  // ── EOF SECURITY COMMAND ─────────────────────────────────────────────────────
+  {
+    id: 'security',
+    name: 'EOF Security Command',
+    shortName: 'Security',
+    tagline: 'Protect every agent, every workflow, every system',
+    description: 'The protection layer of the EOF OS. Sentinel Prime oversees threat mapping, API auditing, IAM management, compliance monitoring, and incident response.',
+    emoji: '🛡️',
+    color: '#EF4444',
+    gradient: 'from-red-900/40 to-red-800/20',
+    border: 'border-red-600/30',
+    path: '/security',
+    role: 'Protects',
+    minTier: 'enterprise',
+    agents: [
+      {
+        id: 'sentinel-prime',
+        name: 'Sentinel Prime',
+        title: 'Master Security AI',
+        avatar: '🛡️',
+        colorFrom: '#EF4444',
+        colorTo: '#7F1D1D',
+        greeting: "I'm Sentinel Prime, the Master Security AI for EOF. I oversee every threat, audit every agent action, enforce role-based access, and protect the entire ecosystem. What needs securing?",
+        capabilities: ['Threat monitoring', 'Agent action auditing', 'Role-based access control', 'Incident response', 'Compliance enforcement'],
+        handles: ['Threat mapping', 'Security monitoring', 'Agent permissions', 'Incident coordination', 'Security policy'],
+        spawns: ['Threat Mapper', 'Pentest Agent', 'API Auditor', 'IAM Manager', 'SOC Monitor', 'Compliance Agent', 'Incident Response Agent', 'Red Team Simulator'],
+        isHead: true,
+        quickActions: [
+          { label: 'System scan', action: 'scan', query: 'run a full system security scan' },
+          { label: 'Threat report', action: 'threats', query: 'show current threat landscape' },
+          { label: 'Access review', action: 'access', query: 'review all agent access permissions' },
+        ]
+      },
+      {
+        id: 'threat-mapper',
+        name: 'Threat Mapper',
+        title: 'Threat Intelligence Agent',
+        avatar: '🗺️',
+        colorFrom: '#F87171',
+        colorTo: '#DC2626',
+        greeting: "I'm the Threat Mapper. I identify, categorize, and track threats across the ecosystem — from data vulnerabilities to agent behavior anomalies.",
+        capabilities: ['Threat identification', 'Vulnerability tracking', 'Attack surface mapping', 'Risk scoring', 'Anomaly detection'],
+        quickActions: [
+          { label: 'Map threats', action: 'map', query: 'show current threat map' },
+          { label: 'Risk score', action: 'risk', query: 'what is the current risk score' },
+          { label: 'Anomalies', action: 'anomalies', query: 'show detected anomalies' },
+        ]
+      },
+      {
+        id: 'iam-manager',
+        name: 'IAM Manager',
+        title: 'Identity & Access Manager',
+        avatar: '🔑',
+        colorFrom: '#B91C1C',
+        colorTo: '#7F1D1D',
+        greeting: "I'm the IAM Manager. I control who can access what — managing agent roles, user permissions, membership tier enforcement, and access audit logs.",
+        capabilities: ['Role assignment', 'Permission management', 'Tier enforcement', 'Access audit logs', 'Zero-trust verification'],
+        quickActions: [
+          { label: 'Access review', action: 'review', query: 'review current access permissions' },
+          { label: 'Role audit', action: 'roles', query: 'audit all agent roles' },
+          { label: 'Permission report', action: 'permissions', query: 'generate permission report' },
+        ]
+      },
+      {
+        id: 'compliance-agent',
+        name: 'Compliance Agent',
+        title: 'Regulatory & Policy Manager',
+        avatar: '📋',
+        colorFrom: '#DC2626',
+        colorTo: '#991B1B',
+        greeting: "I'm the Compliance Agent. I keep the ecosystem aligned with regulations, policies, and standards — flagging gaps and generating compliance reports.",
+        capabilities: ['Policy compliance tracking', 'Regulatory alignment', 'Compliance reporting', 'Gap analysis', 'Audit trail management'],
+        quickActions: [
+          { label: 'Compliance report', action: 'report', query: 'generate compliance report' },
+          { label: 'Policy gaps', action: 'gaps', query: 'identify compliance gaps' },
+          { label: 'Audit trail', action: 'audit', query: 'show audit trail' },
+        ]
+      },
+    ],
+    helpers: ['Threat Mapper', 'Pentest Agent', 'API Auditor', 'Cloud Security Monitor', 'IAM Manager', 'SOC Monitor', 'Compliance Agent', 'Incident Response Agent', 'Red Team Simulator', 'Cloud Security Agent'],
+  },
+
+  // ── ORION MEDIA NETWORK ──────────────────────────────────────────────────────
+  {
+    id: 'orion-media',
+    name: 'Orion Media Network',
+    shortName: 'Orion Media',
+    tagline: 'News. Podcasts. Radio. TV. Magazine.',
+    description: 'The full media division of the EOF OS. Orion News Director leads a team of journalists, editors, researchers, fact checkers, and anchors across all media formats.',
+    emoji: '🌟',
+    color: '#6366F1',
+    gradient: 'from-indigo-900/40 to-indigo-800/20',
+    border: 'border-indigo-600/30',
+    path: '/orion-media',
+    role: 'Reports',
+    minTier: 'enterprise',
+    agents: [
+      {
+        id: 'orion-news-director',
+        name: 'Orion News Director',
+        title: 'Media Division Head',
+        avatar: '🌟',
+        colorFrom: '#6366F1',
+        colorTo: '#3730A3',
+        greeting: "I'm the Orion News Director, heading the full media division. I coordinate journalists, editors, podcast producers, and anchors across news, radio, TV, and magazine formats.",
+        capabilities: ['News coordination', 'Editorial direction', 'Multi-format publishing', 'Journalist management', 'Media strategy'],
+        handles: ['News production', 'Editorial standards', 'Department coordination', 'Media strategy', 'Publishing pipeline'],
+        spawns: ['Journalist Agent', 'Editor Agent', 'Researcher Agent', 'Fact Checker', 'Anchor Agent', 'Podcast Producer', 'Magazine Editor'],
+        isHead: true,
+        quickActions: [
+          { label: 'Coming soon', action: 'soon', query: 'when will Orion Media launch' },
+        ]
+      },
+    ],
+    helpers: ['Journalist Agent', 'Story Editor', 'Research Agent', 'Fact Checker', 'Anchor Agent', 'Podcast Producer', 'Magazine Editor'],
+  },
+
+  // ── ORION TALENT AGENCY ──────────────────────────────────────────────────────
+  {
+    id: 'orion-talent',
+    name: 'Orion Talent Agency',
+    shortName: 'Orion Talent',
+    tagline: 'Actors. Musicians. Producers. Digital Avatars.',
+    description: 'The talent management division of the EOF OS. The Talent Director oversees actors, musicians, writers, producers, influencers, and digital avatars across all productions.',
+    emoji: '🎭',
+    color: '#EC4899',
+    gradient: 'from-pink-900/40 to-pink-800/20',
+    border: 'border-pink-600/30',
+    path: '/orion-talent',
+    role: 'Represents',
+    minTier: 'enterprise',
+    agents: [
+      {
+        id: 'talent-director',
+        name: 'Talent Director',
+        title: 'Talent Division Head',
+        avatar: '🎭',
+        colorFrom: '#EC4899',
+        colorTo: '#9D174D',
+        greeting: "I'm the Talent Director, heading Orion Talent Agency. I manage actors, musicians, voice talent, writers, producers, influencers, and digital avatars across the EOF ecosystem.",
+        capabilities: ['Talent management', 'Casting', 'Contract coordination', 'Digital avatar management', 'Talent development'],
+        handles: ['Talent roster management', 'Casting coordination', 'Career development', 'Contract oversight', 'Digital avatar creation'],
+        spawns: ['Casting Agent', 'Voice Talent Agent', 'Influencer Manager', 'Contract Advisor', 'Digital Avatar Designer', 'Brand Partner Agent'],
+        isHead: true,
+        quickActions: [
+          { label: 'Coming soon', action: 'soon', query: 'when will Orion Talent launch' },
+        ]
+      },
+    ],
+    helpers: ['Casting Agent', 'Voice Talent Agent', 'Influencer Manager', 'Avatar Designer', 'Contract Advisor', 'Brand Partner Agent'],
+  },
 ];
 
 export function getSystem(id) {
@@ -1401,16 +1581,21 @@ export const ROUNDTABLE_TEMPLATES = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const SYSTEM_HEALTH = [
-  { id: 'griot',       name: 'Griot AI',        emoji: '🌀', status: 'active',  agents: 5, tasks: 7,  color: '#7C3AED' },
-  { id: 'library',     name: 'EOF Library',      emoji: '📚', status: 'active',  agents: 4, tasks: 3,  color: '#D4AF37' },
-  { id: 'university',  name: 'DIY University',   emoji: '🎓', status: 'active',  agents: 5, tasks: 12, color: '#2563EB' },
-  { id: 'fhhl',        name: 'FHHL',             emoji: '🏆', status: 'active',  agents: 5, tasks: 4,  color: '#F97316' },
-  { id: 'bac',         name: 'BAC',              emoji: '💼', status: 'active',  agents: 5, tasks: 6,  color: '#16A34A' },
-  { id: 'legacy-vault',name: 'Legacy Vault',     emoji: '🏺', status: 'idle',    agents: 4, tasks: 1,  color: '#6366F1' },
-  { id: 'akashic',     name: 'Akashic Records',  emoji: '🌌', status: 'idle',    agents: 3, tasks: 2,  color: '#0D9488' },
-  { id: 'radio',       name: 'EOF Radio',        emoji: '📻', status: 'live',    agents: 4, tasks: 9,  color: '#0891B2' },
-  { id: 'streaming',   name: 'EOF Streaming',    emoji: '📺', status: 'active',  agents: 4, tasks: 5,  color: '#6366F1' },
-  { id: 'central',     name: 'EOF Central',      emoji: '🏛️', status: 'active',  agents: 4, tasks: 8,  color: '#D4AF37' },
+  { id: 'central',      name: 'EOF Central',       emoji: '🏛️', status: 'active',      agents: 4,  tasks: 8,  color: '#D4AF37' },
+  { id: 'griot',        name: 'Griot AI',          emoji: '🌀', status: 'active',      agents: 5,  tasks: 7,  color: '#7C3AED' },
+  { id: 'film-studio',  name: 'Film Studio',       emoji: '🎬', status: 'active',      agents: 4,  tasks: 5,  color: '#EF4444' },
+  { id: 'music-studio', name: 'Music Studio',      emoji: '🎵', status: 'active',      agents: 5,  tasks: 6,  color: '#D4AF37' },
+  { id: 'university',   name: 'DIY University',    emoji: '🎓', status: 'active',      agents: 5,  tasks: 12, color: '#2563EB' },
+  { id: 'library',      name: 'EOF Library',       emoji: '📚', status: 'active',      agents: 4,  tasks: 3,  color: '#D4AF37' },
+  { id: 'fhhl',         name: 'FHHL',              emoji: '🏆', status: 'active',      agents: 5,  tasks: 4,  color: '#F97316' },
+  { id: 'bac',          name: 'BAC',               emoji: '💼', status: 'active',      agents: 5,  tasks: 6,  color: '#16A34A' },
+  { id: 'legacy-vault', name: 'Legacy Vault',      emoji: '🏺', status: 'idle',        agents: 4,  tasks: 1,  color: '#6366F1' },
+  { id: 'akashic',      name: 'Akashic Records',   emoji: '🌌', status: 'idle',        agents: 3,  tasks: 2,  color: '#0D9488' },
+  { id: 'radio',        name: 'EOF Radio',         emoji: '📻', status: 'live',        agents: 4,  tasks: 9,  color: '#0891B2' },
+  { id: 'streaming',    name: 'EOF Streaming',     emoji: '📺', status: 'active',      agents: 4,  tasks: 5,  color: '#6366F1' },
+  { id: 'security',     name: 'Security Command',  emoji: '🛡️', status: 'active',      agents: 4,  tasks: 3,  color: '#EF4444' },
+  { id: 'orion-media',  name: 'Orion Media',       emoji: '🌟', status: 'coming_soon', agents: 1,  tasks: 0,  color: '#6366F1' },
+  { id: 'orion-talent', name: 'Orion Talent',      emoji: '🎭', status: 'coming_soon', agents: 1,  tasks: 0,  color: '#EC4899' },
 ];
 
 export const GLOBAL_ACTIVITY_FEED = [
@@ -1431,6 +1616,48 @@ export const ACTIVE_PROJECTS = [
   { id: 'p4', name: 'Q3 Grant Package',    system: 'BAC',           type: '🎯 Grant',       progress: 30, quality: 82, agents: 1, deadline: 'Jul 2026' },
   { id: 'p5', name: 'Morning Show Rebrand',system: 'EOF Radio',     type: '📻 Broadcast',   progress: 55, quality: 87, agents: 2, deadline: 'Jun 2026' },
 ];
+
+// Agent evolution data — knowledge level, research score, performance rating, learning vault
+export const AGENT_EVOLUTION = {
+  // Central
+  'eof-central-agent':    { level: 'Master',    knowledgeScore: 97, researchScore: 95, performanceRating: 98, learningVault: ['Ecosystem routing optimized', 'Cross-system memory protocol v2', 'Approval workflow redesigned'] },
+  'knowledge-manager':    { level: 'Expert',    knowledgeScore: 93, researchScore: 91, performanceRating: 94, learningVault: ['Knowledge graph expanded', 'Duplicate detection improved'] },
+  'asset-manager':        { level: 'Skilled',   knowledgeScore: 84, researchScore: 80, performanceRating: 86, learningVault: ['Asset tagging system upgraded'] },
+  'security-governance':  { level: 'Master',    knowledgeScore: 96, researchScore: 92, performanceRating: 97, learningVault: ['Zero-trust protocol v2', 'Agent audit system upgraded'] },
+  // Griot
+  'griot-central':        { level: 'Master',    knowledgeScore: 94, researchScore: 90, performanceRating: 95, learningVault: ['Story routing v3', 'Canon conflict protocol', 'Project memory depth increased'] },
+  'story-architect':      { level: 'Expert',    knowledgeScore: 92, researchScore: 88, performanceRating: 93, learningVault: ['Three-act structure mastery', 'Dialogue engine upgraded'] },
+  'canon-keeper':         { level: 'Master',    knowledgeScore: 96, researchScore: 94, performanceRating: 97, learningVault: ['Story bible protocol v4', 'Contradiction scanner upgraded', 'Timeline validator v2'] },
+  'world-builder':        { level: 'Expert',    knowledgeScore: 91, researchScore: 87, performanceRating: 92, learningVault: ['Cultural authenticity protocols', 'Faction relationship mapper'] },
+  'production-studio':    { level: 'Skilled',   knowledgeScore: 85, researchScore: 82, performanceRating: 87, learningVault: ['Storyboard pipeline v2'] },
+  // Film Studio
+  'the-director':         { level: 'Master',    knowledgeScore: 95, researchScore: 89, performanceRating: 96, learningVault: ['Scene pacing algorithm upgraded', 'Emotional arc tracker v2'] },
+  'the-cinematographer':  { level: 'Expert',    knowledgeScore: 93, researchScore: 86, performanceRating: 92, learningVault: ['Shot composition matrix', 'Color theory database expanded'] },
+  'the-film-editor':      { level: 'Expert',    knowledgeScore: 90, researchScore: 85, performanceRating: 91, learningVault: ['Rhythm cut engine', 'Trailer pacing formula v2'] },
+  'the-film-producer':    { level: 'Skilled',   knowledgeScore: 87, researchScore: 83, performanceRating: 88, learningVault: ['Production checklist v3'] },
+  // Music Studio
+  'the-architect':        { level: 'Master',    knowledgeScore: 96, researchScore: 91, performanceRating: 96, learningVault: ['Sonic blueprint v3', 'Mix balance optimizer'] },
+  'the-lyricist':         { level: 'Expert',    knowledgeScore: 91, researchScore: 87, performanceRating: 93, learningVault: ['Hook formula database', 'Rhyme scheme library expanded'] },
+  'the-vocal-director':   { level: 'Expert',    knowledgeScore: 89, researchScore: 85, performanceRating: 90, learningVault: ['Take selection algorithm', 'Harmony mapping upgraded'] },
+  'the-maestro':          { level: 'Master',    knowledgeScore: 94, researchScore: 90, performanceRating: 95, learningVault: ['Album sequencing matrix', 'Creative direction protocol v2'] },
+  'the-mogul':            { level: 'Expert',    knowledgeScore: 90, researchScore: 86, performanceRating: 91, learningVault: ['Distribution strategy database', 'Release timing model'] },
+  // Library
+  'library-curator':      { level: 'Master',    knowledgeScore: 93, researchScore: 89, performanceRating: 94, learningVault: ['Collection system v3', 'Reader advisory upgraded'] },
+  'research-librarian':   { level: 'Expert',    knowledgeScore: 90, researchScore: 88, performanceRating: 91, learningVault: ['Source credibility matrix', 'Research synthesis engine'] },
+  'archive-manager':      { level: 'Expert',    knowledgeScore: 88, researchScore: 86, performanceRating: 89, learningVault: ['Preservation standards upgraded', 'Tagging system v2'] },
+  'citation-agent':       { level: 'Skilled',   knowledgeScore: 85, researchScore: 84, performanceRating: 86, learningVault: ['Citation format library expanded'] },
+  // University
+  'chancellor':           { level: 'Master',    knowledgeScore: 97, researchScore: 93, performanceRating: 97, learningVault: ['Curriculum v3 approved', 'Certification standards elevated'] },
+  'professor':            { level: 'Expert',    knowledgeScore: 89, researchScore: 85, performanceRating: 90, learningVault: ['Adaptive teaching upgraded', 'Student profiling v2'] },
+  'curriculum-builder':   { level: 'Skilled',   knowledgeScore: 83, researchScore: 81, performanceRating: 85, learningVault: ['Module sequencing v2'] },
+  'student-coach':        { level: 'Skilled',   knowledgeScore: 82, researchScore: 79, performanceRating: 84, learningVault: ['Habit tracking upgraded'] },
+  'assessment-agent':     { level: 'Expert',    knowledgeScore: 88, researchScore: 85, performanceRating: 89, learningVault: ['Rubric library v3', 'Feedback quality score elevated'] },
+  // Security
+  'sentinel-prime':       { level: 'Elite',     knowledgeScore: 99, researchScore: 97, performanceRating: 99, learningVault: ['Zero-trust protocol implemented', 'Agent audit system v3', 'Threat response time < 200ms'] },
+  'threat-mapper':        { level: 'Master',    knowledgeScore: 95, researchScore: 93, performanceRating: 96, learningVault: ['Attack surface model v2', 'Anomaly detection trained'] },
+  'iam-manager':          { level: 'Master',    knowledgeScore: 94, researchScore: 91, performanceRating: 95, learningVault: ['Role model v3', 'Permission audit trail upgraded'] },
+  'compliance-agent':     { level: 'Expert',    knowledgeScore: 90, researchScore: 88, performanceRating: 91, learningVault: ['Compliance report v2', 'Policy gap scanner upgraded'] },
+};
 
 // Build the full system prompt for any agent that has a brain
 export function buildAgentSystemPrompt(agent) {

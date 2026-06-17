@@ -18,7 +18,7 @@ const RECENT_PROJECTS = [
 ];
 
 const TOOLS = [
-  { id:'film-editor', label:'Film Editor',    icon:'✂️', desc:'Full NLE timeline editor',      path:'/film-editor',   color:'#EF4444' },
+  { id:'film-editor', label:'Film Editor',    icon:'✂️', desc:'Full NLE timeline editor',      path:'/film-studio',   color:'#EF4444' },
   { id:'trailer',     label:'Trailer Builder', icon:'🎥', desc:'Auto-assemble highlight reels',path:'#',              color:'#F59E0B' },
   { id:'storyboard',  label:'Storyboard',      icon:'🖼️', desc:'Shot planning & scene layout', path:'#',              color:'#A78BFA' },
   { id:'export',      label:'Export Suite',    icon:'📤', desc:'Multi-format export & deliver', path:'#',              color:'#10B981' },
@@ -78,7 +78,7 @@ export default function FilmStudioHub() {
 
         {/* ── Open Editor CTA ─────────────────────────────────────────── */}
         <motion.div initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.1 }}>
-          <Link to="/film-editor"
+          <Link to="/film-studio"
             className="flex items-center justify-between px-6 py-5 rounded-2xl border transition-all hover:brightness-110 group"
             style={{ background:'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(153,27,27,0.15))', borderColor:'rgba(239,68,68,0.35)' }}>
             <div className="flex items-center gap-4">
@@ -154,7 +154,7 @@ export default function FilmStudioHub() {
                   <p className="text-[9px] text-gray-600">{proj.clips > 0 ? `${proj.clips} clips` : 'No clips yet'}</p>
                   <p className="text-[9px] text-gray-700">{proj.updated}</p>
                 </div>
-                <Link to="/film-editor"
+                <Link to="/film-studio"
                   className="flex-shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-bold border border-red-500/25 text-red-400 hover:brightness-110 transition-all">
                   Edit →
                 </Link>

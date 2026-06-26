@@ -7,7 +7,7 @@ import { Outlet, NavLink, useLocation, useNavigate, Link } from 'react-router-do
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiMenu, FiX, FiChevronDown, FiChevronLeft,
-  FiGrid, FiBook, FiUsers, FiUser, FiAward, FiSettings,
+  FiGrid, FiBook, FiUsers, FiUser, FiAward, FiSettings, FiZap,
 } from 'react-icons/fi';
 import EOFTopNav from '../components/EOFTopNav';
 import DIYUniversitySplash from '../components/DIYUniversitySplash';
@@ -71,6 +71,13 @@ const SIDEBAR_NAV = [
       { label: 'Professors',        path: '/university/roster',    icon: '👨‍🏫' },
       { label: 'Chancellor AI',     path: '/university/agent/chancellor', icon: '🏛️' },
     ],
+  },
+  {
+    id: 'adapt',
+    label: 'Adaptation Engine',
+    icon: FiZap,
+    path: '/university/adaptation-engine',
+    exact: true,
   },
   {
     id: 'certifications',

@@ -31,6 +31,7 @@ import University from './pages/University';
 import UniversitySchool from './pages/UniversitySchool';
 import ProfessorAgent from './pages/ProfessorAgent';
 import UniversityWidgetPage from './pages/UniversityWidgetPage';
+import UniversityAdaptationEngine from './pages/UniversityAdaptationEngine';
 import EcosystemHub from './pages/EcosystemHub';
 import GroitAIHub from './pages/GroitAIHub';
 import StreamingHub from './pages/StreamingHub';
@@ -71,17 +72,11 @@ import GriotCentralWidgetPage from './pages/GriotCentralWidgetPage';
 import AllWidgetsHub from './pages/AllWidgetsHub';
 import TheBListApp from './pages/TheBListApp';
 import SkillsHub from './pages/SkillsHub';
-import DevStudioAppLayout from './layouts/DevStudioAppLayout';
 import DevStudioHub from './pages/DevStudioHub';
 import DevStudioDept from './pages/DevStudioDept';
-import GrowthStudioAppLayout from './layouts/GrowthStudioAppLayout';
 import GrowthStudioHub from './pages/GrowthStudioHub';
 import GrowthStudioDept from './pages/GrowthStudioDept';
-import DevStudioWidgetPage from './pages/DevStudioWidgetPage';
-import DevStudioTeamPage from './pages/DevStudioTeamPage';
-import ProductionHubLayout from './layouts/ProductionHubLayout';
 import ProductionHub from './pages/ProductionHub';
-import GrowthStudioWidgetPage from './pages/GrowthStudioWidgetPage';
 import GriotStudioAppLayout from './layouts/GriotStudioAppLayout';
 import GriotStudioHub from './pages/GriotStudioHub';
 import GriotStudioDept from './pages/GriotStudioDept';
@@ -100,8 +95,6 @@ import FilmAgentRoster from './pages/FilmAgentRoster';
 import FilmAgentProfile from './pages/FilmAgentProfile';
 import MusicAgentRoster from './pages/MusicAgentRoster';
 import MusicAgentProfile from './pages/MusicAgentProfile';
-import GrowthAgentRoster from './pages/GrowthAgentRoster';
-import GrowthAgentProfile from './pages/GrowthAgentProfile';
 import UniversityAgentRoster from './pages/UniversityAgentRoster';
 import UniversityAgentProfile from './pages/UniversityAgentProfile';
 import LibraryAgentRoster from './pages/LibraryAgentRoster';
@@ -116,8 +109,6 @@ import FHHLAgentRoster from './pages/FHHLAgentRoster';
 import FHHLAgentProfile from './pages/FHHLAgentProfile';
 import VaultAgentRoster from './pages/VaultAgentRoster';
 import VaultAgentProfile from './pages/VaultAgentProfile';
-import ProductionAgentRoster from './pages/ProductionAgentRoster';
-import ProductionAgentProfile from './pages/ProductionAgentProfile';
 import StreamingAgentRoster from './pages/StreamingAgentRoster';
 import StreamingAgentProfile from './pages/StreamingAgentProfile';
 import RadioAgentRoster from './pages/RadioAgentRoster';
@@ -127,6 +118,7 @@ import AkashicAgentProfile from './pages/AkashicAgentProfile';
 import BListAgentRoster from './pages/BListAgentRoster';
 import BListAgentProfile from './pages/BListAgentProfile';
 import AgentIntelligenceApp from './pages/AgentIntelligenceApp';
+import PluginRegistry from './pages/PluginRegistry';
 
 function App() {
   return (
@@ -178,6 +170,7 @@ function App() {
           <Route path="/streaming/agent/:agentId" element={<StreamingAgentProfile />} />
 
           <Route path="/agent-intelligence" element={<AgentIntelligenceApp />} />
+          <Route path="/plugins" element={<PluginRegistry />} />
 
           <Route path="/the-b-list" element={<TheBListApp />} />
           <Route path="/the-b-list/roster" element={<BListAgentRoster />} />
@@ -270,50 +263,11 @@ function App() {
             <Route path=":schoolId/:profId" element={<ProfessorAgent />} />
             <Route path="widgets" element={<UniversityWidgetPage />} />
             <Route path="roster" element={<UniversityAgentRoster />} />
+            <Route path="adaptation-engine" element={<UniversityAdaptationEngine />} />
           </Route>
           {/* DIY University — full-screen faculty profile */}
           <Route path="/university/agent/:agentId" element={<UniversityAgentProfile />} />
 
-          {/* EOF Development Studios */}
-          <Route path="/dev-studio" element={<DevStudioAppLayout />}>
-            <Route index element={<DevStudioHub />} />
-            <Route path="widgets"     element={<DevStudioWidgetPage />} />
-            <Route path="team"        element={<DevStudioTeamPage />} />
-            <Route path="executive/*" element={<DevStudioDept />} />
-            <Route path="engineering"  element={<DevStudioDept />} />
-            <Route path="ai-division"  element={<DevStudioDept />} />
-            <Route path="qa"           element={<DevStudioDept />} />
-            <Route path="security"     element={<DevStudioDept />} />
-            <Route path="cloud"        element={<DevStudioDept />} />
-            <Route path="clients"      element={<DevStudioDept />} />
-            <Route path="factories"    element={<DevStudioDept />} />
-            <Route path="knowledge"    element={<DevStudioDept />} />
-            <Route path="rnd"          element={<DevStudioDept />} />
-          </Route>
-
-          {/* EOF Growth Intelligence Suite */}
-          <Route path="/growth" element={<GrowthStudioAppLayout />}>
-            <Route index element={<GrowthStudioHub />} />
-            <Route path="widgets"     element={<GrowthStudioWidgetPage />} />
-            <Route path="seo"         element={<GrowthStudioDept />} />
-            <Route path="marketing"   element={<GrowthStudioDept />} />
-            <Route path="content"     element={<GrowthStudioDept />} />
-            <Route path="advertising" element={<GrowthStudioDept />} />
-            <Route path="clients"     element={<GrowthStudioDept />} />
-            <Route path="analytics"   element={<GrowthStudioDept />} />
-            <Route path="portal"      element={<GrowthStudioDept />} />
-            <Route path="roster"      element={<GrowthAgentRoster />} />
-          </Route>
-          {/* Growth Intelligence — full-screen agent profile */}
-          <Route path="/growth/agent/:agentId" element={<GrowthAgentProfile />} />
-
-          {/* EOF Production Hub — Master Control */}
-          <Route path="/production" element={<ProductionHubLayout />}>
-            <Route index element={<ProductionHub />} />
-            <Route path="roster" element={<ProductionAgentRoster />} />
-          </Route>
-          {/* Production Hub — full-screen agent profile (outside layout) */}
-          <Route path="/production/agent/:agentId" element={<ProductionAgentProfile />} />
 
           {/* Griot Interactive Studios — Unreal Engine Development Division */}
           <Route path="/griot-studio" element={<GriotStudioAppLayout />}>

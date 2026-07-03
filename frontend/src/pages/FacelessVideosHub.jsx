@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiZap, FiPlus, FiCheck, FiX, FiDownload, FiUpload, FiPlay, FiPause,
   FiEdit2, FiCopy, FiSend, FiRefreshCw, FiStar, FiGrid, FiList,
-  FiChevronDown, FiChevronRight, FiAlertCircle, FiLink, FiExternalLink,
+  FiChevronDown, FiChevronRight, FiChevronLeft, FiAlertCircle, FiLink, FiExternalLink,
   FiMic, FiMusic, FiScissors, FiMonitor, FiSettings, FiPackage,
 } from 'react-icons/fi';
 import {
@@ -449,121 +449,811 @@ const RATIOS = [
   { id:'custom',label:'Custom',             w:120, h:68  },
 ];
 
+// ── EOF Storyboard Engine 3.0 ─────────────────────────────────────────────────
+const SB3_TEMPLATES = [
+  { id:'A', icon:'🖼️', label:'Single Shot',      count:1  },
+  { id:'B', icon:'📽️', label:'3-Shot Sequence',  count:3  },
+  { id:'C', icon:'🎬', label:'5-Shot Sequence',  count:5  },
+  { id:'D', icon:'📰', label:'9-Panel Comic',    count:9  },
+  { id:'E', icon:'🎭', label:'Director\'s Board', count:6 },
+  { id:'F', icon:'🎞️', label:'Film Strip',       count:12 },
+  { id:'G', icon:'📱', label:'Shorts 9:16',      count:4  },
+  { id:'H', icon:'▶️', label:'YouTube 16:9',     count:5  },
+  { id:'I', icon:'✨', label:'Animation Layout', count:6  },
+  { id:'J', icon:'🎯', label:'Thumbnail Layout', count:9  },
+];
+const SB3_FRAME_LABELS = {
+  A:['Establishing Shot'],
+  B:['Beginning','Middle','Ending'],
+  C:['Wide Shot','Medium Shot','Close-Up','Reaction','Transition'],
+  D:['Panel 01','Panel 02','Panel 03','Panel 04','Panel 05','Panel 06','Panel 07','Panel 08','Panel 09'],
+  E:['Establishing','Hero Shot','Coverage A','Coverage B','Insert','Cutaway'],
+  F:Array.from({length:12},(_,i)=>`Frame ${(i+1).toString().padStart(2,'0')}`),
+  G:['Hook (0–3s)','Content (3–15s)','CTA (15–25s)','End Card'],
+  H:['Intro Shot','Main Content','B-Roll','Talking Head','Outro'],
+  I:['Key Frame 1','In-Between','Key Frame 2','In-Between 2','Key Frame 3','End Frame'],
+  J:['Thumb A','Thumb B','Thumb C','Social 1','Social 2','Social 3','Poster 1','Poster 2','Poster 3'],
+};
+const SB3_FRAME_CAMERAS = ['Wide Shot','Medium Shot','Close-Up','Establishing','OTS','POV','Drone','Tracking','Dolly','Static'];
+const SB3_GRADIENTS = [
+  'linear-gradient(135deg,#1a1a2e,#16213e)','linear-gradient(135deg,#0f0c29,#302b63)',
+  'linear-gradient(135deg,#1a2a1a,#2d4a2d)','linear-gradient(135deg,#2a1a1a,#4a2d2d)',
+  'linear-gradient(135deg,#1a1a2e,#0f3460)','linear-gradient(135deg,#2d1b69,#11998e)',
+  'linear-gradient(135deg,#1f1c2c,#928dab)','linear-gradient(135deg,#0a0a0a,#2c2c2c)',
+  'linear-gradient(135deg,#0d2137,#1a3a5c)','linear-gradient(135deg,#1a0a2a,#3a0a5a)',
+  'linear-gradient(135deg,#0a1a0a,#1a3a1a)','linear-gradient(135deg,#1a1a0a,#3a3a0a)',
+];
+const SB3_STUDIO_MODES = ['Creator','Director','Studio','Producer','Comic','Animation','Documentary','Historical','YouTube','Shorts','Presentation'];
+const SB3_TEMPLATE_LIB  = ['Film','Documentary','Commercial','Podcast','Music Video','Anime','Comic','Pixar Style','Historical','Horror','Sci-Fi','Fantasy','Sports','YouTube','TikTok','Instagram','Corporate','Education','Kids'];
+const SB3_AI_ACTIONS = [
+  {id:'break',  icon:'🧩', label:'Break Into Scenes',    section:null},
+  {id:'create', icon:'📋', label:'Create Storyboard',    section:null},
+  {id:'prompt', icon:'💬', label:'Generate Image Prompt',section:null},
+  {id:'genimg', icon:'🖼️', label:'Generate Image',       section:'image'},
+  {id:'anim',   icon:'🎬', label:'Animate Image',        section:'img2video'},
+  {id:'regen',  icon:'♻️', label:'Regenerate',           section:null},
+  {id:'upscale',icon:'⬆️', label:'Upscale',              section:null},
+  {id:'rembg',  icon:'✂️', label:'Remove Background',    section:'image'},
+  {id:'editor', icon:'📹', label:'Send to Editor',       section:'editor'},
+  {id:'voice',  icon:'🎙️', label:'Add Voice-over',       section:'audio'},
+  {id:'music',  icon:'🎵', label:'Add Music',            section:'audio'},
+  {id:'export', icon:'📦', label:'Export',               section:'export'},
+];
+const SB3_DETAIL_CARDS = [
+  {id:'summary',     icon:'📝', label:'Scene Summary'},
+  {id:'camera',      icon:'📷', label:'Camera'},
+  {id:'lighting',    icon:'💡', label:'Lighting'},
+  {id:'environment', icon:'🌍', label:'Environment'},
+  {id:'character',   icon:'👤', label:'Character Info'},
+  {id:'audio',       icon:'🎙️', label:'Audio'},
+  {id:'prompt',      icon:'🤖', label:'AI Prompt'},
+  {id:'animation',   icon:'✨', label:'Animation'},
+  {id:'export',      icon:'📦', label:'Export'},
+];
+const SB3_VIEW_MODES = ['Single Page','Double Page','Comic Grid','Film Strip','Director Board','Shot List','Mood Board','Gallery'];
+
+function sbGetFrames(sc, tmplId) {
+  const labels  = SB3_FRAME_LABELS[tmplId] || SB3_FRAME_LABELS.C;
+  return labels.map((label, i) => ({
+    key:      `${sc.id}::${tmplId}::${i}`,
+    num:      i + 1,
+    label,
+    camera:   SB3_FRAME_CAMERAS[i % SB3_FRAME_CAMERAS.length],
+    emoji:    sc.emoji,
+    title:    sc.title,
+    grad:     SB3_GRADIENTS[i % SB3_GRADIENTS.length],
+    runtime:  `${i * 3 + 2}s`,
+    desc:     `${label} — ${sc.title.slice(0, 28)}${sc.title.length > 28 ? '…' : ''}`,
+  }));
+}
+
+function sbCardData(sc) {
+  return {
+    summary: [
+      ['Scene Summary', `${sc.emoji} ${sc.title} — Introduce the environment, culture, and energy of this story beat.`],
+      ['Story Purpose', 'Establish atmosphere and advance the narrative arc.'],
+      ['Character Goal', 'Show the life and environment that shaped this moment.'],
+      ['Conflict', 'Economic struggle, limited resources, but strong community bonds.'],
+      ['Emotional Beat', 'Gritty, raw, powerful, hopeful — building momentum.'],
+    ],
+    camera: [
+      ['Shot Type',    sc.storyboard?.cameraAngle || 'Wide Establishing Shot'],
+      ['Lens',         '35mm prime — balanced perspective, minimal distortion'],
+      ['Height',       'Eye level — neutral, observational'],
+      ['Movement',     'Slow push in during climax moment'],
+      ['Focus',        'Deep focus — environment and subject both sharp'],
+      ['Depth of Field','Wide — cinematic, fully immersive'],
+    ],
+    lighting: [
+      ['Time of Day',  'Day to Evening — golden hour transition'],
+      ['Mood',         'Warm, nostalgic, authentic'],
+      ['Weather',      'Warm urban summer feel'],
+      ['Color Palette','Warm ambers, deep blues, earth tones'],
+      ['Lighting Style', sc.storyboard?.lighting || 'Natural sunlight → Golden hour'],
+      ['Practical Lights','Street lamps, building windows, neon signage'],
+    ],
+    environment: [
+      ['Location',    sc.storyboard?.style?.split(',')[0] || 'Urban Exterior, 1970s'],
+      ['Props',       'Basketball hoops, boomboxes, cardboard, graffiti walls'],
+      ['Architecture','Tenement buildings, fire escapes, urban decay and resilience'],
+      ['Background',  'Kids playing, community members, bystanders'],
+      ['Atmosphere',  'Vibrant community despite economic hardship'],
+    ],
+    character: [
+      ['Wardrobe',    'Period-appropriate street fashion — authentic to era'],
+      ['Expression',  'Determined, proud, full of raw energy'],
+      ['Pose',        'Dynamic, active, authentic street posture'],
+      ['Body Language','Open, confident, community-oriented'],
+      ['Consistency', 'Match wardrobe palette across scenes 01–03'],
+    ],
+    audio: [
+      ['Voice-over',  'Deep, authoritative narrator — cinematic documentary style'],
+      ['Dialogue',    'Character speaks to camera — direct address format'],
+      ['Narration',   `"${sc.title}" — bridges into next scene`],
+      ['Music Cue',   'Tempo builds 80bpm → 120bpm — percussive, urban'],
+      ['Sound FX',    'Ambient crowd, distant music, city sounds'],
+      ['Ambient',     'Urban soundscape — authentic location audio bed'],
+    ],
+    prompt: [
+      ['Master Prompt', `${sc.title}, ${sc.storyboard?.shotDesc || 'wide establishing shot'}, ${sc.storyboard?.lighting || 'cinematic lighting'}, ${sc.storyboard?.style || 'documentary cinematic style'}, ultra-detailed, 8K, professional cinematography`],
+      ['Negative Prompt', sc.negativePrompt || 'blurry, watermark, text overlay, distorted, low quality, deformed'],
+      ['Style Preset','Cinematic Documentary'],
+      ['Model',       'SDXL + FLUX (recommended) — ComfyUI or Fooocus'],
+      ['Resolution',  '1920×1080 (16:9) — or 1080×1920 for Shorts'],
+    ],
+    animation: [
+      ['Camera Motion',  'Slow push in — 0.2px/frame over 120 frames'],
+      ['Char Motion',    'Natural idle — breathing, micro-movement'],
+      ['Object Motion',  'Wind effect: clothing, leaves, paper'],
+      ['Particles',      'Dust motes, ambient particle drift'],
+      ['Transition',     'Cross-dissolve to Scene 02 — 12 frames'],
+      ['Duration',       '8–12 seconds at 24fps'],
+    ],
+    export: [
+      ['Image Formats',   'PNG · JPG · WebP · PSD · TIFF'],
+      ['Video',           'MP4 (H.264) · WebM · ProRes (Studio Mode)'],
+      ['Storyboard PDF',  'Full production package with all scene cards'],
+      ['Prompt Package',  'JSON — all prompts, seeds, settings'],
+      ['ComfyUI Workflow','Automated node graph for batch generation'],
+      ['EOF Package',     'Complete project archive with assets'],
+    ],
+  };
+}
+
+const SB3_MODES = [
+  { id:'quick',    icon:'⚡', label:'Quick Mode',    desc:'Fast storyboard, basic cards + prompts' },
+  { id:'creator',  icon:'🎨', label:'Creator Mode',  desc:'Richer notes, camera, dialogue, sound' },
+  { id:'director', icon:'🎬', label:'Director Mode', desc:'Full pre-production: shots, lighting, editing' },
+  { id:'studio',   icon:'🏢', label:'Studio Mode',   desc:'Team approvals, versions, task assignments' },
+];
+
+const SB_SHOT_TYPES = [
+  { id:'establishing', icon:'🌅', label:'Establishing Shot',    desc:'Sets the scene location and scale' },
+  { id:'wide',         icon:'🖼️', label:'Wide Shot',            desc:'Shows full environment and subjects' },
+  { id:'medium',       icon:'👤', label:'Medium Shot',          desc:'Waist-up, conversation and action' },
+  { id:'closeup',      icon:'👁️', label:'Close-Up',             desc:'Face or object detail' },
+  { id:'xcloseup',     icon:'🔬', label:'Extreme Close-Up',     desc:'Tiny detail, high emotion' },
+  { id:'ots',          icon:'🤝', label:'Over-the-Shoulder',    desc:'POV of the person listening' },
+  { id:'pov',          icon:'👀', label:'Point of View',        desc:'Camera as character\'s eyes' },
+  { id:'drone',        icon:'🚁', label:'Drone Shot',           desc:'Aerial perspective, epic scale' },
+  { id:'tracking',     icon:'🏃', label:'Tracking Shot',        desc:'Camera follows subject' },
+  { id:'dolly',        icon:'🎠', label:'Dolly / Slider',       desc:'Smooth horizontal movement' },
+  { id:'crane',        icon:'🏗️', label:'Crane / Jib',         desc:'Vertical arc movement' },
+  { id:'handheld',     icon:'📳', label:'Handheld',             desc:'Kinetic, immersive energy' },
+  { id:'static',       icon:'🗿', label:'Static',               desc:'Locked-off, deliberate framing' },
+  { id:'dutch',        icon:'↗️', label:'Dutch Angle',          desc:'Tilted frame — unease, tension' },
+];
+
+const SB_PROMPT_TOOLS = {
+  images: [
+    { id:'sdxl',      label:'SDXL',              layer:2, icon:'🔵' },
+    { id:'flux',      label:'FLUX',              layer:2, icon:'⚡' },
+    { id:'comfyui',   label:'ComfyUI',           layer:2, icon:'🟢' },
+    { id:'fooocus',   label:'Fooocus',           layer:2, icon:'🟣' },
+    { id:'sd',        label:'Stable Diffusion',  layer:2, icon:'🔴' },
+    { id:'midjourney',label:'Midjourney',        layer:3, icon:'💎' },
+    { id:'firefly',   label:'Adobe Firefly',     layer:3, icon:'💎' },
+  ],
+  video: [
+    { id:'wan',       label:'Wan',               layer:2, icon:'🟢' },
+    { id:'kling',     label:'Kling',             layer:3, icon:'💎' },
+    { id:'veo',       label:'Veo',               layer:3, icon:'💎' },
+    { id:'runway',    label:'Runway',            layer:3, icon:'💎' },
+    { id:'hailuo',    label:'Hailuo',            layer:3, icon:'💎' },
+    { id:'ltx',       label:'LTX Studio',        layer:3, icon:'💎' },
+  ],
+  voice: [
+    { id:'xtts',      label:'XTTS',              layer:2, icon:'🟢' },
+    { id:'fishspeech',label:'Fish Speech',       layer:2, icon:'🟢' },
+    { id:'elevenlabs',label:'ElevenLabs',        layer:3, icon:'💎' },
+  ],
+  music: [
+    { id:'ardour',    label:'Ardour',            layer:2, icon:'🟢' },
+    { id:'lmms',      label:'LMMS',              layer:2, icon:'🟢' },
+    { id:'suno',      label:'Suno',              layer:3, icon:'💎' },
+    { id:'udio',      label:'Udio',              layer:3, icon:'💎' },
+  ],
+};
+
+const SB_SCENE_SECTIONS = {
+  quick: ['core','camera'],
+  creator: ['core','location','camera','dialogue'],
+  director: ['core','location','camera','dialogue','production'],
+  studio: ['core','location','camera','dialogue','production','approval'],
+};
+
+function sceneFieldGroups(sc) {
+  return {
+    core: [
+      { id:'summary',  label:'Summary',        val: `${sc.emoji} Scene depicting ${sc.title.toLowerCase()}` },
+      { id:'purpose',  label:'Story Purpose',  val: 'Establish atmosphere and advance narrative' },
+      { id:'charGoal', label:'Character Goal', val: 'Achieve objective through scene action' },
+      { id:'conflict', label:'Conflict',       val: 'Internal tension drives the scene forward' },
+      { id:'emotion',  label:'Emotional Beat', val: 'Wonder → Tension → Resolution' },
+    ],
+    location: [
+      { id:'location', label:'Location',      val: sc.storyboard?.style?.split(',')[0] || 'Urban Exterior' },
+      { id:'tod',      label:'Time of Day',   val: 'Golden Hour' },
+      { id:'weather',  label:'Weather',       val: 'Clear, slight breeze' },
+      { id:'lighting', label:'Lighting',      val: sc.storyboard?.lighting || 'Natural cinematic' },
+    ],
+    camera: [
+      { id:'setup',    label:'Camera Setup',  val: sc.storyboard?.cameraAngle || 'Medium-wide establishing' },
+      { id:'lens',     label:'Lens',          val: '35mm prime — balanced perspective' },
+      { id:'movement', label:'Movement',      val: 'Slow push in during climax' },
+      { id:'shotDesc', label:'Shot Desc',     val: sc.storyboard?.shotDesc || 'Main composition description' },
+    ],
+    dialogue: [
+      { id:'dialogue',  label:'Dialogue',     val: 'Character speaks to camera — direct address style' },
+      { id:'narration', label:'Narration',    val: sc.title + ' — narration bridging to next scene' },
+      { id:'sfx',       label:'Sound FX',     val: 'Ambient crowd noise, distant music' },
+      { id:'musicCue',  label:'Music Cue',    val: 'Tempo builds from 80bpm to 120bpm' },
+    ],
+    production: [
+      { id:'wardrobe',  label:'Wardrobe',     val: 'Period-appropriate, color palette: warm earth tones' },
+      { id:'props',     label:'Props',        val: 'Essential scene props listed here' },
+      { id:'vfx',       label:'VFX Notes',    val: 'Subtle color grade, optional motion graphics overlay' },
+      { id:'editing',   label:'Editing Notes',val: 'Cut on action — transition to next scene at peak' },
+    ],
+    approval: [
+      { id:'status',    label:'Status',       val: 'Pending Review' },
+      { id:'assignee',  label:'Assigned To',  val: 'Director' },
+      { id:'version',   label:'Version',      val: 'v1.0' },
+      { id:'notes',     label:'Director Notes',val: 'Add notes here...' },
+    ],
+  };
+}
+
+function buildPrompt(sc, toolId, category) {
+  const style = sc.storyboard?.style || 'cinematic';
+  const lighting = sc.storyboard?.lighting || 'dramatic lighting';
+  const shot = sc.storyboard?.shotDesc || 'wide shot';
+  if (category === 'images') {
+    return `${sc.title}, ${shot}, ${lighting}, ${style}, ultra-detailed, 8k, photorealistic, professional cinematography`;
+  }
+  if (category === 'video') {
+    return `${shot} of "${sc.title}", ${lighting}, ${style}, smooth camera motion, 4K cinematic quality, 5-7 seconds`;
+  }
+  if (category === 'voice') {
+    return `Narrate Scene ${sc.num}: "${sc.title}". Tone: ${sc.storyboard?.style?.includes('dramatic') ? 'dramatic' : 'informative'}. Pace: measured. Emotion: building intensity.`;
+  }
+  if (category === 'music') {
+    return `Background score for "${sc.title}". Mood: cinematic tension building. BPM: 80-120. Instruments: strings, percussion. Duration: scene length.`;
+  }
+  return '';
+}
+
 function StoryboardEngine({ project, setSection }) {
   const scenes = project?.scenes || [];
-  const [activeRatio, setActiveRatio] = useState('16_9');
-  const [generating, setGenerating]   = useState(null);
-  const [genDone,    setGenDone]      = useState({});
+  const [activeSceneId, setActiveSceneId] = useState(scenes[0]?.id || null);
+  const [sbTemplate,    setSbTemplate]    = useState('C');
+  const [activeFrame,   setActiveFrame]   = useState(0);
+  const [studioMode,    setStudioMode]    = useState('Creator');
+  const [viewMode,      setViewMode]      = useState('Single Page');
+  const [mainView,      setMainView]      = useState('frames'); // 'frames' | 'detailed'
+  const [openCards,     setOpenCards]     = useState(new Set(['summary','camera']));
+  const [genDone,       setGenDone]       = useState(new Set());
+  const [generating,    setGenerating]    = useState(null);
+  const [playing,       setPlaying]       = useState(false);
+  const [actionFlash,   setActionFlash]   = useState(null);
+  const [copied,        setCopied]        = useState(null);
+  const [showTmplLib,   setShowTmplLib]   = useState(false);
+  const [arRatio,       setArRatio]       = useState('16:9');
+  const [analyzing,     setAnalyzing]     = useState(false);
+  const [analyzed,      setAnalyzed]      = useState(false);
+  const playRef = useRef(null);
 
-  function generate(scId) {
-    setGenerating(scId);
-    setTimeout(() => {
-      setGenerating(null);
-      setGenDone(p => ({ ...p, [scId]: true }));
-    }, 2000);
+  const sc     = scenes.find(s => s.id === activeSceneId) || scenes[0];
+  const frames = sc ? sbGetFrames(sc, sbTemplate) : [];
+  const curF   = frames[activeFrame] || frames[0];
+  const tmpl   = SB3_TEMPLATES.find(t => t.id === sbTemplate) || SB3_TEMPLATES[2];
+  const details = sc ? sbCardData(sc) : {};
+
+  // ── auto-play ──
+  useEffect(() => {
+    if (playing && frames.length > 1) {
+      playRef.current = setInterval(() => setActiveFrame(f => (f + 1) % frames.length), 1800);
+    } else clearInterval(playRef.current);
+    return () => clearInterval(playRef.current);
+  }, [playing, frames.length]);
+
+  function generateFrame(key) {
+    setGenerating(key);
+    setTimeout(() => { setGenDone(p => new Set([...p, key])); setGenerating(null); }, 2100);
+  }
+  function generateAll() { frames.forEach((f, i) => setTimeout(() => generateFrame(f.key), i * 350)); }
+  function analyzeScript() { setAnalyzing(true); setTimeout(() => { setAnalyzing(false); setAnalyzed(true); }, 2600); }
+  function toggleCard(id) { setOpenCards(p => { const s = new Set(p); s.has(id) ? s.delete(id) : s.add(id); return s; }); }
+  function flashAction(id, sec) { setActionFlash(id); setTimeout(() => setActionFlash(null), 900); if (sec) setSection(sec); }
+  function copyText(t) { navigator.clipboard?.writeText(t).catch(()=>{}); setCopied(t.slice(0,16)); setTimeout(()=>setCopied(null),1400); }
+  function prevFrame() { setActiveFrame(f => Math.max(0, f - 1)); }
+  function nextFrame() { setActiveFrame(f => Math.min(frames.length - 1, f + 1)); }
+  function sceneIdx()  { return scenes.findIndex(s => s.id === sc?.id); }
+
+  if (!sc || !scenes.length) return (
+    <div className="flex items-center justify-center h-full text-gray-700 text-sm p-8 text-center">
+      <div>
+        <p className="text-2xl mb-2">🎬</p>
+        <p>No scenes yet. Load a project to begin storyboarding.</p>
+      </div>
+    </div>
+  );
+
+  const scIdx = sceneIdx();
+
+  // ── Frame visual helper ────────────────────────────────────────────
+  function FrameCard({ frame, idx, large = false }) {
+    const key    = frame.key;
+    const isDone = genDone.has(key);
+    const isGen  = generating === key;
+    const isAct  = idx === activeFrame;
+    const h      = large ? 170 : 130;
+    return (
+      <div onClick={() => setActiveFrame(idx)}
+        className="flex-shrink-0 rounded-xl overflow-hidden border cursor-pointer transition-all"
+        style={{
+          width: large ? 280 : 200,
+          borderColor: isAct ? ACCENT : 'rgba(255,255,255,0.08)',
+          boxShadow: isAct ? `0 0 0 2px ${ACCENT}40` : 'none',
+        }}>
+        {/* Visual area */}
+        <div className="relative flex items-center justify-center"
+          style={{ height:h, background: isDone ? frame.grad : '#111' }}>
+          {isDone
+            ? <span style={{ fontSize: large ? 56 : 36, opacity:0.45 }}>{frame.emoji}</span>
+            : isGen
+              ? <FiRefreshCw size={large ? 22 : 16} className="animate-spin" style={{ color:ACCENT }}/>
+              : <span style={{ fontSize: large ? 56 : 36, opacity:0.1 }}>{frame.emoji}</span>
+          }
+          <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[7px] font-black"
+            style={{ background:A_SOFT, color:'#6EE7B7', border:`1px solid ${A_BORDER}` }}>
+            {frame.num.toString().padStart(2,'0')}
+          </div>
+          {isDone && <div className="absolute top-2 right-2"><StatusBadge status="ready"/></div>}
+          {!isDone && !isGen && (
+            <button onClick={e => { e.stopPropagation(); generateFrame(key); }}
+              className="absolute bottom-2 right-2 px-2 py-1 rounded-lg text-[7px] font-black hover:brightness-110"
+              style={{ background:ACCENT, color:'#000' }}>
+              {large ? '🖼️ Generate' : '+'}
+            </button>
+          )}
+        </div>
+        {/* Caption */}
+        <div className="px-2.5 py-2" style={{ background:'#0d0d0d' }}>
+          <p className="text-[9px] font-bold text-white truncate">{frame.label}</p>
+          {large && <p className="text-[7px] text-gray-600 mt-0.5 truncate">{frame.desc}</p>}
+          {large && <p className="text-[7px] text-gray-700 mt-0.5">{frame.camera} · {frame.runtime}</p>}
+        </div>
+      </div>
+    );
   }
 
-  const ratio = RATIOS.find(r => r.id === activeRatio);
-
   return (
-    <div className="p-5 space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h2 className="text-sm font-black text-white">Storyboard Engine</h2>
-          <p className="text-[10px] text-gray-600 mt-0.5">Each card is linked to a scene · Generate image directly from each card</p>
+    <div className="flex flex-col" style={{ height:'calc(100vh - 96px)', minHeight:600 }}>
+
+      {/* ── Scene header bar ─────────────────────────────────────────── */}
+      <div className="flex items-center gap-3 px-4 h-11 border-b border-white/6 flex-shrink-0" style={{ background:'rgba(0,0,0,0.3)' }}>
+        {/* Scene info */}
+        <div className="flex items-center gap-2">
+          <span className="text-base">{sc.emoji}</span>
+          <div>
+            <p className="text-[7px] font-black uppercase tracking-widest text-gray-700">SCENE {sc.num < 10 ? `0${sc.num}` : sc.num}</p>
+            <p className="text-[11px] font-black text-white leading-tight truncate max-w-[180px]">{sc.title}</p>
+          </div>
+          <StatusBadge status={genDone.size > 0 ? 'ready' : 'pending'}/>
         </div>
-        <div className="flex gap-1.5 flex-wrap">
-          {RATIOS.map(r => (
-            <button key={r.id} onClick={() => setActiveRatio(r.id)}
-              className="px-2.5 py-1.5 rounded-xl text-[9px] font-semibold border transition-all"
-              style={activeRatio === r.id
-                ? { background: A_SOFT, borderColor: A_BORDER, color:'#6EE7B7' }
-                : { borderColor:'rgba(255,255,255,0.10)', color:'#6B7280' }}>
-              {r.label}
+
+        <div className="w-px h-5 bg-white/10 mx-1 flex-shrink-0"/>
+
+        {/* Aspect ratio */}
+        <div className="flex items-center gap-0.5">
+          {['16:9','9:16','1:1','4:5'].map(r => (
+            <button key={r} onClick={() => setArRatio(r)}
+              className="px-2 py-1 rounded-lg text-[8px] font-bold transition-all"
+              style={arRatio === r ? { background:A_SOFT, color:'#6EE7B7' } : { color:'#4B5563' }}>
+              {r}
             </button>
           ))}
         </div>
+
+        {/* Frame template dropdown */}
+        <select value={sbTemplate} onChange={e => { setSbTemplate(e.target.value); setActiveFrame(0); }}
+          className="px-2 py-1 rounded-lg text-[8px] font-bold border border-white/10 bg-black/40 text-gray-400 focus:outline-none cursor-pointer">
+          {SB3_TEMPLATES.map(t => (
+            <option key={t.id} value={t.id}>{t.icon} {t.label} ({t.count})</option>
+          ))}
+        </select>
+
+        {/* Studio mode */}
+        <select value={studioMode} onChange={e => setStudioMode(e.target.value)}
+          className="px-2 py-1 rounded-lg text-[8px] font-bold border border-white/10 bg-black/40 text-gray-400 focus:outline-none cursor-pointer">
+          {SB3_STUDIO_MODES.map(m => <option key={m} value={m}>{m} Mode</option>)}
+        </select>
+
+        {/* View mode */}
+        <select value={viewMode} onChange={e => setViewMode(e.target.value)}
+          className="px-2 py-1 rounded-lg text-[8px] font-bold border border-white/10 bg-black/40 text-gray-400 focus:outline-none cursor-pointer">
+          {SB3_VIEW_MODES.map(v => <option key={v} value={v}>{v}</option>)}
+        </select>
+
+        <div className="ml-auto flex items-center gap-1.5">
+          {/* Playback */}
+          <button onClick={() => setPlaying(p => !p)}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[8px] font-bold transition-all border"
+            style={playing ? { background:A_SOFT, borderColor:A_BORDER, color:'#6EE7B7' } : { borderColor:'rgba(255,255,255,0.10)', color:'#6B7280' }}>
+            {playing ? <FiPause size={10}/> : <FiPlay size={10}/>}
+            {playing ? 'Pause' : 'Play'}
+          </button>
+          <button onClick={generateAll}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[8px] font-black transition-all hover:brightness-110"
+            style={{ background:ACCENT, color:'#000' }}>
+            ✨ Auto Generate All
+          </button>
+          <button onClick={analyzeScript} disabled={analyzing}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg text-[8px] font-bold border border-white/10 text-gray-500 hover:text-white transition-all disabled:opacity-40">
+            {analyzing ? <FiRefreshCw size={9} className="animate-spin"/> : analyzed ? '✅' : '🧠'}
+            {analyzing ? 'Analyzing…' : 'Analyze'}
+          </button>
+        </div>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-2">
-        {scenes.map(sc => (
-          <div key={sc.id} className="flex-shrink-0 space-y-3" style={{ width: Math.max(ratio.w, 160) + 40 }}>
-            {/* Card */}
-            <div className="rounded-xl border overflow-hidden"
-              style={{ width: Math.max(ratio.w + 40, 160), borderColor: genDone[sc.id] ? A_BORDER : 'rgba(255,255,255,0.10)', background:'#111' }}>
-              {/* Visual area */}
-              <div className="flex items-center justify-center bg-white/3 relative"
-                style={{ width: '100%', height: Math.max(ratio.h, 90) }}>
-                {genDone[sc.id] && (
-                  <div className="absolute inset-0 flex items-center justify-center"
-                    style={{ background:'linear-gradient(135deg, #0a0a1a 0%, #1a0a0a 100%)' }}>
-                    <span className="text-3xl opacity-60">{sc.emoji}</span>
-                  </div>
-                )}
-                {generating === sc.id && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-                    <FiRefreshCw size={18} className="animate-spin" style={{ color: ACCENT }}/>
-                  </div>
-                )}
-                {!genDone[sc.id] && generating !== sc.id && (
-                  <span className="text-4xl opacity-20">{sc.emoji}</span>
-                )}
-                {/* Scene badge */}
-                <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[8px] font-black"
-                  style={{ background: A_SOFT, color:'#6EE7B7', border:`1px solid ${A_BORDER}` }}>
-                  SC {sc.num}
-                </div>
-                {genDone[sc.id] && (
-                  <div className="absolute top-2 right-2">
-                    <StatusBadge status="ready"/>
-                  </div>
-                )}
-              </div>
+      {/* ── 3-panel body ─────────────────────────────────────────────── */}
+      <div className="flex flex-1 min-h-0 overflow-hidden">
 
-              {/* Card metadata */}
-              <div className="p-3 space-y-2">
-                <p className="text-[10px] font-black text-white leading-tight">{sc.title}</p>
-                <div className="space-y-1">
-                  {[
-                    { label:'Shot', val: sc.storyboard.shotDesc },
-                    { label:'Lighting', val: sc.storyboard.lighting },
-                    { label:'Style', val: sc.storyboard.style },
-                    { label:'Camera', val: sc.storyboard.cameraAngle },
-                  ].map(f => (
-                    <div key={f.label}>
-                      <span className="text-[7px] font-black uppercase tracking-widest text-gray-700">{f.label}: </span>
-                      <span className="text-[8px] text-gray-600">{f.val}</span>
-                    </div>
-                  ))}
-                  <div>
-                    <span className="text-[7px] font-black uppercase tracking-widest text-gray-700">Neg Prompt: </span>
-                    <span className="text-[8px] text-gray-700 font-mono">{sc.negativePrompt}</span>
-                  </div>
-                </div>
+        {/* ── LEFT NAV (172px) ── */}
+        <div className="w-44 flex-shrink-0 border-r border-white/6 flex flex-col overflow-hidden"
+          style={{ background:'#0a0a0a' }}>
 
-                {/* Buttons */}
-                <div className="flex gap-1 pt-1">
-                  <button onClick={() => generate(sc.id)} disabled={generating === sc.id}
-                    className="flex-1 py-1.5 rounded-lg text-[9px] font-bold transition-all hover:brightness-110 disabled:opacity-50"
-                    style={{ background: ACCENT, color:'#000' }}>
-                    {generating === sc.id ? '…' : genDone[sc.id] ? '✅ Regenerate' : '🖼️ Generate'}
-                  </button>
-                  <button onClick={() => setSection('img2video')}
-                    className="py-1.5 px-2 rounded-lg text-[9px] font-bold border border-white/10 text-gray-500 hover:text-white transition-all">
-                    📹
-                  </button>
-                  <button onClick={() => setSection('editor')}
-                    className="py-1.5 px-2 rounded-lg text-[9px] font-bold border border-white/10 text-gray-500 hover:text-white transition-all">
-                    ✂️
-                  </button>
-                </div>
+          {/* Project */}
+          <div className="px-3 pt-3 pb-2 border-b border-white/5">
+            <p className="text-[7px] font-black uppercase tracking-widest text-gray-700 mb-1.5">Project</p>
+            <div className="flex items-center gap-2 p-2 rounded-xl bg-white/3 border border-white/6">
+              <span className="text-sm">📁</span>
+              <div className="min-w-0">
+                <p className="text-[9px] font-bold text-white truncate">{project?.title || 'Active Project'}</p>
+                <p className="text-[7px] text-gray-700">{scenes.length} scenes · {frames.length} frames</p>
               </div>
             </div>
-
-            {/* Provenance */}
-            <ProvenanceChain items={[`Script`, `Scene ${sc.num}`, `Card ${sc.num}`, `Prompt ${sc.num}A`]}/>
           </div>
-        ))}
+
+          {/* Scenes list */}
+          <div className="flex-1 overflow-y-auto py-2 px-2">
+            <p className="text-[7px] font-black uppercase tracking-widest text-gray-700 px-1 mb-1.5">Scenes</p>
+            {scenes.map((s, i) => {
+              const isCur = s.id === activeSceneId;
+              const sf = sbGetFrames(s, sbTemplate);
+              const doneCount = sf.filter(f => genDone.has(f.key)).length;
+              return (
+                <button key={s.id} onClick={() => { setActiveSceneId(s.id); setActiveFrame(0); }}
+                  className="w-full flex items-center gap-2 px-2 py-1.5 rounded-xl text-left transition-all mb-0.5"
+                  style={isCur ? { background:A_SOFT, border:`1px solid ${A_BORDER}` } : { border:'1px solid transparent' }}>
+                  <div className="w-6 h-6 rounded-lg flex-shrink-0 flex items-center justify-center text-sm">
+                    {s.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[8px] font-bold truncate leading-tight" style={{ color: isCur ? '#fff' : '#6B7280' }}>
+                      {(i+1).toString().padStart(2,'0')}. {s.title}
+                    </p>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <div className="flex-1 h-0.5 rounded-full bg-white/6">
+                        <div className="h-full rounded-full" style={{ width:`${(doneCount/sf.length)*100}%`, background:ACCENT }}/>
+                      </div>
+                      <span className="text-[6px] text-gray-700">{doneCount}/{sf.length}</span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tools */}
+          <div className="border-t border-white/5 px-3 py-2">
+            <p className="text-[7px] font-black uppercase tracking-widest text-gray-700 mb-1.5">Tools</p>
+            {[
+              {icon:'🧠', label:'AI Script Analyst'},
+              {icon:'👤', label:'Character Reference'},
+              {icon:'📍', label:'Location Scout'},
+              {icon:'🎬', label:'Shot Suggestion'},
+              {icon:'🎨', label:'Mood Board'},
+            ].map(t => (
+              <button key={t.label} className="w-full flex items-center gap-1.5 px-1.5 py-1 rounded-lg text-left hover:bg-white/4 transition-all">
+                <span className="text-[10px]">{t.icon}</span>
+                <span className="text-[8px] text-gray-600 hover:text-gray-300 transition-colors">{t.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Template library */}
+          <div className="border-t border-white/5 px-3 py-2">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[7px] font-black uppercase tracking-widest text-gray-700">Templates</p>
+              <span className="text-[6px] px-1 py-0.5 rounded font-bold" style={{ background:'rgba(16,185,129,0.15)', color:ACCENT }}>NEW</span>
+            </div>
+            <button onClick={() => setShowTmplLib(p => !p)}
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-xl text-[8px] font-bold border transition-all"
+              style={{ borderColor:A_BORDER, color:'#6EE7B7', background:A_SOFT }}>
+              📚 Choose Template
+            </button>
+            {showTmplLib && (
+              <div className="mt-1.5 space-y-0.5 max-h-32 overflow-y-auto">
+                {SB3_TEMPLATE_LIB.map(t => (
+                  <button key={t} onClick={() => setShowTmplLib(false)}
+                    className="w-full text-left px-2 py-1 rounded-lg text-[8px] text-gray-600 hover:text-white hover:bg-white/4 transition-all">
+                    {t}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Import / Export */}
+          <div className="border-t border-white/5 px-3 py-2 flex gap-1.5">
+            <button className="flex-1 py-1 rounded-lg text-[8px] font-bold border border-white/10 text-gray-600 hover:text-white transition-colors">
+              Import
+            </button>
+            <button onClick={() => setSection('export')}
+              className="flex-1 py-1 rounded-lg text-[8px] font-bold transition-all hover:brightness-110"
+              style={{ background:ACCENT, color:'#000' }}>
+              Export
+            </button>
+          </div>
+        </div>
+
+        {/* ── CENTER ── */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+          {/* Sub-tabs: Storyboard Frames | Detailed View */}
+          <div className="flex items-center gap-2 px-4 h-9 border-b border-white/6 flex-shrink-0" style={{ background:'rgba(0,0,0,0.2)' }}>
+            <button onClick={() => setMainView('frames')}
+              className="px-3 py-1 rounded-lg text-[9px] font-bold transition-all"
+              style={mainView === 'frames' ? { background:A_SOFT, color:'#6EE7B7' } : { color:'#4B5563' }}>
+              Storyboard Frames
+            </button>
+            <button onClick={() => setMainView('detailed')}
+              className="px-3 py-1 rounded-lg text-[9px] font-bold transition-all"
+              style={mainView === 'detailed' ? { background:A_SOFT, color:'#6EE7B7' } : { color:'#4B5563' }}>
+              Detailed View
+            </button>
+            <div className="flex-1"/>
+            <button className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[8px] font-bold border border-white/10 text-gray-500 hover:text-white hover:border-white/20 transition-all">
+              <FiPlus size={9}/> Add Frame
+            </button>
+            <button onClick={generateAll}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[8px] font-bold border transition-all"
+              style={{ borderColor:A_BORDER, color:'#6EE7B7', background:A_SOFT }}>
+              ✨ Auto Generate Frames
+            </button>
+          </div>
+
+          {/* ─ FRAMES view ─ */}
+          {mainView === 'frames' && (
+            <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+              {/* Large frame carousel */}
+              <div className="flex-shrink-0 px-4 pt-3 pb-2">
+                <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none">
+                  <button onClick={prevFrame} disabled={activeFrame === 0}
+                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center border border-white/10 text-gray-600 hover:text-white hover:border-white/25 transition-all disabled:opacity-30">
+                    <FiChevronLeft size={14}/>
+                  </button>
+                  {frames.map((f, i) => <FrameCard key={f.key} frame={f} idx={i} large={i === activeFrame}/>)}
+                  <button onClick={nextFrame} disabled={activeFrame === frames.length - 1}
+                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center border border-white/10 text-gray-600 hover:text-white hover:border-white/25 transition-all disabled:opacity-30">
+                    <FiChevronRight size={14}/>
+                  </button>
+                </div>
+              </div>
+
+              {/* Film strip */}
+              <div className="flex-shrink-0 px-4 pb-2 border-b border-white/6">
+                <p className="text-[7px] font-black uppercase tracking-widest text-gray-700 mb-1.5">
+                  Film Strip — {tmpl?.icon} {tmpl?.label} · {frames.length} Frames
+                </p>
+                <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
+                  {frames.map((f, i) => {
+                    const isDone = genDone.has(f.key);
+                    const isAct  = i === activeFrame;
+                    return (
+                      <button key={f.key} onClick={() => setActiveFrame(i)}
+                        className="flex-shrink-0 rounded-lg overflow-hidden border transition-all"
+                        style={{
+                          width:52, height:38,
+                          borderColor: isAct ? ACCENT : 'rgba(255,255,255,0.08)',
+                          background: isDone ? f.grad : '#111',
+                          boxShadow: isAct ? `0 0 0 2px ${ACCENT}55` : 'none',
+                        }}>
+                        <div className="w-full h-full flex items-center justify-center relative">
+                          <span style={{ fontSize: 18, opacity: isDone ? 0.5 : 0.12 }}>{f.emoji}</span>
+                          <span className="absolute top-0.5 left-0.5 text-[6px] font-black leading-none"
+                            style={{ color: isAct ? '#6EE7B7' : '#4B5563' }}>
+                            {f.num.toString().padStart(2,'0')}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Collapsible detail cards */}
+              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+                <p className="text-[7px] font-black uppercase tracking-widest text-gray-600 mb-2">
+                  Scene {sc.num < 10 ? `0${sc.num}` : sc.num} · {sc.title} · Frame {(activeFrame+1).toString().padStart(2,'0')} of {frames.length}
+                </p>
+                {SB3_DETAIL_CARDS.map(card => {
+                  const open  = openCards.has(card.id);
+                  const rows  = details[card.id] || [];
+                  return (
+                    <div key={card.id} className="rounded-xl border border-white/8 overflow-hidden">
+                      <button onClick={() => toggleCard(card.id)}
+                        className="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-white/3 transition-all">
+                        <span className="text-sm">{card.icon}</span>
+                        <span className="text-[10px] font-bold text-white flex-1">{card.label}</span>
+                        <span className="text-gray-700 text-[9px]">{open ? '▲' : '▼'}</span>
+                      </button>
+                      {open && (
+                        <div className="px-3 pb-3 border-t border-white/5">
+                          {card.id === 'export' ? (
+                            <div className="pt-2 space-y-1.5">
+                              {rows.map(([k, v]) => (
+                                <div key={k} className="p-2 rounded-lg bg-white/3">
+                                  <p className="text-[7px] font-black uppercase tracking-widest text-gray-700 mb-0.5">{k}</p>
+                                  <p className="text-[8px] text-gray-400">{v}</p>
+                                </div>
+                              ))}
+                              <button onClick={() => setSection('export')}
+                                className="w-full mt-2 py-2 rounded-xl text-[9px] font-black hover:brightness-110"
+                                style={{ background:ACCENT, color:'#000' }}>
+                                📦 Export This Scene
+                              </button>
+                            </div>
+                          ) : card.id === 'prompt' ? (
+                            <div className="pt-2 space-y-1.5">
+                              {rows.map(([k, v]) => (
+                                <div key={k} className="p-2 rounded-lg bg-white/3">
+                                  <div className="flex items-center justify-between mb-0.5">
+                                    <p className="text-[7px] font-black uppercase tracking-widest text-gray-700">{k}</p>
+                                    <button onClick={() => copyText(v)}
+                                      className="text-[7px] font-bold transition-all"
+                                      style={{ color: copied === v.slice(0,16) ? '#6EE7B7' : '#4B5563' }}>
+                                      {copied === v.slice(0,16) ? '✓' : <FiCopy size={8}/>}
+                                    </button>
+                                  </div>
+                                  <p className="text-[8px] text-gray-400 font-mono leading-relaxed break-words">{v}</p>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="pt-2 grid grid-cols-2 gap-1.5">
+                              {rows.map(([k, v]) => (
+                                <div key={k} className="p-2 rounded-lg bg-white/3">
+                                  <p className="text-[7px] font-black uppercase tracking-widest text-gray-700 mb-0.5">{k}</p>
+                                  <p className="text-[8px] text-gray-400 leading-relaxed">{v}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ─ DETAILED view ─ */}
+          {mainView === 'detailed' && (
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {scenes.map((s, i) => {
+                const sf = sbGetFrames(s, sbTemplate);
+                const doneCount = sf.filter(f => genDone.has(f.key)).length;
+                return (
+                  <div key={s.id} className="rounded-2xl border border-white/8 overflow-hidden">
+                    <div className="flex items-center gap-3 px-4 py-3 border-b border-white/6"
+                      style={{ background: s.id === activeSceneId ? A_SOFT : 'transparent' }}>
+                      <span className="text-lg">{s.emoji}</span>
+                      <div className="flex-1">
+                        <p className="text-[8px] font-black uppercase tracking-widest text-gray-600">Scene {i+1}</p>
+                        <p className="text-sm font-black text-white">{s.title}</p>
+                      </div>
+                      <StatusBadge status={doneCount === sf.length && sf.length > 0 ? 'ready' : 'pending'}/>
+                      <span className="text-[8px] text-gray-600">{doneCount}/{sf.length} frames</span>
+                      <button onClick={() => { setActiveSceneId(s.id); setMainView('frames'); }}
+                        className="px-2.5 py-1 rounded-lg text-[8px] font-bold transition-all hover:brightness-110"
+                        style={{ background:ACCENT, color:'#000' }}>
+                        Open →
+                      </button>
+                    </div>
+                    <div className="flex gap-2 p-3 overflow-x-auto scrollbar-none">
+                      {sf.slice(0, 6).map((f, fi) => (
+                        <div key={f.key} className="flex-shrink-0 rounded-xl overflow-hidden border border-white/8"
+                          style={{ width:100, background: genDone.has(f.key) ? f.grad : '#111' }}>
+                          <div className="h-16 flex items-center justify-center">
+                            <span style={{ fontSize:24, opacity: genDone.has(f.key) ? 0.5 : 0.1 }}>{f.emoji}</span>
+                          </div>
+                          <div className="px-2 py-1" style={{ background:'#0d0d0d' }}>
+                            <p className="text-[7px] text-gray-600 truncate">{f.label}</p>
+                          </div>
+                        </div>
+                      ))}
+                      {sf.length > 6 && (
+                        <div className="flex-shrink-0 rounded-xl border border-white/8 flex items-center justify-center text-gray-700 text-[9px] font-bold"
+                          style={{ width:60, background:'#0d0d0d' }}>
+                          +{sf.length - 6}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* ── Bottom bar ── */}
+          <div className="flex items-center gap-1.5 px-4 py-2 border-t border-white/6 flex-shrink-0" style={{ background:'rgba(0,0,0,0.3)' }}>
+            <button className="text-[8px] text-gray-700 hover:text-gray-400 transition-colors">⌨️ Shortcuts</button>
+            <div className="w-px h-4 bg-white/8"/>
+            {[
+              { label:'New Scene',     fn:()=>{} },
+              { label:'Duplicate',     fn:()=>{} },
+              { label:'Delete',        fn:()=>{} },
+              { label:'Move',          fn:()=>{} },
+              { label:'Copy Frames',   fn:()=>{} },
+              { label:'Paste Frames',  fn:()=>{} },
+              { label:'Lock Scene',    fn:()=>{} },
+            ].map(a => (
+              <button key={a.label} onClick={a.fn}
+                className="px-2 py-1 rounded-lg text-[8px] font-semibold border border-white/8 text-gray-600 hover:text-white hover:border-white/20 transition-all">
+                {a.label}
+              </button>
+            ))}
+            <div className="ml-auto flex items-center gap-2">
+              <p className="text-[7px] font-bold text-gray-700">SCENE PROGRESS</p>
+              <div className="w-24 h-1.5 rounded-full bg-white/8">
+                <div className="h-full rounded-full transition-all"
+                  style={{ width:`${(frames.filter(f=>genDone.has(f.key)).length / Math.max(frames.length,1))*100}%`, background:ACCENT }}/>
+              </div>
+              <span className="text-[7px] font-mono text-gray-600">
+                {frames.filter(f=>genDone.has(f.key)).length}/{frames.length}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── RIGHT: AI Actions (196px) ── */}
+        <div className="w-48 flex-shrink-0 border-l border-white/6 flex flex-col overflow-hidden"
+          style={{ background:'#0a0a0a' }}>
+          <div className="px-3 pt-3 pb-2 border-b border-white/5 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="text-sm">🤖</span>
+              <p className="text-[8px] font-black uppercase tracking-widest text-gray-600">AI Actions</p>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto py-2 px-2">
+            <p className="text-[7px] font-black uppercase tracking-widest text-gray-700 px-1 mb-2">Quick Actions</p>
+            <div className="space-y-0.5">
+              {SB3_AI_ACTIONS.map(a => (
+                <button key={a.id} onClick={() => flashAction(a.id, a.section)}
+                  className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-left transition-all border"
+                  style={actionFlash === a.id
+                    ? { background:A_SOFT, borderColor:A_BORDER, color:'#6EE7B7' }
+                    : { borderColor:'transparent', color:'#6B7280' }}>
+                  <span className="text-sm">{a.icon}</span>
+                  <span className="text-[9px] font-semibold">{a.label}</span>
+                  {actionFlash === a.id && <FiRefreshCw size={8} className="animate-spin ml-auto" style={{ color:ACCENT }}/>}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="px-3 py-2.5 border-t border-white/5 flex-shrink-0">
+            <button onClick={() => setSection('export')}
+              className="w-full py-2 rounded-xl text-[9px] font-black transition-all hover:brightness-110 flex items-center justify-center gap-1.5"
+              style={{ background:ACCENT, color:'#000' }}>
+              📦 Export All Scenes
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   );

@@ -32,6 +32,12 @@ import UniversitySchool from './pages/UniversitySchool';
 import ProfessorAgent from './pages/ProfessorAgent';
 import UniversityWidgetPage from './pages/UniversityWidgetPage';
 import UniversityAdaptationEngine from './pages/UniversityAdaptationEngine';
+import UniversityFlipbook from './pages/UniversityFlipbook';
+import DocumentaryStudioAppLayout from './layouts/DocumentaryStudioAppLayout';
+import DocumentaryStudioHub from './pages/DocumentaryStudioHub';
+import FacelessVideosAppLayout from './layouts/FacelessVideosAppLayout';
+import FacelessVideosHub from './pages/FacelessVideosHub';
+import MyFirstLoveHub from './pages/MyFirstLoveHub';
 import EcosystemHub from './pages/EcosystemHub';
 import GroitAIHub from './pages/GroitAIHub';
 import StreamingHub from './pages/StreamingHub';
@@ -256,6 +262,17 @@ function App() {
           {/* Central AI Hub — full-screen agent profile (outside layout) */}
           <Route path="/central/agent/:agentId" element={<CentralAgentProfile />} />
 
+          {/* Documentary Studio — standalone production OS */}
+          <Route path="/documentary-studio" element={<DocumentaryStudioAppLayout />}>
+            <Route index element={<DocumentaryStudioHub />} />
+          </Route>
+
+          {/* EOF Faceless Videos — AI video production studio */}
+          <Route path="/faceless-videos" element={<FacelessVideosAppLayout />}>
+            <Route index element={<FacelessVideosHub />} />
+            <Route path="my-first-love" element={<MyFirstLoveHub />} />
+          </Route>
+
           {/* DIY University — standalone app shell */}
           <Route path="/university" element={<UniversityAppLayout />}>
             <Route index element={<University />} />
@@ -264,6 +281,7 @@ function App() {
             <Route path="widgets" element={<UniversityWidgetPage />} />
             <Route path="roster" element={<UniversityAgentRoster />} />
             <Route path="adaptation-engine" element={<UniversityAdaptationEngine />} />
+            <Route path="flipbook" element={<UniversityFlipbook />} />
           </Route>
           {/* DIY University — full-screen faculty profile */}
           <Route path="/university/agent/:agentId" element={<UniversityAgentProfile />} />

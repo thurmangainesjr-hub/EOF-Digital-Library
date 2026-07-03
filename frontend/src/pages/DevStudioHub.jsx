@@ -27,12 +27,12 @@ const STATS = [
 ];
 
 const DEPARTMENTS = [
-  { id: 'engineering', label: 'Engineering',      icon: FiCode,         color: CYAN,     agents: 6,  tasks: 14, status: 'active', path: '/dev-studio/engineering' },
-  { id: 'ai-division', label: 'AI Division',      icon: FiCpu,          color: '#A78BFA',agents: 5,  tasks: 9,  status: 'active', path: '/dev-studio/ai-division' },
-  { id: 'qa',          label: 'Quality Assurance',icon: FiCheckSquare,  color: GREEN,    agents: 4,  tasks: 7,  status: 'active', path: '/dev-studio/qa' },
-  { id: 'security',    label: 'Security',         icon: FiShield,       color: '#EF4444',agents: 4,  tasks: 3,  status: 'active', path: '/dev-studio/security' },
-  { id: 'cloud',       label: 'Cloud Operations', icon: FiCloud,        color: '#38BDF8',agents: 4,  tasks: 11, status: 'active', path: '/dev-studio/cloud' },
-  { id: 'clients',     label: 'Client Services',  icon: FiUsers,        color: '#F97316',agents: 4,  tasks: 6,  status: 'active', path: '/dev-studio/clients' },
+  { id: 'engineering', label: 'Engineering',      icon: FiCode,         color: CYAN,     agents: 6,  tasks: 14, status: 'active', path: '/dev-team/dev/engineering' },
+  { id: 'ai-division', label: 'AI Division',      icon: FiCpu,          color: '#A78BFA',agents: 5,  tasks: 9,  status: 'active', path: '/dev-team/dev/ai-division' },
+  { id: 'qa',          label: 'Quality Assurance',icon: FiCheckSquare,  color: GREEN,    agents: 4,  tasks: 7,  status: 'active', path: '/dev-team/dev/qa' },
+  { id: 'security',    label: 'Security',         icon: FiShield,       color: '#EF4444',agents: 4,  tasks: 3,  status: 'active', path: '/dev-team/dev/security' },
+  { id: 'cloud',       label: 'Cloud Operations', icon: FiCloud,        color: '#38BDF8',agents: 4,  tasks: 11, status: 'active', path: '/dev-team/dev/cloud' },
+  { id: 'clients',     label: 'Client Services',  icon: FiUsers,        color: '#F97316',agents: 4,  tasks: 6,  status: 'active', path: '/dev-team/dev/clients' },
 ];
 
 const PROJECTS = [
@@ -225,7 +225,7 @@ export default function DevStudioHub() {
             </p>
           </div>
           <button
-            onClick={() => navigate('/dev-studio/factories')}
+            onClick={() => navigate('/dev-team/dev/factories')}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
               padding: '10px 18px', borderRadius: 10, cursor: 'pointer',
@@ -255,7 +255,7 @@ export default function DevStudioHub() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
               {EXECUTIVES.map(ex => (
-                <div key={ex.role} onClick={() => navigate('/dev-studio/executive/ceo')}
+                <div key={ex.role} onClick={() => navigate('/dev-team/dev/team')}
                   style={{
                     background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(6,182,212,0.12)',
                     borderRadius: 10, padding: '12px 14px', cursor: 'pointer',
@@ -323,7 +323,7 @@ export default function DevStudioHub() {
                 fontSize: 10, color: CYAN, background: CYAN + '15', border: `1px solid ${CYAN}30`,
                 padding: '1px 8px', borderRadius: 10,
               }}>{totalAgents} agents</span>
-              <button onClick={() => navigate('/dev-studio/team')}
+              <button onClick={() => navigate('/dev-team/dev/team')}
                 style={{
                   marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 5,
                   padding: '4px 10px', borderRadius: 8, cursor: 'pointer',
@@ -486,10 +486,10 @@ export default function DevStudioHub() {
           <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '16px' }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'white', marginBottom: 12 }}>Quick Actions</div>
             {[
-              { label: 'Launch SaaS Factory',  icon: '⚡', path: '/dev-studio/factories' },
-              { label: 'New Client Project',   icon: '🤝', path: '/dev-studio/clients'   },
-              { label: 'Deploy to Production', icon: '🚀', path: '/dev-studio/cloud'      },
-              { label: 'Run Security Audit',   icon: '🛡️', path: '/dev-studio/security'  },
+              { label: 'Launch SaaS Factory',  icon: '⚡', path: '/dev-team/dev/factories' },
+              { label: 'New Client Project',   icon: '🤝', path: '/dev-team/dev/clients'   },
+              { label: 'Deploy to Production', icon: '🚀', path: '/dev-team/dev/cloud'      },
+              { label: 'Run Security Audit',   icon: '🛡️', path: '/dev-team/dev/security'  },
             ].map(a => (
               <button key={a.label} onClick={() => navigate(a.path)}
                 style={{

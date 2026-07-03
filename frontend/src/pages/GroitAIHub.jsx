@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiGrid, FiBook, FiUsers, FiGlobe, FiClock, FiImage, FiFilm, FiMic, FiMusic,
@@ -643,45 +644,73 @@ const CHAR_TAB_KEYS = {
   memory:        'char-memory',
 };
 
+const CHAR_ROSTER = [
+  { name: 'Amara Jackson', role: 'Protagonist', avatar: '👸🏿', color: '#7C3AED', traits: ['Fearless','Strategic'] },
+  { name: 'The Elder',     role: 'Mentor',      avatar: '🧙🏿', color: '#D4AF37', traits: ['Wise','Mysterious']  },
+  { name: 'Kai Osei',      role: 'Antagonist',  avatar: '🦅',   color: '#EF4444', traits: ['Ruthless','Brilliant'] },
+  { name: 'Zuri Nkosi',    role: 'Supporting',  avatar: '🌟',   color: '#10B981', traits: ['Loyal','Humorous']  },
+];
+
 function CharacterBuilder({ onFeature }) {
+  const navigate = useNavigate();
   const [tab, setTab]           = useState('bio');
   const [selected, setSelected] = useState(0);
-  const chars = [
-    { name: 'Amara Jackson', role: 'Protagonist' },
-    { name: 'The Elder',     role: 'Mentor'      },
-  ];
+  const [chars, setChars]       = useState(CHAR_ROSTER);
   const TABS = ['bio', 'appearance', 'personality', 'powers', 'relationships', 'media', 'memory'];
   const TAB_LABELS = { bio: 'Bio', powers: 'Powers / Skills', media: 'Media', memory: 'Canon / Memory' };
+  const current = chars[selected];
 
   return (
     <div className="flex flex-1 min-h-0 overflow-hidden">
-      <aside className="w-48 flex-shrink-0 flex flex-col border-r border-white/6" style={{ background: 'rgba(10,10,10,0.85)' }}>
+      <aside className="w-52 flex-shrink-0 flex flex-col border-r border-white/6" style={{ background: 'rgba(10,10,10,0.85)' }}>
         <div className="px-3 pt-3 pb-2 flex items-center justify-between border-b border-white/5">
           <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Characters</span>
-          <button className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-white hover:bg-white/8">
+          <button onClick={() => setChars(c => [...c, { name: 'New Character', role: 'Supporting', avatar: '👤', color: ACCENT, traits: [] }])}
+            className="w-5 h-5 rounded flex items-center justify-center text-gray-600 hover:text-white hover:bg-white/8">
             <FiPlus size={12} />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto py-2 px-2 space-y-1">
+        <div className="flex-1 overflow-y-auto py-2 px-2 space-y-1.5">
           {chars.map((c, i) => (
-            <button key={i} onClick={() => setSelected(i)}
-              className={`w-full flex items-center gap-2.5 px-2 py-2.5 rounded-xl transition-all text-left ${
-                selected === i ? 'text-white' : 'text-gray-500 hover:text-gray-300 hover:bg-white/4'
-              }`}
-              style={selected === i ? { background: A_SOFT, border: `1px solid ${A_BORDER}` } : { border: '1px solid transparent' }}>
-              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(124,58,237,0.2)' }}>
-                <FiUser size={14} style={{ color: ACCENT }} />
+            <button key={i} onClick={() => { setSelected(i); setTab('bio'); }}
+              className="w-full text-left transition-all rounded-xl overflow-hidden"
+              style={{
+                border: selected === i ? `1px solid ${c.color}50` : '1px solid rgba(255,255,255,0.06)',
+                background: selected === i ? `${c.color}12` : 'rgba(255,255,255,0.02)',
+              }}>
+              {/* Mini card header */}
+              <div className="flex items-center gap-2.5 px-2.5 pt-2.5 pb-1.5">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                  style={{ background: `${c.color}20` }}>
+                  {c.avatar}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-white truncate leading-tight">{c.name}</p>
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                    style={{ background: `${c.color}20`, color: c.color }}>
+                    {c.role}
+                  </span>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="text-xs font-medium truncate">{c.name}</p>
-                <p className="text-[10px] text-gray-600">{c.role}</p>
+              {/* Studio links on card */}
+              <div className="flex gap-1 px-2 pb-2">
+                <button onClick={e => { e.stopPropagation(); navigate('/film-studio/hub'); }}
+                  className="flex-1 text-[9px] font-semibold py-1 rounded-lg transition-all hover:brightness-110"
+                  style={{ background: 'rgba(239,68,68,0.12)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.2)' }}>
+                  🎬 Film
+                </button>
+                <button onClick={e => { e.stopPropagation(); navigate('/music-studio/hub'); }}
+                  className="flex-1 text-[9px] font-semibold py-1 rounded-lg transition-all hover:brightness-110"
+                  style={{ background: 'rgba(139,92,246,0.12)', color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.2)' }}>
+                  🎵 Music
+                </button>
               </div>
             </button>
           ))}
         </div>
         <div className="px-2 pb-3 pt-2 border-t border-white/5">
-          <button className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium"
+          <button onClick={() => setChars(c => [...c, { name: 'New Character', role: 'Supporting', avatar: '👤', color: ACCENT, traits: [] }])}
+            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium"
             style={{ background: A_SOFT, border: `1px solid ${A_BORDER}`, color: ACCENT }}>
             <FiPlus size={12} /> Add Character
           </button>
@@ -727,9 +756,21 @@ function CharacterBuilder({ onFeature }) {
                   className="w-full px-3 py-2 rounded-lg text-sm text-white placeholder-gray-600 outline-none resize-none"
                   style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }} />
               </div>
-              <div className="col-span-2 flex justify-end">
+              <div className="col-span-2 flex items-center justify-between gap-2">
+                <div className="flex gap-2">
+                  <button onClick={() => navigate('/film-studio/hub')}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:brightness-110"
+                    style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', color: '#EF4444' }}>
+                    🎬 Create Film Scene
+                  </button>
+                  <button onClick={() => navigate('/music-studio/hub')}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:brightness-110"
+                    style={{ background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.25)', color: '#8B5CF6' }}>
+                    🎵 Create Theme Song
+                  </button>
+                </div>
                 <button className="px-5 py-2 rounded-xl text-sm font-medium text-white hover:opacity-90 transition-all"
-                  style={{ background: ACCENT }}>
+                  style={{ background: current?.color || ACCENT }}>
                   Save Character
                 </button>
               </div>

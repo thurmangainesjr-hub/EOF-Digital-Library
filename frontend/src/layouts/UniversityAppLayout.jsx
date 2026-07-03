@@ -37,7 +37,7 @@ const SIDEBAR_NAV = [
     label: 'Schools',
     icon: FiBook,
     children: [
-      { label: 'Chancellor AI', path: '/university/chancellor/chat', icon: '🏛️' },
+      { label: 'Chancellor AI', path: '/university/chancellor', icon: '🏛️' },
       ...schoolChildren,
     ],
   },
@@ -46,10 +46,10 @@ const SIDEBAR_NAV = [
     label: 'Courses',
     icon: FiBook,
     children: [
-      { label: 'All Courses',    path: '/university', icon: '📚' },
-      { label: 'In Progress',    path: '/university', icon: '▶️' },
-      { label: 'Completed',      path: '/university', icon: '✅' },
-      { label: 'Certificates',   path: '/university', icon: '🏅' },
+      { label: 'All Courses',    path: '/university',          icon: '📚' },
+      { label: 'In Progress',    path: '/university',          icon: '▶️' },
+      { label: 'Completed',      path: '/university/roster',   icon: '✅' },
+      { label: 'Certificates',   path: '/university/roster',   icon: '🏅' },
     ],
   },
   {
@@ -57,9 +57,9 @@ const SIDEBAR_NAV = [
     label: 'Students',
     icon: FiUsers,
     children: [
-      { label: 'Enrollment',    path: '/university', icon: '📋' },
-      { label: 'Progress',      path: '/university', icon: '📈' },
-      { label: 'Community',     path: '/university', icon: '👥' },
+      { label: 'Enrollment',    path: '/university/roster',   icon: '📋' },
+      { label: 'Progress',      path: '/university',          icon: '📈' },
+      { label: 'Community',     path: '/',                    icon: '👥' },
     ],
   },
   {
@@ -80,13 +80,20 @@ const SIDEBAR_NAV = [
     exact: true,
   },
   {
+    id: 'flipbooks',
+    label: 'Flipbooks',
+    icon: FiBook,
+    path: '/university/flipbook',
+    exact: true,
+  },
+  {
     id: 'certifications',
     label: 'Certifications',
     icon: FiAward,
     children: [
-      { label: 'Available',     path: '/university', icon: '🎓' },
-      { label: 'Earned',        path: '/university', icon: '🏆' },
-      { label: 'Verify',        path: '/university', icon: '✅' },
+      { label: 'Available',     path: '/university',          icon: '🎓' },
+      { label: 'Earned',        path: '/university/roster',   icon: '🏆' },
+      { label: 'Verify',        path: '/university/roster',   icon: '✅' },
     ],
   },
 ];
@@ -184,6 +191,7 @@ function NavSection({ item, collapsed, openId, setOpenId }) {
 // ── Desktop sidebar ────────────────────────────────────────────────────────────
 function DesktopSidebar({ collapsed, setCollapsed }) {
   const [openId, setOpenId] = useState('schools');
+  const navigate = useNavigate();
   return (
     <aside className={`flex-shrink-0 hidden lg:flex flex-col h-full overflow-hidden transition-all duration-200 ${collapsed ? 'w-14' : 'w-56'}`}
       style={{ background: '#0a0a0a', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
@@ -215,6 +223,7 @@ function DesktopSidebar({ collapsed, setCollapsed }) {
           {!collapsed && <span>Widgets</span>}
         </NavLink>
         <button
+          onClick={() => navigate('/university')}
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-gray-700 hover:text-gray-500 hover:bg-white/5 transition-all ${collapsed ? 'justify-center' : ''}`}
           title={collapsed ? 'Settings' : undefined}>
           <FiSettings size={13}/>

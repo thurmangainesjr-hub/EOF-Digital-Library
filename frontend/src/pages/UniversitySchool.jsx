@@ -74,7 +74,7 @@ function ChancellorPage() {
           </div>
           <p className="text-gray-300 leading-relaxed text-base mb-6">{CHANCELLOR.bio}</p>
           <Link
-            to="/university/chancellor/chat"
+            to="/university/chancellor"
             className="btn-primary inline-flex items-center gap-2 text-sm px-6 py-3"
           >
             <FiMessageSquare size={15} />

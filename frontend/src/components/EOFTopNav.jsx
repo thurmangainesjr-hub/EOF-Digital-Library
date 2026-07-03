@@ -4,7 +4,8 @@
  */
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiSearch, FiBell, FiUser, FiChevronDown, FiX, FiArrowRight } from 'react-icons/fi';
+import { FiSearch, FiBell, FiUser, FiChevronDown, FiX, FiArrowRight, FiZap } from 'react-icons/fi';
+import EOFTaskRouter from './EOFTaskRouter';
 
 // ── Studios card data ─────────────────────────────────────────────────────────
 const STUDIOS = [
@@ -29,6 +30,28 @@ const STUDIOS = [
     patternColor: 'rgba(139,92,246,0.12)',
     desc: 'Record, mix & release tracks',
     badge: 'LIVE',
+  },
+  {
+    id: 'documentary',
+    label: 'Documentary Studio',
+    emoji: '🎙️',
+    path: '/documentary-studio',
+    color: '#D97706',
+    gradient: 'linear-gradient(135deg, #4a2800 0%, #120a00 100%)',
+    patternColor: 'rgba(217,119,6,0.12)',
+    desc: 'Produce faceless documentary series',
+    badge: 'NEW',
+  },
+  {
+    id: 'faceless-videos',
+    label: 'Faceless Videos',
+    emoji: '🎬',
+    path: '/faceless-videos',
+    color: '#10B981',
+    gradient: 'linear-gradient(135deg, #052e16 0%, #010b07 100%)',
+    patternColor: 'rgba(16,185,129,0.12)',
+    desc: 'AI-powered faceless video studio',
+    badge: 'NEW',
   },
   {
     id: 'university',
@@ -68,6 +91,9 @@ const NAV_ITEMS = [
       { label: 'Music Studio',           emoji: '🎵', path: '/music-studio', color: '#8B5CF6' },
       { label: 'Legacy Vault',           emoji: '🏛️', path: '/legacy-vault', color: '#A78BFA' },
       { label: 'BAC',                    emoji: '⭐', path: '/bac',          color: '#FBBF24' },
+      { label: 'Agent Intelligence',    emoji: '🧠', path: '/agent-intelligence', color: '#A855F7' },
+      { label: 'Plugin Registry',       emoji: '⚙️', path: '/plugins',       color: '#D4AF37' },
+      { label: 'Dev Team Elite',        emoji: '⚡', path: '/dev-team',      color: '#06B6D4' },
     ],
   },
   { id: 'studios', label: 'Studios' },
@@ -297,16 +323,27 @@ function SearchOverlay({ onClose }) {
 
 // ── EOFTopNav ─────────────────────────────────────────────────────────────────
 export default function EOFTopNav({ accentColor = '#D4AF37', systemName, systemEmoji }) {
-  const [openMenu, setOpenMenu]   = useState(null);
+  const [openMenu, setOpenMenu]     = useState(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [showTaskRouter, setShowTaskRouter] = useState(false);
   const navRef = useRef(null);
 
   useEffect(() => {
     function handler(e) {
       if (navRef.current && !navRef.current.contains(e.target)) setOpenMenu(null);
     }
+    function hotkey(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowTaskRouter(t => !t);
+      }
+    }
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('keydown', hotkey);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('keydown', hotkey);
+    };
   }, []);
 
   function toggle(id) { setOpenMenu(prev => prev === id ? null : id); }
@@ -362,6 +399,15 @@ export default function EOFTopNav({ accentColor = '#D4AF37', systemName, systemE
 
         {/* Right actions */}
         <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+          {/* Task Router trigger */}
+          <button onClick={() => setShowTaskRouter(true)}
+            title="Task Router (⌘K)"
+            className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg transition-all text-xs font-semibold"
+            style={{ background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)', color: '#D4AF37' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.18)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(212,175,55,0.1)'; }}>
+            <FiZap size={12}/><span className="hidden sm:inline">Tasks</span>
+          </button>
           <button onClick={() => setShowSearch(true)}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:text-white hover:bg-white/8 transition-all">
             <FiSearch size={15}/>
@@ -379,6 +425,7 @@ export default function EOFTopNav({ accentColor = '#D4AF37', systemName, systemE
       </nav>
 
       {showSearch && <SearchOverlay onClose={() => setShowSearch(false)}/>}
+      {showTaskRouter && <EOFTaskRouter onClose={() => setShowTaskRouter(false)}/>}
     </>
   );
 }

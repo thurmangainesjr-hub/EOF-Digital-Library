@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 /* ══════════════════════════════════════════════════════════
@@ -198,7 +198,20 @@ function DemoPlaceholder({ step, title, desc, bullets }) {
    STEP COMPONENTS
    ══════════════════════════════════════════════════════════ */
 
+const SOURCE_PULL_MAP = {
+  'Canon Vault':         'lore',
+  'Character Database':  'characters',
+  'World Database':      'world',
+  'Timeline':            'timeline',
+  'Lore Database':       'lore',
+  'Memory Engine':       'lore',
+  'Project Library':     'outline',
+  'EOF Library':         'novel',
+};
+
 function Step1Import({ state, setState, onLoadMock }) {
+  const browseRef = useRef(null);
+  const [pulledSource, setPulledSource] = useState('');
   return (
     <div className="space-y-5">
       <div>
@@ -240,7 +253,10 @@ function Step1Import({ state, setState, onLoadMock }) {
           <p className="text-3xl mb-2">⬆️</p>
           <p className="text-sm font-bold text-white mb-1">Drop your file here</p>
           <p className="text-[11px] text-gray-600 mb-3">PDF · DOCX · TXT · EPUB · FDX · MD · Audio Transcript</p>
-          <button className="px-4 py-2 rounded-xl text-xs font-bold"
+          <input ref={browseRef} type="file" accept=".txt,.pdf,.docx,.epub,.md,.fdx" className="hidden"
+            onChange={e => { if (e.target.files?.[0]) { setState({ ...state, sourceType: 'upload' }); e.target.value = ''; } }} />
+          <button onClick={() => browseRef.current?.click()}
+            className="px-4 py-2 rounded-xl text-xs font-bold"
             style={{ background: ACCENT_SOFT, color: '#93C5FD', border: `1px solid ${ACCENT_BORDER}` }}>
             Browse Files
           </button>
@@ -275,13 +291,28 @@ function Step1Import({ state, setState, onLoadMock }) {
       <div className="rounded-xl p-4" style={{ background: ACCENT_SOFT, border: `1px solid ${ACCENT_BORDER}` }}>
         <p className="text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#60A5FA' }}>Or pull from your project</p>
         <div className="flex flex-wrap gap-2">
-          {['Canon Vault', 'Character Database', 'World Database', 'Timeline', 'Lore Database', 'Memory Engine', 'Project Library', 'EOF Library'].map(src => (
-            <button key={src} className="px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all"
-              style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              {src}
-            </button>
-          ))}
+          {Object.keys(SOURCE_PULL_MAP).map(src => {
+            const isSelected = pulledSource === src;
+            return (
+              <button key={src}
+                onClick={() => {
+                  setPulledSource(src);
+                  setState({ ...state, sourceType: SOURCE_PULL_MAP[src] });
+                }}
+                className="px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all"
+                style={isSelected
+                  ? { background: ACCENT_SOFT, color: '#93C5FD', border: `1px solid ${ACCENT}` }
+                  : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                {isSelected ? `✓ ${src}` : src}
+              </button>
+            );
+          })}
         </div>
+        {pulledSource && (
+          <p className="text-[9px] mt-2" style={{ color: '#34D399' }}>
+            ✓ {pulledSource} selected as source — load the mock file to see a full demo workflow.
+          </p>
+        )}
       </div>
     </div>
   );
@@ -541,7 +572,7 @@ function Step7Plan({ state }) {
   );
 }
 
-function Step8Assets({ state }) {
+function Step8Assets({ state, generatedGroups, setGeneratedGroups, generatedItems, setGeneratedItems }) {
   if (!state.mockLoaded && !state.targetMedium) return (
     <DemoPlaceholder step={8} title="Assets" desc="Generate Production Assets"
       bullets={['Generates scripts, screenplays, and outlines', 'Creates character and environment reference sheets', 'Produces storyboard panels and shot lists', 'Generates audio/music direction notes', 'Exports game design docs for game adaptations']} />
@@ -552,6 +583,16 @@ function Step8Assets({ state }) {
     { icon: '🎬', label: 'Film / Storyboard',color: '#EF4444', items: ['Episode 1 Storyboard Panels', 'Shot List — Thread City Battle', 'Camera / Motion Notes', 'Pacing Guide', 'OP/ED Sequence Notes'] },
     { icon: '🎵', label: 'Audio & Music',    color: '#F59E0B', items: ['Drake Voice Direction (ElevenLabs)', 'The Archivist Voice Profile', 'Thread City Ambient Sound Design', 'OP Theme — Suno Prompt', 'Score Direction — Afrofuturist Orchestral'] },
   ];
+
+  function generateAll(label, items) {
+    setGeneratedGroups(prev => ({ ...prev, [label]: true }));
+    items.forEach(item => setGeneratedItems(prev => ({ ...prev, [item]: true })));
+  }
+
+  function generateItem(item) {
+    setGeneratedItems(prev => ({ ...prev, [item]: true }));
+  }
+
   return (
     <div className="space-y-4">
       <div>
@@ -565,18 +606,24 @@ function Step8Assets({ state }) {
               <span className="text-lg">{g.icon}</span>
               <p className="text-xs font-bold" style={{ color: g.color }}>{g.label}</p>
             </div>
-            <button className="text-[10px] font-bold px-3 py-1 rounded-lg"
-              style={{ background: `${g.color}15`, color: g.color, border: `1px solid ${g.color}25` }}>
-              ⚡ Generate All
+            <button onClick={() => generateAll(g.label, g.items)}
+              className="text-[10px] font-bold px-3 py-1 rounded-lg transition-all"
+              style={generatedGroups[g.label]
+                ? { background: 'rgba(16,185,129,0.15)', color: '#34D399', border: '1px solid rgba(16,185,129,0.3)' }
+                : { background: `${g.color}15`, color: g.color, border: `1px solid ${g.color}25` }}>
+              {generatedGroups[g.label] ? '✓ All Generated' : '⚡ Generate All'}
             </button>
           </div>
           <div className="grid grid-cols-2 gap-1.5">
             {g.items.map(item => (
-              <button key={item} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-white/4"
-                style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
-                <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: g.color + '60' }} />
-                <span className="text-[10px] text-gray-500">{item}</span>
-                <span className="ml-auto text-[8px] text-gray-700">Generate</span>
+              <button key={item} onClick={() => generateItem(item)}
+                className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-all hover:bg-white/4"
+                style={{ border: `1px solid ${generatedItems[item] ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)'}`, background: generatedItems[item] ? 'rgba(16,185,129,0.05)' : 'transparent' }}>
+                <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: generatedItems[item] ? '#34D399' : g.color + '60' }} />
+                <span className="text-[10px]" style={{ color: generatedItems[item] ? '#6EE7B7' : '#6B7280' }}>{item}</span>
+                <span className="ml-auto text-[8px]" style={{ color: generatedItems[item] ? '#34D399' : '#374151' }}>
+                  {generatedItems[item] ? '✓' : 'Generate'}
+                </span>
               </button>
             ))}
           </div>
@@ -586,17 +633,47 @@ function Step8Assets({ state }) {
   );
 }
 
-function Step9Export({ state }) {
+function Step9Export({ state, pkgSaved, setPkgSaved, promptsCopied, setPromptsCopied }) {
   const studios = [
-    { icon: '📖', label: 'Story Production',  href: '/story-production', color: '#8B5CF6' },
-    { icon: '📚', label: 'Comic Production',   href: '/comic-production', color: '#F59E0B' },
-    { icon: '🎬', label: 'Film Production',    href: '/film-production',  color: '#EF4444' },
-    { icon: '🎨', label: 'Animation',          href: '/animation',        color: '#10B981' },
-    { icon: '🎨', label: 'Image Studio',       href: '/image-studio',     color: '#EC4899' },
-    { icon: '🎵', label: 'Music Studio',       href: '/music-studio',     color: '#D4AF37' },
-    { icon: '🎥', label: 'Film Studio',        href: '/film-studio',      color: '#3B82F6' },
-    { icon: '◈',  label: 'Griot AI Engine',    href: 'http://localhost:3000/adaptation-engine', color: ACCENT, external: true },
+    { icon: '📖', label: 'Story Production',  href: '/griot',        color: '#8B5CF6', note: 'Griot Story Tools →' },
+    { icon: '📚', label: 'Comic Production',   href: '/griot',        color: '#F59E0B', note: 'Griot Story Tools →' },
+    { icon: '🎬', label: 'Film Production',    href: '/film-studio',  color: '#EF4444', note: 'Send assets here →' },
+    { icon: '🎨', label: 'Animation',          href: '/griot-studio', color: '#10B981', note: 'Griot Interactive →' },
+    { icon: '🖼️', label: 'Image Studio',       href: '/film-studio',  color: '#EC4899', note: 'Film Studio →' },
+    { icon: '🎵', label: 'Music Studio',       href: '/music-studio', color: '#D4AF37', note: 'Send assets here →' },
+    { icon: '🎥', label: 'Film Studio',        href: '/film-studio',  color: '#3B82F6', note: 'Send assets here →' },
+    { icon: '◈',  label: 'Griot AI Engine',    href: 'http://localhost:3000/adaptation-engine', color: ACCENT, note: 'Open in Griot AI →', external: true },
   ];
+
+  const ALL_PROMPTS = `THE DRAKE PROPHECY — Adaptation Prompt Package
+
+CHARACTER PROMPTS:
+• Drake Osei portrait: Anime character, male, 28, West African heritage, Thread-Keeper armor with glowing Kente patterns, pyrokinesis aura. Deep gold/electric blue/quantum cyan palette.
+• The Archivist: Rogue AI villain, crystalline form made of corrupted ancestral data nodes, cold blue glow.
+
+WORLD PROMPTS:
+• Thread City establishing shot: Floating city above the Sahara, Afrofuturist architecture, gold domes and quantum towers.
+• The Dead Archive: Frozen data wasteland, monochrome with fragmented holographic memory shards.
+
+EPISODE 1 SCRIPT PROMPT:
+Write anime episode 1 for "The Drake Prophecy" — Drake discovers his Thread-Keeper inheritance. Afrofuturist setting, Neo-Ancestral Earth 2147. 24 minutes, ~18 scenes.
+
+MUSIC PROMPT:
+Compose opening theme for Afrofuturist anime series. Traditional West African percussion + orchestral synths + choir. Key: D minor. Tempo: 128 BPM. Duration: 90 seconds.`;
+
+  function savePackage() {
+    const pkg = { title: DRAKE_MOCK_FILE.title, adaptationGoal: DRAKE_MOCK_FILE.adaptationGoal, savedAt: new Date().toISOString() };
+    localStorage.setItem('university_adaptation_package', JSON.stringify(pkg));
+    setPkgSaved(true);
+    setTimeout(() => setPkgSaved(false), 2500);
+  }
+
+  function copyPrompts() {
+    navigator.clipboard.writeText(ALL_PROMPTS).catch(() => {});
+    setPromptsCopied(true);
+    setTimeout(() => setPromptsCopied(false), 2500);
+  }
+
   return (
     <div className="space-y-5">
       <div>
@@ -618,34 +695,40 @@ function Step9Export({ state }) {
       <div className="grid grid-cols-2 gap-2">
         {studios.map(s => (
           s.external
-            ? <a key={s.href} href={s.href} target="_blank" rel="noreferrer"
+            ? <a key={s.label} href={s.href} target="_blank" rel="noreferrer"
                 className="flex items-center gap-3 p-3 rounded-xl transition-all"
                 style={{ background: `${s.color}0d`, border: `1px solid ${s.color}20` }}>
                 <span className="text-xl">{s.icon}</span>
                 <div>
                   <p className="text-[11px] font-bold" style={{ color: s.color }}>{s.label}</p>
-                  <p className="text-[9px] text-gray-700">Open in Griot AI →</p>
+                  <p className="text-[9px] text-gray-700">{s.note}</p>
                 </div>
               </a>
-            : <Link key={s.href} to={s.href}
+            : <Link key={s.label} to={s.href}
                 className="flex items-center gap-3 p-3 rounded-xl transition-all"
                 style={{ background: `${s.color}0d`, border: `1px solid ${s.color}20` }}>
                 <span className="text-xl">{s.icon}</span>
                 <div>
                   <p className="text-[11px] font-bold" style={{ color: s.color }}>{s.label}</p>
-                  <p className="text-[9px] text-gray-700">Send assets here →</p>
+                  <p className="text-[9px] text-gray-700">{s.note}</p>
                 </div>
               </Link>
         ))}
       </div>
       <div className="flex gap-2">
-        <button className="flex-1 py-2.5 rounded-xl text-xs font-black"
-          style={{ background: ACCENT, color: '#fff', border: `1px solid ${ACCENT}` }}>
-          💾 Save Adaptation Package
+        <button onClick={savePackage}
+          className="flex-1 py-2.5 rounded-xl text-xs font-black transition-all"
+          style={pkgSaved
+            ? { background: 'rgba(16,185,129,0.2)', color: '#34D399', border: '1px solid rgba(16,185,129,0.4)' }
+            : { background: ACCENT, color: '#fff', border: `1px solid ${ACCENT}` }}>
+          {pkgSaved ? '✓ Package Saved!' : '💾 Save Adaptation Package'}
         </button>
-        <button className="py-2.5 px-4 rounded-xl text-xs font-bold"
-          style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}>
-          📋 Copy All Prompts
+        <button onClick={copyPrompts}
+          className="py-2.5 px-4 rounded-xl text-xs font-bold transition-all"
+          style={promptsCopied
+            ? { background: 'rgba(16,185,129,0.15)', color: '#34D399', border: '1px solid rgba(16,185,129,0.3)' }
+            : { background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          {promptsCopied ? '✓ Copied!' : '📋 Copy All Prompts'}
         </button>
       </div>
     </div>
@@ -658,6 +741,10 @@ function Step9Export({ state }) {
 export default function UniversityAdaptationEngine() {
   const [state, setState] = useState(EMPTY_STATE);
   const [mockSaved, setMockSaved] = useState(false);
+  const [generatedGroups, setGeneratedGroups] = useState({});
+  const [generatedItems, setGeneratedItems] = useState({});
+  const [pkgSaved, setPkgSaved] = useState(false);
+  const [promptsCopied, setPromptsCopied] = useState(false);
 
   function loadMock() {
     setState({ ...EMPTY_STATE, sourceType: 'novel', mockLoaded: true, completedSteps: [1], mockFileName: DRAKE_MOCK_FILE.fileName });
@@ -745,8 +832,8 @@ export default function UniversityAdaptationEngine() {
           {state.step === 5 && <Step5Genre state={state} setState={setState} />}
           {state.step === 6 && <Step6Style state={state} setState={setState} />}
           {state.step === 7 && <Step7Plan state={state} />}
-          {state.step === 8 && <Step8Assets state={state} />}
-          {state.step === 9 && <Step9Export state={state} />}
+          {state.step === 8 && <Step8Assets state={state} generatedGroups={generatedGroups} setGeneratedGroups={setGeneratedGroups} generatedItems={generatedItems} setGeneratedItems={setGeneratedItems} />}
+          {state.step === 9 && <Step9Export state={state} pkgSaved={pkgSaved} setPkgSaved={setPkgSaved} promptsCopied={promptsCopied} setPromptsCopied={setPromptsCopied} />}
 
           {/* Bottom nav */}
           <div className="flex items-center justify-between mt-6 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>

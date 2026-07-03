@@ -10,7 +10,7 @@ export const DEPARTMENTS = [
     id: 'executive', label: 'Executive Suite',      icon: '🏛️', color: '#F0C040',
     tagline: 'Vision · Strategy · Operations',
     description: 'AI leadership team overseeing every division, project pipeline, and business decision.',
-    path: '/dev-studio/executive',
+    path: '/dev-team/dev/team',
     agents: [
       { name: 'General Vance',    icon: '👑', focus: 'Vision & Strategy',    task: 'Reviewing Q4 product roadmap',            status: 'active', branch: 'Army'        },
       { name: 'Admiral Nexus',    icon: '⚙️', focus: 'Architecture & Stack', task: 'Evaluating AI infrastructure upgrade',    status: 'active', branch: 'Navy'        },
@@ -22,7 +22,7 @@ export const DEPARTMENTS = [
     id: 'engineering', label: 'Engineering',         icon: '💻', color: '#06B6D4',
     tagline: 'Frontend · Backend · Mobile · Database',
     description: 'Full-spectrum engineering team building production-grade software across every platform.',
-    path: '/dev-studio/engineering',
+    path: '/dev-team/dev/engineering',
     agents: [
       { name: 'Colonel Blueprint', icon: '🏛️', focus: 'System Design',        task: 'Designing microservice architecture for SaaS client', status: 'active',   branch: 'Army'       },
       { name: 'Commander Volt',    icon: '⚡', focus: 'Frontend + Backend',    task: 'Building admin dashboard for e-commerce client',      status: 'building', branch: 'Navy'       },
@@ -36,7 +36,7 @@ export const DEPARTMENTS = [
     id: 'ai-division', label: 'AI Division',         icon: '🤖', color: '#A78BFA',
     tagline: 'Agents · Prompts · Orchestration · Knowledge',
     description: 'Designs and deploys AI agent systems, prompt engineering workflows, and intelligent automation.',
-    path: '/dev-studio/ai-division',
+    path: '/dev-team/dev/ai-division',
     agents: [
       { name: 'Colonel Neural',    icon: '🤖', focus: 'Model Integration',     task: 'Integrating Claude into client CRM system',    status: 'active',   branch: 'Space Force' },
       { name: 'Commander Ghost',   icon: '🧠', focus: 'Agent System Design',   task: 'Designing 12-agent orchestration workflow',    status: 'active',   branch: 'Navy'        },
@@ -49,7 +49,7 @@ export const DEPARTMENTS = [
     id: 'qa', label: 'Quality Assurance',            icon: '✅', color: '#34D399',
     tagline: 'Testing · Debug · Automation · UX',
     description: 'Ensures every build ships bug-free with automated test suites, manual review, and UX auditing.',
-    path: '/dev-studio/qa',
+    path: '/dev-team/dev/qa',
     agents: [
       { name: 'Colonel Veritas',   icon: '✅', focus: 'QA Strategy & Process', task: 'Setting test coverage targets for 3 active projects', status: 'active',  branch: 'Army'      },
       { name: 'Commander Cypher',  icon: '🔄', focus: 'Test Automation',        task: 'Writing Playwright e2e tests for SaaS client',        status: 'active',  branch: 'Navy'      },
@@ -61,7 +61,7 @@ export const DEPARTMENTS = [
     id: 'security', label: 'Security Division',      icon: '🛡️', color: '#F87171',
     tagline: 'Pentesting · Compliance · Identity · Threat Intel',
     description: 'Protects every client deliverable with proactive security audits, compliance checks, and identity management.',
-    path: '/dev-studio/security',
+    path: '/dev-team/dev/security',
     agents: [
       { name: 'General Shield',    icon: '🛡️', focus: 'Security Strategy',      task: 'Reviewing security posture for fintech client',  status: 'active',   branch: 'Army'       },
       { name: 'Colonel Specter',   icon: '🔓', focus: 'Ethical Hacking',         task: 'Running auth flow penetration test',             status: 'active',   branch: 'Navy'       },
@@ -73,7 +73,7 @@ export const DEPARTMENTS = [
     id: 'cloud', label: 'Cloud Operations',          icon: '☁️', color: '#60A5FA',
     tagline: 'DevOps · Deploy · Monitor · Disaster Recovery',
     description: 'Manages cloud infrastructure, CI/CD pipelines, uptime monitoring, and production reliability.',
-    path: '/dev-studio/cloud',
+    path: '/dev-team/dev/cloud',
     agents: [
       { name: 'Colonel Nimbus',   icon: '☁️', focus: 'CI/CD & Infrastructure', task: 'Setting up GitHub Actions pipeline for client',  status: 'active',    branch: 'Air Force'  },
       { name: 'Commander Launch', icon: '🚀', focus: 'Production Deployments', task: 'Zero-downtime deploy for client v2.1 launch',    status: 'deploying', branch: 'Navy'       },
@@ -85,7 +85,7 @@ export const DEPARTMENTS = [
     id: 'clients', label: 'Client Services',         icon: '🤝', color: '#FB923C',
     tagline: 'Analysis · PM · Success · Delivery',
     description: 'Bridges client needs with the dev team — scoping, managing, and delivering projects on time.',
-    path: '/dev-studio/clients',
+    path: '/dev-team/dev/clients',
     agents: [
       { name: 'Colonel Intel',      icon: '📊', focus: 'Requirements & Scope',     task: 'Documenting specs for new church platform project', status: 'active', branch: 'Army'       },
       { name: 'Commander Waypoint', icon: '🗺️', focus: 'Roadmap & Prioritization', task: 'Updating sprint board for 3 active clients',       status: 'active', branch: 'Navy'       },
@@ -97,7 +97,7 @@ export const DEPARTMENTS = [
     id: 'factories', label: 'Dev Factories',         icon: '⚡', color: '#FBBF24',
     tagline: 'SaaS · Website · AI · Mobile · Automation · Game',
     description: 'Specialized production lines for the 6 core product types — each factory has its own agent team and workflow.',
-    path: '/dev-studio/factories',
+    path: '/dev-team/dev/factories',
     agents: [
       { name: 'Colonel Ironworks',   icon: '🏭', focus: 'SaaS Platform Builds',  task: 'Building multi-tenant SaaS dashboard for client', status: 'active',    branch: 'Army'       },
       { name: 'Commander Beacon',    icon: '🌐', focus: 'Web Presence & CMS',    task: 'Launching 3 church websites this sprint',          status: 'building',  branch: 'Navy'       },
@@ -111,7 +111,7 @@ export const DEPARTMENTS = [
     id: 'knowledge', label: 'Knowledge Center',      icon: '📚', color: '#818CF8',
     tagline: 'Docs · Standards · Templates · History',
     description: 'Maintains the institutional memory — architecture standards, reusable templates, and project documentation.',
-    path: '/dev-studio/knowledge',
+    path: '/dev-team/dev/knowledge',
     agents: [
       { name: 'Major Chronicle',    icon: '📝', focus: 'Technical Writing',             task: 'Documenting API endpoints for 4 active projects', status: 'active',   branch: 'Army'      },
       { name: 'Commander Codex',    icon: '📐', focus: 'Code Standards & Best Practices',task: 'Updating component library guidelines',           status: 'active',   branch: 'Navy'      },
@@ -123,7 +123,7 @@ export const DEPARTMENTS = [
     id: 'rnd', label: 'Research & Innovation',       icon: '🔬', color: '#F472B6',
     tagline: 'AI Research · XR · Cybersecurity · Game Tech',
     description: 'Explores bleeding-edge technology — from AI model research to extended reality and next-gen game engines.',
-    path: '/dev-studio/rnd',
+    path: '/dev-team/dev/rnd',
     agents: [
       { name: 'Colonel Nexus',     icon: '🧪', focus: 'AI Model Research',           task: 'Benchmarking Claude 4 vs GPT-5 for coding tasks',    status: 'active',   branch: 'Space Force' },
       { name: 'Commander Phantom', icon: '🥽', focus: 'Extended Reality & Robotics', task: 'Prototyping AR overlay for field service app',        status: 'building', branch: 'Navy'        },

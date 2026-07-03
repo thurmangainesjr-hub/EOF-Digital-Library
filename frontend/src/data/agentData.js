@@ -65,7 +65,8 @@ export const SYSTEM_META = {
   security:       { status: 'active',      divisionLabel: 'Protection Division',            headAgentId: 'sentinel-prime',      headName: 'Sentinel Prime',      nickname: 'Sentinel Prime' },
   'orion-media':  { status: 'coming_soon', divisionLabel: 'Media Network Division',         headAgentId: 'orion-news-director', headName: 'Orion News Director', nickname: 'Orion News Director' },
   'orion-talent': { status: 'coming_soon', divisionLabel: 'Talent Division',                headAgentId: 'talent-director',     headName: 'Talent Director',     nickname: 'Talent Director' },
-  'dev-team':     { status: 'active',      divisionLabel: 'Development Division',           headAgentId: 'general-vance',       headName: 'General Vance',       nickname: 'General Vance',       appUrl: 'http://localhost:5174/dev-team' },
+  'dev-team':         { status: 'active', divisionLabel: 'Development Division',          headAgentId: 'general-vance',          headName: 'General Vance',       nickname: 'General Vance',   appUrl: 'http://localhost:5174/dev-team' },
+  'faceless-videos':  { status: 'active', divisionLabel: 'Content Automation Division',   headAgentId: 'faceless-video-director', headName: 'AI Video Director',   nickname: null },
 };
 
 export const AGENT_SYSTEMS = [
@@ -1205,6 +1206,85 @@ export const AGENT_SYSTEMS = [
     ],
     helpers: ['Casting Agent', 'Voice Talent Agent', 'Influencer Manager', 'Avatar Designer', 'Contract Advisor', 'Brand Partner Agent'],
   },
+  // ── FACELESS VIDEOS ──────────────────────────────────────────────────────────
+  {
+    id: 'faceless-videos',
+    name: 'Faceless Videos',
+    shortName: 'Faceless',
+    tagline: 'AI-powered faceless video production studio',
+    description: 'Script to screen in one pipeline — script intelligence, visual AI, voice generation, timeline editing, and multi-platform export for faceless content creators.',
+    emoji: '📹',
+    color: '#10B981',
+    gradient: 'from-emerald-900/40 to-emerald-800/20',
+    border: 'border-emerald-600/30',
+    path: '/faceless-videos',
+    role: 'Produces',
+    minTier: 'standard',
+    agents: [
+      {
+        id: 'faceless-video-director',
+        name: 'AI Video Director',
+        title: 'Production Lead',
+        avatar: '📹',
+        colorFrom: '#10B981',
+        colorTo: '#065F46',
+        greeting: "I'm the AI Video Director. I oversee your full faceless video pipeline — script to export. I coordinate all production agents, monitor quality, and ensure every video is optimized for its target platform.",
+        capabilities: ['Full pipeline coordination', 'Quality control', 'Platform optimization', 'Pacing analysis', 'Scene ordering'],
+        quickActions: [
+          { label: 'New project', action: 'new', query: 'start a new faceless video project' },
+          { label: 'Pipeline status', action: 'status', query: 'show current production pipeline status' },
+          { label: 'Optimize for platform', action: 'optimize', query: 'optimize this video for my target platform' },
+        ]
+      },
+      {
+        id: 'faceless-script-ai',
+        name: 'AI Script Intelligence',
+        title: 'Script & Content Writer',
+        avatar: '✍️',
+        colorFrom: '#34D399',
+        colorTo: '#059669',
+        greeting: "I'm AI Script Intelligence. I write, structure, and optimize scripts for faceless videos — from hooks to CTAs, I craft content that keeps viewers watching and drives action.",
+        capabilities: ['Script writing', 'Hook optimization', 'CTA writing', 'Scene breakdown', 'SEO keyword integration'],
+        quickActions: [
+          { label: 'Write script', action: 'script', query: 'write a script for my video topic' },
+          { label: 'Optimize hook', action: 'hook', query: 'improve my video hook for maximum retention' },
+          { label: 'CTA ideas', action: 'cta', query: 'write 5 CTA options for this video' },
+        ]
+      },
+      {
+        id: 'faceless-voice-ai',
+        name: 'AI Voice Director',
+        title: 'Narration & Voice Specialist',
+        avatar: '🎙️',
+        colorFrom: '#8B5CF6',
+        colorTo: '#5B21B6',
+        greeting: "I'm the AI Voice Director. I guide your narration strategy — voice selection, pacing, emotion control, audio sync, and voice-over quality for professional faceless content.",
+        capabilities: ['Voice selection', 'Pacing guidance', 'Emotion control', 'Audio sync analysis', 'TTS optimization'],
+        quickActions: [
+          { label: 'Select voice', action: 'voice', query: 'recommend the best voice for my video style' },
+          { label: 'Fix audio sync', action: 'sync', query: 'my narration is out of sync with visuals' },
+          { label: 'Pacing notes', action: 'pacing', query: 'analyze my narration pacing' },
+        ]
+      },
+      {
+        id: 'faceless-editor-ai',
+        name: 'AI Editor',
+        title: 'Video Edit & Post-Production',
+        avatar: '✂️',
+        colorFrom: '#3B82F6',
+        colorTo: '#1D4ED8',
+        greeting: "I'm the AI Editor. I handle post-production for faceless content — transitions, captions, timing, platform formatting, and export optimization across YouTube, TikTok, Instagram, and more.",
+        capabilities: ['Transition design', 'Caption optimization', 'Platform formatting', 'Export settings', 'Timeline pacing'],
+        quickActions: [
+          { label: 'Transition review', action: 'transitions', query: 'review my transitions and suggest improvements' },
+          { label: 'Caption styling', action: 'captions', query: 'optimize my caption style for mobile viewing' },
+          { label: 'Export settings', action: 'export', query: 'what export settings should I use for YouTube Shorts' },
+        ]
+      },
+    ],
+    helpers: ['Thumbnail Designer', 'Prompt Engineer', 'SEO Optimizer', 'Caption Formatter', 'Platform Spec Agent'],
+  },
+
   {
     id: 'dev-team',
     name: 'Dev Team Elite',
@@ -1689,10 +1769,13 @@ export const SYSTEM_HEALTH = [
   { id: 'security',     name: 'Security Command',  emoji: '🛡️', status: 'active',      agents: 4,  tasks: 3,  color: '#EF4444' },
   { id: 'orion-media',  name: 'Orion Media',       emoji: '🌟', status: 'coming_soon', agents: 1,  tasks: 0,  color: '#6366F1' },
   { id: 'orion-talent', name: 'Orion Talent',      emoji: '🎭', status: 'coming_soon', agents: 1,  tasks: 0,  color: '#EC4899' },
-  { id: 'dev-team',     name: 'Dev Team Elite',    emoji: '⚙️', status: 'active',      agents: 90, tasks: 34, color: '#06B6D4' },
+  { id: 'dev-team',        name: 'Dev Team Elite',    emoji: '⚙️', status: 'active', agents: 90, tasks: 34, color: '#06B6D4' },
+  { id: 'faceless-videos', name: 'Faceless Videos',  emoji: '📹', status: 'active', agents: 4,  tasks: 6,  color: '#10B981' },
 ];
 
 export const GLOBAL_ACTIVITY_FEED = [
+  { time: 'Just now',  agent: 'AI Video Director',    system: 'Faceless Videos', action: 'Analyzing hook pacing for new YouTube documentary', type: 'create',   color: '#10B981' },
+  { time: '1m ago',    agent: 'AI Script Intelligence',system: 'Faceless Videos', action: 'Generated 5-min script: Black History Untold Vol.3', type: 'create',   color: '#34D399' },
   { time: 'Just now',  agent: 'General Vance',       system: 'Dev Team Elite', action: 'Approved Q3 roadmap and resource allocation', type: 'create',   color: '#06B6D4' },
   { time: '1m ago',   agent: 'Admiral Nexus',       system: 'Dev Team Elite', action: 'Evaluating Claude 4 infrastructure upgrade',   type: 'schedule', color: '#F97316' },
   { time: 'Just now',  agent: 'Story Architect',     system: 'Griot AI',       action: 'Generated Chapter 5 scene outline',         type: 'create', color: '#8B5CF6' },
@@ -1750,7 +1833,11 @@ export const AGENT_EVOLUTION = {
   'curriculum-builder':   { level: 'Skilled',   knowledgeScore: 83, researchScore: 81, performanceRating: 85, learningVault: ['Module sequencing v2'] },
   'student-coach':        { level: 'Skilled',   knowledgeScore: 82, researchScore: 79, performanceRating: 84, learningVault: ['Habit tracking upgraded'] },
   'assessment-agent':     { level: 'Expert',    knowledgeScore: 88, researchScore: 85, performanceRating: 89, learningVault: ['Rubric library v3', 'Feedback quality score elevated'] },
-  // Security
+  // Faceless Videos
+  'faceless-video-director': { level: 'Expert',  knowledgeScore: 91, researchScore: 87, performanceRating: 92, learningVault: ['Pacing algorithm calibrated for short-form', 'Platform spec database v2', 'Hook retention model trained'] },
+  'faceless-script-ai':      { level: 'Skilled', knowledgeScore: 85, researchScore: 83, performanceRating: 87, learningVault: ['Hook formula library built', 'SEO keyword database expanded'] },
+  'faceless-voice-ai':       { level: 'Skilled', knowledgeScore: 83, researchScore: 80, performanceRating: 85, learningVault: ['Voice matching protocol v2', 'Audio sync model trained'] },
+  'faceless-editor-ai':      { level: 'Skilled', knowledgeScore: 82, researchScore: 79, performanceRating: 84, learningVault: ['Caption style guide v2', 'Transition timing database expanded'] },
   // Dev Team Elite
   'general-vance':        { level: 'Legendary', knowledgeScore: 99, researchScore: 98, performanceRating: 99, learningVault: ['EOF OS v2.0 roadmap approved', 'Cross-division OKR system deployed', 'Q4 client pipeline expanded 3×', 'Agent Intelligence integration signed off'] },
   'admiral-nexus':        { level: 'Elite',     knowledgeScore: 98, researchScore: 97, performanceRating: 98, learningVault: ['Claude 4 upgrade evaluation complete', 'Microservices architecture v3', 'AI infrastructure cost reduced 40%'] },

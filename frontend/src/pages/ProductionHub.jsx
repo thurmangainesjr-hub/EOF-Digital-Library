@@ -86,14 +86,14 @@ const APPS = [
   },
   {
     id: 'dev',        name: 'Dev Studios',          emoji: '💻', icon: FiCode,
-    color: CYAN,       path: '/dev-studio',
+    color: CYAN,       path: '/dev-team/dev',
     tagline: 'AI Software Company · 31 Agents',
     stats: [{ k: 'Projects', v: '12' }, { k: 'Agents', v: '31' }],
     status: 'live',
   },
   {
     id: 'growth',     name: 'Growth Intelligence',  emoji: '📈', icon: FiTrendingUp,
-    color: GREEN,      path: '/growth',
+    color: GREEN,      path: '/dev-team/growth',
     tagline: 'SEO · Marketing · Advertising',
     stats: [{ k: 'Clients', v: '24' }, { k: 'Campaigns', v: '18' }],
     status: 'live',
@@ -129,8 +129,8 @@ const QUICK_WORKFLOWS = [
   { label: 'Write a Story',      emoji: '✍️', path: '/griot',             desc: 'Open Griot AI story engine' },
   { label: 'Record a Track',     emoji: '🎵', path: '/music-studio',      desc: 'Open Music Studio DAW'       },
   { label: 'Edit a Video',       emoji: '🎬', path: '/film-studio',       desc: 'Open Film Studio editor'     },
-  { label: 'Launch a Campaign',  emoji: '📣', path: '/growth/marketing',  desc: 'Growth Intelligence'         },
-  { label: 'Build Software',     emoji: '⚡', path: '/dev-studio',        desc: 'Dev Studios Command Center'  },
+  { label: 'Launch a Campaign',  emoji: '📣', path: '/dev-team/growth/marketing',  desc: 'Growth Intelligence'         },
+  { label: 'Build Software',     emoji: '⚡', path: '/dev-team/dev',              desc: 'Dev Studios Command Center'  },
   { label: 'Start a Course',     emoji: '🎓', path: '/university',        desc: 'DIY University'              },
 ];
 

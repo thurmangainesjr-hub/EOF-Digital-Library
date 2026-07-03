@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiPlus, FiSearch, FiChevronLeft, FiChevronRight, FiX,
@@ -271,6 +271,8 @@ function EntryDetail({ entry, category, onClose }) {
   const cat = CATEGORIES.find(c => c.id === category);
   const status = STATUS_META[entry.status];
   const [activeTab, setActiveTab] = useState('overview');
+  const navigate = useNavigate();
+  const isCharacter = category === 'characters';
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
@@ -362,6 +364,33 @@ function EntryDetail({ entry, category, onClose }) {
                 ))}
               </div>
             </div>
+            {isCharacter && (
+              <div>
+                <p className="text-[9px] font-bold tracking-widest uppercase text-gray-600 mb-2">Studio Actions</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => navigate('/film-studio/hub')}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all hover:brightness-110"
+                    style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.25)', color: '#F87171' }}>
+                    <span className="text-base">🎬</span>
+                    <div>
+                      <p className="text-[10px] font-bold">Film Studio</p>
+                      <p className="text-[8px] text-gray-600">Create scene</p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => navigate('/music-studio/hub')}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all hover:brightness-110"
+                    style={{ background: 'rgba(139,92,246,0.08)', borderColor: 'rgba(139,92,246,0.25)', color: '#A78BFA' }}>
+                    <span className="text-base">🎵</span>
+                    <div>
+                      <p className="text-[10px] font-bold">Music Studio</p>
+                      <p className="text-[8px] text-gray-600">Create theme</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         )}
 
@@ -445,6 +474,7 @@ function EntryDetail({ entry, category, onClose }) {
 
 // ── Main Page ────────────────────────────────────────────────────────────────
 export default function CanonKeeperHub() {
+  const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('characters');
   const [selectedEntry, setSelectedEntry]   = useState(null);
   const [searchQ, setSearchQ]               = useState('');
@@ -599,6 +629,22 @@ export default function CanonKeeperHub() {
                           ))}
                           <span className="text-[8px] text-gray-700 ml-auto">v{entry.version} · {entry.updated}</span>
                         </div>
+                        {activeCategory === 'characters' && (
+                          <div className="flex items-center gap-1.5 mt-2">
+                            <button
+                              onClick={e => { e.stopPropagation(); navigate('/film-studio/hub'); }}
+                              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold border transition-all hover:brightness-110"
+                              style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.25)', color: '#F87171' }}>
+                              🎬 Film Studio
+                            </button>
+                            <button
+                              onClick={e => { e.stopPropagation(); navigate('/music-studio/hub'); }}
+                              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold border transition-all hover:brightness-110"
+                              style={{ background: 'rgba(139,92,246,0.08)', borderColor: 'rgba(139,92,246,0.25)', color: '#A78BFA' }}>
+                              🎵 Music Studio
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <FiChevronRight size={12} className="text-gray-700 flex-shrink-0 mt-1"
                         style={{ transform: isSelected ? 'rotate(90deg)' : 'none', color: isSelected ? cat.color : '#374151' }} />

@@ -12,6 +12,7 @@ import {
   FiCpu, FiFeather, FiSend,
 } from 'react-icons/fi';
 import GroitIntro, { hasSeenGroitIntro } from '../components/GroitIntro';
+import EOFTopNav from '../components/EOFTopNav';
 
 const ACCENT = '#7C3AED';
 const ACCENT_SOFT = 'rgba(124,58,237,0.12)';
@@ -298,8 +299,9 @@ export default function GroitAppLayout() {
   const [introSeen, setIntroSeen] = useState(() => hasSeenGroitIntro());
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#0d0d0d' }}>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#0d0d0d' }}>
       {!introSeen && <GroitIntro onDone={() => setIntroSeen(true)} />}
+      <EOFTopNav accentColor="#7C3AED" systemName="Griot AI" systemEmoji="🌀" />
       {/* Mobile menu button */}
       <button onClick={() => setDrawerOpen(true)}
         className="lg:hidden fixed bottom-6 left-4 z-30 w-11 h-11 rounded-full flex items-center justify-center shadow-xl border"
@@ -307,6 +309,7 @@ export default function GroitAppLayout() {
         <FiMenu size={18}/>
       </button>
 
+      <div className="flex flex-1 min-h-0 overflow-hidden">
       <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)}/>
       <DesktopSidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed}/>
 
@@ -314,6 +317,7 @@ export default function GroitAppLayout() {
       <main className="flex-1 min-h-0 flex flex-col overflow-hidden">
         <Outlet/>
       </main>
+      </div>
     </div>
   );
 }

@@ -29,7 +29,7 @@ const SIDEBAR_NAV = [
   {
     id: 'recording', label: 'Recording', icon: FiMic,
     children: [
-      { label: 'Studio Recorder', path: '/music-recorder', icon: '🎙️' },
+      { label: 'Studio Recorder', path: '/music-studio',  icon: '🎙️' },
       { label: 'Beat Builder',    path: '/music-studio',   icon: '🥁' },
       { label: 'Vocals',          path: '/music-studio',   icon: '🎤' },
       { label: 'Live Session',    path: '/music-studio',   icon: '🎸' },

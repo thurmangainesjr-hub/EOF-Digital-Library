@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Use the EOF Ecosystem — DIY University</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --purple:#534AB7;--purple-light:#EEEDFE;--purple-mid:#AFA9EC;--purple-dark:#26215C;
+  --teal:#0F6E56;--teal-light:#E1F5EE;--teal-mid:#5DCAA5;--teal-dark:#04342C;
+  --green:#3B6D11;--green-light:#EAF3DE;--green-mid:#97C459;--green-dark:#173404;
+  --dark:#0d0b14;--surface:#1a1625;--surface2:#221d30;
+  --text:#ede6ff;--muted:#9b8fc0;--lighter:#c4b8e8;
+}
+
+body{
+  background:var(--dark);
+  font-family:'Inter',system-ui,sans-serif;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  min-height:100vh;padding:2rem 1rem;
+  color:var(--text);
+}
+
+h1.site-title{
+  font-family:'Playfair Display',serif;
+  font-size:15px;font-weight:400;
+  color:var(--muted);letter-spacing:.12em;
+  text-transform:uppercase;margin-bottom:1.5rem;
+}
+
+/* ── BOOK SHELL ── */
+.book-shell{
+  position:relative;
+  width:760px;
+  filter:drop-shadow(0 32px 64px rgba(0,0,0,.7));
+}
+
+/* page-turn shadow spine */
+.book-spine{
+  position:absolute;left:50%;top:4px;bottom:4px;
+  width:12px;transform:translateX(-50%);
+  background:linear-gradient(to right,rgba(0,0,0,.6),rgba(255,255,255,.04),rgba(0,0,0,.5));
+  z-index:10;pointer-events:none;border-radius:1px;
+}
+
+.flipbook{
+  display:flex;width:760px;height:520px;
+  border-radius:6px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+}
+
+/* LEFT HALF */
+.page-left{
+  width:380px;height:520px;flex-shrink:0;
+  position:relative;overflow:hidden;
+}
+
+/* RIGHT HALF */
+.page-right{
+  width:380px;height:520px;flex-shrink:0;
+  background:var(--surface);
+  position:relative;overflow:hidden;
+  border-left:1px solid rgba(255,255,255,.06);
+}
+
+/* ── NAV BAR BELOW BOOK ── */
+.nav-bar{
+  display:flex;align-items:center;gap:16px;
+  margin-top:1.25rem;
+}
+
+.nav-btn{
+  padding:8px 20px;border-radius:6px;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.05);
+  color:var(--lighter);font-size:13px;
+  cursor:pointer;transition:all .15s;
+  font-family:'Inter',sans-serif;
+}
+.nav-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3)}
+.nav-btn:disabled{opacity:.25;cursor:default}
+
+.page-counter{
+  font-size:12px;color:var(--muted);
+  font-family:'IBM Plex Mono',monospace;
+  min-width:90px;text-align:center;
+}
+
+.progress-track{
+  flex:1;height:3px;background:rgba(255,255,255,.08);
+  border-radius:99px;overflow:hidden;max-width:200px;
+}
+.progress-fill{height:3px;background:var(--purple-mid);border-radius:99px;transition:width .3s ease}
+
+/* ── COVER (page 0) ── */
+.cover-left{
+  background:linear-gradient(160deg,#1a1040 0%,#0d0b14 100%);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:2rem;text-align:center;
+}
+
+.cover-right{
+  background:linear-gradient(160deg,#120f28 0%,#0d0b14 100%);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:2rem 1.75rem;
+}
+
+.cover-icon{font-size:56px;margin-bottom:1rem;line-height:1}
+.cover-tag{
+  font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--purple-mid);font-weight:500;margin-bottom:.6rem;
+}
+.cover-title{
+  font-family:'Playfair Display',serif;
+  font-size:28px;font-weight:700;
+  color:#fff;line-height:1.25;margin-bottom:.6rem;
+}
+.cover-sub{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:1.5rem}
+
+.diy-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 14px;border-radius:99px;
+  border:1px solid var(--purple-mid);
+  color:var(--purple-mid);font-size:11px;font-weight:500;
+}
+
+.cover-right-inner{width:100%;max-width:300px}
+.cover-right-inner h3{
+  font-family:'Playfair Display',serif;
+  font-size:15px;color:var(--lighter);margin-bottom:1rem;
+  border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:.5rem;
+}
+
+.toc-item{
+  display:flex;align-items:center;gap:10px;
+  padding:.45rem 0;border-bottom:1px solid rgba(255,255,255,.05);
+  font-size:12px;color:var(--muted);
+}
+.toc-dot{
+  width:6px;height:6px;border-radius:50%;flex-shrink:0;
+}
+.toc-dot.purple{background:var(--purple-mid)}
+.toc-dot.teal{background:var(--teal-mid)}
+.toc-dot.green{background:var(--green-mid)}
+.toc-num{font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(255,255,255,.2);margin-left:auto}
+
+/* ── LESSON PAGES ── */
+.lesson-left{
+  background:var(--surface2);
+  padding:1.5rem 1.25rem;
+  display:flex;flex-direction:column;
+  border-right:1px solid rgba(255,255,255,.04);
+}
+
+.lesson-number{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--muted);
+  letter-spacing:.1em;margin-bottom:1rem;
+}
+
+.lesson-module-tag{
+  font-size:10px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.12em;
+  padding:3px 8px;border-radius:4px;
+  display:inline-block;margin-bottom:.75rem;
+}
+.lesson-module-tag.purple{background:var(--purple-light);color:var(--purple-dark)}
+.lesson-module-tag.teal{background:var(--teal-light);color:var(--teal-dark)}
+.lesson-module-tag.green{background:var(--green-light);color:var(--green-dark)}
+
+.lesson-title-left{
+  font-family:'Playfair Display',serif;
+  font-size:19px;font-weight:700;
+  color:#fff;line-height:1.3;margin-bottom:1rem;
+  flex:1;
+}
+
+.lesson-body{
+  font-size:12px;color:var(--muted);line-height:1.65;
+}
+
+.lesson-right{
+  padding:1.5rem 1.25rem;
+  display:flex;flex-direction:column;
+  background:var(--surface);
+}
+
+.steps-label{
+  font-size:10px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);
+  margin-bottom:.85rem;
+}
+
+.step-item{
+  display:flex;gap:10px;margin-bottom:.75rem;
+  align-items:flex-start;
+}
+.step-num{
+  width:20px;height:20px;border-radius:50%;
+  font-size:11px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+}
+.step-num.purple{background:var(--purple);color:#fff}
+.step-num.teal{background:var(--teal);color:#fff}
+.step-num.green{background:var(--green);color:#fff}
+.step-text{font-size:12px;color:var(--lighter);line-height:1.55}
+
+.lesson-page-num{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  color:rgba(255,255,255,.15);margin-top:auto;text-align:right;
+}
+
+/* ── BACK COVER ── */
+.back-left{
+  background:linear-gradient(160deg,#0a1a10 0%,#0d0b14 100%);
+  padding:1.75rem 1.5rem;
+  display:flex;flex-direction:column;
+}
+
+.back-right{
+  background:linear-gradient(160deg,#0d1a0a 0%,#080d06 100%);
+  padding:1.75rem 1.5rem;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+}
+
+.back-title{
+  font-family:'Playfair Display',serif;
+  font-size:14px;color:var(--green-mid);
+  letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:1rem;
+}
+
+.learned-grid{display:flex;flex-direction:column;gap:.5rem;flex:1}
+.learned-item{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:11.5px;color:var(--muted);line-height:1.5;
+}
+.learned-check{color:var(--green-mid);font-size:13px;flex-shrink:0;margin-top:1px}
+
+.pipeline-title{
+  font-family:'Playfair Display',serif;
+  font-size:22px;color:#fff;
+  margin-bottom:.5rem;line-height:1.3;
+}
+.pipeline-sub{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:1.5rem}
+.pipeline-steps{display:flex;flex-direction:column;gap:.4rem;width:100%}
+.pipe-step{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;color:var(--lighter);
+  background:rgba(255,255,255,.04);
+  border-radius:5px;padding:.4rem .6rem;
+  border:1px solid rgba(255,255,255,.06);
+}
+.pipe-icon{font-size:14px}
+
+.seal{
+  margin-top:1.5rem;
+  width:60px;height:60px;border-radius:50%;
+  border:2px solid var(--green-mid);
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+}
+.seal-label{font-size:10px;color:var(--green-mid);margin-top:.4rem;letter-spacing:.1em;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<p class="site-title">🎓 EOF DIY University</p>
+
+<div class="book-shell">
+  <div class="book-spine"></div>
+  <div class="flipbook" id="flipbook">
+
+    <!-- ══════════════════════════════════════
+         PAGE 0 — COVER
+    ══════════════════════════════════════ -->
+    <div class="page-left cover-left" id="pl-0">
+      <div class="cover-icon">📖</div>
+      <p class="cover-tag">DIY University · Beginner Course</p>
+      <h2 class="cover-title">How to Use the EOF Ecosystem</h2>
+      <p class="cover-sub">Griot AI · EOF Library · DIY University<br>Your complete creator guide — start to finish</p>
+      <span class="diy-badge">✦ Beginner · 18 Lessons · 3 Apps</span>
+    </div>
+    <div class="page-right cover-right" id="pr-0">
+      <div class="cover-right-inner">
+        <h3>Table of Contents</h3>
+        <div class="toc-item"><span class="toc-dot purple"></span>What is the EOF Ecosystem?<span class="toc-num">01</span></div>
+        <div class="toc-item"><span class="toc-dot purple"></span>Who is GLITCH?<span class="toc-num">02</span></div>
+        <div class="toc-item"><span class="toc-dot purple"></span>Your creator journey<span class="toc-num">03</span></div>
+        <div class="toc-item"><span class="toc-dot purple"></span>Griot AI — what it is<span class="toc-num">04</span></div>
+        <div class="toc-item"><span class="toc-dot purple"></span>The 15 core agents<span class="toc-num">05</span></div>
+        <div class="toc-item"><span class="toc-dot purple"></span>Canon explained<span class="toc-num">06</span></div>
+        <div class="toc-item"><span class="toc-dot purple"></span>Creating a Character Card<span class="toc-num">07</span></div>
+        <div class="toc-item"><span class="toc-dot purple"></span>Submitting to Canon<span class="toc-num">08</span></div>
+        <div class="toc-item"><span class="toc-dot purple"></span>World &amp; timeline building<span class="toc-num">09</span></div>
+        <div class="toc-item"><span class="toc-dot purple"></span>Gateway Orchestrator<span class="toc-num">10</span></div>
+        <div class="toc-item"><span class="toc-dot teal"></span>What EOF Library is<span class="toc-num">11</span></div>
+        <div class="toc-item"><span class="toc-dot teal"></span>Your Creator Profile<span class="toc-num">12</span></div>
+        <div class="toc-item"><span class="toc-dot teal"></span>Your reputation score<span class="toc-num">13</span></div>
+        <div class="toc-item"><span class="toc-dot teal"></span>Publishing your work<span class="toc-num">14</span></div>
+        <div class="toc-item"><span class="toc-dot teal"></span>Live readings &amp; events<span class="toc-num">15</span></div>
+        <div class="toc-item"><span class="toc-dot green"></span>What makes DIY Uni different<span class="toc-num">16</span></div>
+        <div class="toc-item"><span class="toc-dot green"></span>The 5 curriculum tracks<span class="toc-num">17</span></div>
+        <div class="toc-item"><span class="toc-dot green"></span>The living curriculum<span class="toc-num">18</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         LESSON PAGES 1–18
+    ══════════════════════════════════════ -->
+
+  </div><!-- /.flipbook -->
+</div><!-- /.book-shell -->
+
+<div class="nav-bar">
+  <button class="nav-btn" id="btn-prev" onclick="turn(-1)" disabled>← Prev</button>
+  <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:5%"></div></div>
+  <span class="page-counter" id="page-counter">Page 1 of 20</span>
+  <div class="progress-track"><div class="progress-fill" id="prog-fill2" style="width:5%"></div></div>
+  <button class="nav-btn" id="btn-next" onclick="turn(1)">Next →</button>
+</div>
+
+<script>
+const LESSONS = [
+  {
+    color:"purple",tag:"Overview",
+    title:"What is the EOF Ecosystem?",
+    body:"EOF stands for End of File — a complete creative platform made of three connected apps. You learn at DIY University, build at Griot AI, and publish at EOF Library.",
+    steps:["Open DIY University first — always your starting point","Use Griot AI when ready to build your story","Publish finished work to EOF Library","Each app knows about the others — your progress travels across all three"]
+  },
+  {
+    color:"purple",tag:"Overview",
+    title:"Who is GLITCH and why does it matter?",
+    body:"GLITCH governs the entire EOF ecosystem. You will never talk to GLITCH directly — it runs in the background, keeping everything consistent and connected.",
+    steps:["Griot AI reports through its Gateway Orchestrator Agent","EOF Library reports through its Library Lead Agent","DIY University reports through its Education Lead Agent","As a creator, you just use the apps — GLITCH handles coordination automatically"]
+  },
+  {
+    color:"purple",tag:"Overview",
+    title:"Your creator journey — step by step",
+    body:"Here is the exact path from total beginner to published creator in the EOF ecosystem. Follow this order as a beginner — every step matters.",
+    steps:["Sign up and complete onboarding at DIY University","Pick your first curriculum track based on your creative goal","Complete beginner courses in that track","Open Griot AI and start your first story or character","Develop your Canon — characters, world rules, timeline","When work is ready, submit it to EOF Library","Build your creator profile and reputation","Return to DIY University to level up with intermediate courses"]
+  },
+  {
+    color:"purple",tag:"Griot AI",
+    title:"Griot AI is not just a writing tool",
+    body:"Most writing tools just help you type. Griot AI is a story operating system — it manages the rules of your world, remembers every decision, and protects your characters from being changed without your approval.",
+    steps:["Think of Griot AI as a living bible for your story","Every character, rule, and plot point is stored and protected","The AI warns you when something breaks your own world's rules","You can override anything — but the system logs it so you never lose track","Griot AI connects to EOF Library so published work stays linked to your universe"]
+  },
+  {
+    color:"purple",tag:"Griot AI",
+    title:"The 15 core agents",
+    body:"Griot AI runs on 15 agents working together. They activate automatically when you do things in the app — you do not need to manage them.",
+    steps:["Level 1 — Brain (5): Gateway Orchestrator, Canon Core, Story Intelligence, Timeline Engine, Adaptation Engine","Level 2 — Production (2): Video Editing Core and Audio Editing Core","Level 3 — Film Studio (3): Film Director, Cinematic Design, Post Production Supervisor","Level 4 — Record Label (3): Label Executive, Music Creation, Audio Production","Level 5 — Operations (2): Operations Controller and Governance & Security Engine"]
+  },
+  {
+    color:"purple",tag:"Griot AI",
+    title:"Canon — the most important word",
+    body:"Canon is the official truth of your story world. Once something is in Canon it is locked — it cannot be changed silently. This protects your creative work from drift and contradiction over time.",
+    steps:["Create something — a character, a world rule, a timeline event","Review it — Griot AI flags anything that conflicts with existing Canon","Approve it — your approval sends it to Canon Core for locking","Canon Core stores it with full version history","To override Canon you must do it intentionally — every override is logged"]
+  },
+  {
+    color:"purple",tag:"Griot AI",
+    title:"Creating your first Character Card",
+    body:"A Character Card is a full profile — name, psychology, backstory, power level, and relationships. Griot AI uses it to keep your character consistent across your entire story.",
+    steps:["Go to Characters in Griot AI and click 'New Character'","Give them a name, age, appearance, and story role","Add their backstory — where they came from, what shaped them","Add their psychology — what they fear, what drives them","Set their power level if your story has abilities","Save the draft — you can edit anything before submitting to Canon"]
+  },
+  {
+    color:"purple",tag:"Griot AI",
+    title:"Submitting a character to Canon",
+    body:"Once you are happy with a character, submit them to Canon. After this, the core of who they are is locked — you can add to them, but contradictions will be flagged.",
+    steps:["Review your Character Card one final time","Click 'Submit to Canon'","The Canon Review Engine checks for conflicts with existing Canon","If no conflicts — character is approved and locked into Canon Core","If there is a conflict — Griot AI shows exactly what clashes so you can decide","After submission the character appears in your Canon library permanently"]
+  },
+  {
+    color:"purple",tag:"Griot AI",
+    title:"Building your world and timeline",
+    body:"Your world covers the rules and history of your setting. Your timeline is the order events happen in. The Timeline and Continuity Engine watches for contradictions automatically.",
+    steps:["Go to World in Griot AI and create your setting","Add world rules — how power works, what the history is","Create your first Timeline event — the earliest thing that happened","Add events in order — Griot AI tracks cause and effect","If an event breaks the chain the system warns you before you lock it in","Your timeline connects to characters automatically — events reference who was involved"]
+  },
+  {
+    color:"purple",tag:"Griot AI",
+    title:"Using the Gateway Orchestrator",
+    body:"The Gateway Orchestrator is the brain of Griot AI. Every action you take — writing, submitting, converting — gets routed through it to the right agents automatically.",
+    steps:["Create a character → Gateway routes to Character Intelligence and Canon Core","Write a scene → routes to Story Intelligence and Timeline Engine","Submit to Canon → routes to Canon Core and Governance Engine","Convert to new format → routes to Adaptation Engine","You never manage the routing — just use the app and it handles everything"]
+  },
+  {
+    color:"teal",tag:"EOF Library",
+    title:"What EOF Library actually is",
+    body:"EOF Library is not just a file storage system. It is the public face of the entire EOF ecosystem — where producers, publishers, and other creators discover your work.",
+    steps:["Your Library profile is your public creator identity — treat it seriously","Every work you publish stays connected to its Griot AI Canon universe","Producers and industry professionals can browse and find you here","Your DIY University completions show on your profile and build credibility","Everything you publish is creator-owned — EOF Library never takes your rights"]
+  },
+  {
+    color:"teal",tag:"EOF Library",
+    title:"Setting up your Creator Profile",
+    body:"Your Creator Profile is the first thing producers and community members see. A strong profile gets you discovered. A weak profile keeps you invisible.",
+    steps:["Add your name and a clear bio — say what you create and why","Set your genre focus — be specific (Afrofuturism, urban fantasy, sci-fi thriller)","Connect your Griot AI projects to show what you are actively building","Add your DIY University completions — these signal your skill level","Keep your activity up — live readings, contributions, and new publications all build your score","Profile updates automatically as you do things across the ecosystem"]
+  },
+  {
+    color:"teal",tag:"EOF Library",
+    title:"How your reputation score works",
+    body:"Your reputation score is your professional credibility in the creator community. It cannot be bought or faked — it is earned through real work over time.",
+    steps:["Quality of published work — strong and polished work scores higher","Consistency — regular publishing builds reputation faster than occasional posts","Community engagement — how many people read, share, and react to your work","Live reading attendance — showing up for your own events matters","Peer recognition — other creators endorsing or referencing your work","DIY University completions add to your credibility score"]
+  },
+  {
+    color:"teal",tag:"EOF Library",
+    title:"Publishing your first work",
+    body:"Publishing from Griot AI to EOF Library sends your Canon data with your work so everything stays connected. Here is the full step-by-step.",
+    steps:["Finish your work in Griot AI — complete, not necessarily perfect","Go to Publish and select EOF Library as your destination","Choose your format — text, audio, video, or interactive","Review metadata — title, genre, description, and Canon linkage","Set visibility — public, community-only, or producer-only","Submit — the Library Lead Agent reviews and lists your work","Your Creator Profile updates automatically with the new publication"]
+  },
+  {
+    color:"teal",tag:"EOF Library",
+    title:"Live readings and community events",
+    body:"You can perform your work live to an audience — community, producers, and invited guests can all attend. Every event is recorded and archived automatically.",
+    steps:["Go to Events in EOF Library and click 'Schedule a Reading'","Set your date, time, and title","Choose your audience — public, community, producers, or invite-only","Connect your audio or video stream through EOF Streaming","On the day, go live — your audience joins and reacts in real time","After the event the archive saves automatically to your Library profile","Soundtrack matching can add music to your reading automatically if you want"]
+  },
+  {
+    color:"green",tag:"DIY University",
+    title:"What makes DIY University different",
+    body:"DIY University is built specifically for creators in the EOF ecosystem. Every course connects directly to Griot AI, EOF Library, and other EOF tools. When you learn here, you apply it immediately in the same platform.",
+    steps:["Courses are built around EOF tools — not hypothetical software elsewhere","The curriculum expands as the ecosystem grows — new courses always being added","Completing tracks builds your EOF Library reputation score automatically","You go from beginner to intermediate to advanced at your own pace","The Education Lead Agent manages your learning path and tracks progress","Your completions show on your Creator Profile for others to see"]
+  },
+  {
+    color:"green",tag:"DIY University",
+    title:"The 5 curriculum tracks",
+    body:"DIY University is organized into tracks — complete learning paths for specific areas of the creative business. Start with one track and finish it before jumping to others.",
+    steps:["Storytelling & Writing: Canon management, character building, genre, worldbuilding — where most creators start","Production: Video editing, audio, mixing, post-production — for creators who want to produce their own content","Business: Publishing, distribution, monetization, connecting with producers and industry","Tech: AI tools, automation, n8n workflows, and the technical side of the EOF ecosystem","Community: Live readings, events, peer collaboration, community leadership, building an audience"]
+  },
+  {
+    color:"green",tag:"DIY University",
+    title:"The living curriculum",
+    body:"DIY University is designed to grow forever. The EOF team adds new courses, new tracks, and updated content as the ecosystem evolves. Every course has a version number so you always know you have current information.",
+    steps:["New courses added when EOF systems release new features","Existing courses updated when tools or workflows change","New tracks added when the community identifies new skill needs","Every course has a version number — you know if it has been updated since you took it","Community feedback shapes what gets built next — creator requests become real courses","You are never locked into an outdated version of what you learned"]
+  }
+];
+
+const BACK = {
+  learned:[
+    "How Griot AI, EOF Library, and DIY University connect as one ecosystem",
+    "What Canon is and how it protects your story permanently",
+    "How to create and lock in your first Character Card",
+    "How to build a world and a timeline that never contradicts itself",
+    "How to set up your Creator Profile and build your reputation score",
+    "How to publish your work from Griot AI straight to EOF Library",
+    "How live reading events work and how to schedule one",
+    "Which DIY University track to start with based on your creative goals",
+    "How the living curriculum keeps growing as the ecosystem evolves"
+  ],
+  pipeline:[
+    {icon:"🎓",label:"Learn at DIY University"},
+    {icon:"📖",label:"Build your story in Griot AI"},
+    {icon:"📚",label:"Publish to EOF Library"},
+    {icon:"🏆",label:"Build your reputation"},
+    {icon:"⬆️",label:"Level up with advanced tracks"}
+  ]
+};
+
+// ── Build lesson pages ──
+const fb = document.getElementById('flipbook');
+
+LESSONS.forEach((L,i)=>{
+  const num = String(i+1).padStart(2,'0');
+
+  const left = document.createElement('div');
+  left.className = 'page-left lesson-left';
+  left.id = 'pl-'+(i+1);
+  left.innerHTML = `
+    <p class="lesson-number">LESSON ${num} / 18</p>
+    <span class="lesson-module-tag ${L.color}">${L.tag}</span>
+    <h2 class="lesson-title-left">${L.title}</h2>
+    <p class="lesson-body">${L.body}</p>
+  `;
+
+  const right = document.createElement('div');
+  right.className = 'page-right lesson-right';
+  right.id = 'pr-'+(i+1);
+  const stepsHTML = L.steps.map((s,si)=>`
+    <div class="step-item">
+      <div class="step-num ${L.color}">${si+1}</div>
+      <p class="step-text">${s}</p>
+    </div>`).join('');
+  right.innerHTML = `
+    <p class="steps-label">Step-by-step</p>
+    ${stepsHTML}
+    <p class="lesson-page-num">Page ${i+2} of 20</p>
+  `;
+
+  fb.appendChild(left);
+  fb.appendChild(right);
+});
+
+// ── Build back cover ──
+const backLeft = document.createElement('div');
+backLeft.className = 'page-left back-left';
+backLeft.id = 'pl-19';
+backLeft.innerHTML = `
+  <p class="back-title">What you learned</p>
+  <div class="learned-grid">
+    ${BACK.learned.map(l=>`
+      <div class="learned-item">
+        <span class="learned-check">✓</span>
+        <span>${l}</span>
+      </div>`).join('')}
+  </div>
+`;
+
+const backRight = document.createElement('div');
+backRight.className = 'page-right back-right';
+backRight.id = 'pr-19';
+backRight.innerHTML = `
+  <p class="pipeline-title">Your next step</p>
+  <p class="pipeline-sub">Follow the creator pipeline.<br>One step at a time — you have got this.</p>
+  <div class="pipeline-steps">
+    ${BACK.pipeline.map(p=>`
+      <div class="pipe-step">
+        <span class="pipe-icon">${p.icon}</span>
+        <span>${p.label}</span>
+      </div>`).join('')}
+  </div>
+  <div class="seal">🎓</div>
+  <p class="seal-label">Course Complete</p>
+`;
+
+fb.appendChild(backLeft);
+fb.appendChild(backRight);
+
+// ── Navigation ──
+const TOTAL = 20; // 1 cover + 18 lessons + 1 back = 20 spreads
+let cur = 0;
+
+function showSpread(n){
+  // hide all
+  document.querySelectorAll('.page-left,.page-right').forEach(p=>p.style.display='none');
+  // show current spread
+  const pl = document.getElementById('pl-'+n);
+  const pr = document.getElementById('pr-'+n);
+  if(pl) pl.style.display='flex';
+  if(pr) pr.style.display='flex';
+
+  document.getElementById('btn-prev').disabled = n===0;
+  document.getElementById('btn-next').disabled = n===TOTAL-1;
+  document.getElementById('page-counter').textContent = 'Page '+(n+1)+' of '+TOTAL;
+  const pct = Math.round((n/(TOTAL-1))*100)+'%';
+  document.getElementById('prog-fill').style.width = pct;
+  document.getElementById('prog-fill2').style.width = pct;
+}
+
+function turn(dir){
+  const next = cur+dir;
+  if(next<0||next>=TOTAL) return;
+  cur=next;
+  showSpread(cur);
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight') turn(1);
+  if(e.key==='ArrowLeft')  turn(-1);
+});
+
+showSpread(0);
+</script>
+</body>
+</html>

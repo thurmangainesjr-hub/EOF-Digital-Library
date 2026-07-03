@@ -48,12 +48,13 @@ const STORAGE = {
 };
 
 const QUICK_ACTIONS = [
-  { label: 'Browse Library',    icon: FiBook,     color: GOLD,      path: '/library'       },
-  { label: 'My Bookshelves',    icon: FiGrid,     color: '#A78BFA', path: '/bookshelves'   },
-  { label: 'Story Time',        icon: FiPlay,     color: '#EF4444', path: '/story-time'    },
-  { label: 'Gutenberg',         icon: FiGlobe,    color: '#60A5FA', path: '/gutenberg'     },
-  { label: 'Creator Studio',    icon: FiZap,      color: '#F59E0B', path: '/creator'       },
-  { label: 'Command Center',    icon: FiBookmark, color: '#10B981', path: '/command-center'},
+  { label: 'Browse Library',    icon: FiBook,     color: GOLD,      path: '/library'             },
+  { label: 'My Bookshelves',    icon: FiGrid,     color: '#A78BFA', path: '/bookshelves'         },
+  { label: 'Story Time',        icon: FiPlay,     color: '#EF4444', path: '/story-time'          },
+  { label: 'Gutenberg',         icon: FiGlobe,    color: '#60A5FA', path: '/gutenberg'           },
+  { label: 'Creator Studio',    icon: FiZap,      color: '#F59E0B', path: '/creator'             },
+  { label: 'Command Center',    icon: FiBookmark, color: '#10B981', path: '/command-center'      },
+  { label: 'EOF Flipbooks',     icon: FiBook,     color: '#2563EB', path: '/university/flipbook' },
 ];
 
 const READING_ACTIVITY = [

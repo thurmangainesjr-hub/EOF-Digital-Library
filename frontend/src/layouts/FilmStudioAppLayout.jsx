@@ -29,7 +29,7 @@ const SIDEBAR_NAV = [
   {
     id: 'editor', label: 'Editor', icon: FiEdit3,
     children: [
-      { label: 'Film Editor',    path: '/film-editor',         icon: '🎞️' },
+      { label: 'Film Editor',    path: '/film-studio',         icon: '🎞️' },
       { label: 'Script Editor',  path: '/film-studio',         icon: '📝' },
       { label: 'Storyboard',     path: '/film-studio',         icon: '🖼️' },
       { label: 'Timeline',       path: '/film-studio',         icon: '📅' },

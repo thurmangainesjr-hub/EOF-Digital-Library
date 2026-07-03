@@ -29,31 +29,31 @@ const DIVISIONS = [
   {
     id: 'seo', label: 'SEO Operations', icon: '🔍', color: TEAL,
     agents: 7, campaigns: 8, tagline: 'Visibility · Rankings · Authority',
-    path: '/growth/seo',
+    path: '/dev-team/growth/seo',
     metrics: [{ k: 'Keywords', v: '2,841' }, { k: 'Avg Rank', v: '#4.2' }, { k: 'Audits', v: '12' }],
   },
   {
     id: 'marketing', label: 'Marketing Command', icon: '📣', color: EMERALD,
     agents: 6, campaigns: 5, tagline: 'Acquire · Convert · Retain',
-    path: '/growth/marketing',
+    path: '/dev-team/growth/marketing',
     metrics: [{ k: 'Funnels', v: '9' }, { k: 'Conv Rate', v: '3.8%' }, { k: 'Segments', v: '14' }],
   },
   {
     id: 'content', label: 'Content Empire', icon: '✍️', color: '#A78BFA',
     agents: 6, campaigns: 12, tagline: 'Blog · Social · Video · Podcast',
-    path: '/growth/content',
+    path: '/dev-team/growth/content',
     metrics: [{ k: 'Articles', v: '48' }, { k: 'Posts/wk', v: '21' }, { k: 'Reach', v: '82K' }],
   },
   {
     id: 'advertising', label: 'Advertising Agency', icon: '📺', color: AMBER,
     agents: 5, campaigns: 6, tagline: 'Meta · Google · Search · Display',
-    path: '/growth/advertising',
+    path: '/dev-team/growth/advertising',
     metrics: [{ k: 'Ad Spend', v: '$12K' }, { k: 'ROAS', v: '4.2x' }, { k: 'A/B Tests', v: '8' }],
   },
   {
     id: 'clients', label: 'Client Success', icon: '🤝', color: '#F97316',
     agents: 4, campaigns: 0, tagline: 'CRM · Reporting · Onboarding · ROI',
-    path: '/growth/clients',
+    path: '/dev-team/growth/clients',
     metrics: [{ k: 'NPS', v: '72' }, { k: 'Retention', v: '94%' }, { k: 'Open Cases', v: '3' }],
   },
 ];
@@ -198,7 +198,7 @@ export default function GrowthStudioHub() {
               AI-powered growth services · 28 agents across 5 divisions · Find. Grow. Dominate.
             </p>
           </div>
-          <button onClick={() => navigate('/growth/clients')}
+          <button onClick={() => navigate('/dev-team/growth/clients')}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
               padding: '10px 18px', borderRadius: 10, cursor: 'pointer',
@@ -334,11 +334,11 @@ export default function GrowthStudioHub() {
           <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '16px' }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'white', marginBottom: 12 }}>Quick Launch</div>
             {[
-              { label: 'Run SEO Audit',         icon: '🔍', path: '/growth/seo'         },
-              { label: 'Build Campaign',         icon: '🚀', path: '/growth/marketing'   },
-              { label: 'Create Content Plan',   icon: '✍️', path: '/growth/content'     },
-              { label: 'Launch Ad Campaign',    icon: '📺', path: '/growth/advertising' },
-              { label: 'Onboard New Client',    icon: '🤝', path: '/growth/clients'     },
+              { label: 'Run SEO Audit',         icon: '🔍', path: '/dev-team/growth/seo'         },
+              { label: 'Build Campaign',         icon: '🚀', path: '/dev-team/growth/marketing'   },
+              { label: 'Create Content Plan',   icon: '✍️', path: '/dev-team/growth/content'     },
+              { label: 'Launch Ad Campaign',    icon: '📺', path: '/dev-team/growth/advertising' },
+              { label: 'Onboard New Client',    icon: '🤝', path: '/dev-team/growth/clients'     },
             ].map(a => (
               <button key={a.label} onClick={() => navigate(a.path)}
                 style={{

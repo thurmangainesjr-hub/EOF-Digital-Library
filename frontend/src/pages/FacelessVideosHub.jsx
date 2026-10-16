@@ -837,7 +837,7 @@ function StoryboardEngine({ project, setSection }) {
         <div className="flex items-center gap-2">
           <span className="text-base">{sc.emoji}</span>
           <div>
-            <p className="text-[7px] font-black uppercase tracking-widest text-gray-700">SCENE {sc.num < 10 ? `0${sc.num}` : sc.num}</p>
+            <p className="text-[7px] font-black uppercase tracking-widest text-gray-500">SCENE {sc.num < 10 ? `0${sc.num}` : sc.num}</p>
             <p className="text-[11px] font-black text-white leading-tight truncate max-w-[180px]">{sc.title}</p>
           </div>
           <StatusBadge status={genDone.size > 0 ? 'ready' : 'pending'}/>
@@ -850,7 +850,7 @@ function StoryboardEngine({ project, setSection }) {
           {['16:9','9:16','1:1','4:5'].map(r => (
             <button key={r} onClick={() => setArRatio(r)}
               className="px-2 py-1 rounded-lg text-[8px] font-bold transition-all"
-              style={arRatio === r ? { background:A_SOFT, color:'#6EE7B7' } : { color:'#4B5563' }}>
+              style={arRatio === r ? { background:A_SOFT, color:'#6EE7B7' } : { color:'#94A3B8', transition:'color 150ms ease' }}>
               {r}
             </button>
           ))}
@@ -880,7 +880,7 @@ function StoryboardEngine({ project, setSection }) {
           {/* Playback */}
           <button onClick={() => setPlaying(p => !p)}
             className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[8px] font-bold transition-all border"
-            style={playing ? { background:A_SOFT, borderColor:A_BORDER, color:'#6EE7B7' } : { borderColor:'rgba(255,255,255,0.10)', color:'#6B7280' }}>
+            style={playing ? { background:A_SOFT, borderColor:A_BORDER, color:'#6EE7B7' } : { borderColor:'rgba(255,255,255,0.10)', color:'#94A3B8' }}>
             {playing ? <FiPause size={10}/> : <FiPlay size={10}/>}
             {playing ? 'Pause' : 'Play'}
           </button>
@@ -911,14 +911,14 @@ function StoryboardEngine({ project, setSection }) {
               <span className="text-sm">📁</span>
               <div className="min-w-0">
                 <p className="text-[9px] font-bold text-white truncate">{project?.title || 'Active Project'}</p>
-                <p className="text-[7px] text-gray-700">{scenes.length} scenes · {frames.length} frames</p>
+                <p className="text-[7px] text-gray-500">{scenes.length} scenes · {frames.length} frames</p>
               </div>
             </div>
           </div>
 
           {/* Scenes list */}
           <div className="flex-1 overflow-y-auto py-2 px-2">
-            <p className="text-[7px] font-black uppercase tracking-widest text-gray-700 px-1 mb-1.5">Scenes</p>
+            <p className="text-[7px] font-black uppercase tracking-widest text-gray-500 px-1 mb-1.5">Scenes</p>
             {scenes.map((s, i) => {
               const isCur = s.id === activeSceneId;
               const sf = sbGetFrames(s, sbTemplate);
@@ -931,14 +931,14 @@ function StoryboardEngine({ project, setSection }) {
                     {s.emoji}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[8px] font-bold truncate leading-tight" style={{ color: isCur ? '#fff' : '#6B7280' }}>
+                    <p className="text-[8px] font-bold truncate leading-tight" style={{ color: isCur ? '#fff' : '#94A3B8' }}>
                       {(i+1).toString().padStart(2,'0')}. {s.title}
                     </p>
                     <div className="flex items-center gap-1 mt-0.5">
                       <div className="flex-1 h-0.5 rounded-full bg-white/6">
                         <div className="h-full rounded-full" style={{ width:`${(doneCount/sf.length)*100}%`, background:ACCENT }}/>
                       </div>
-                      <span className="text-[6px] text-gray-700">{doneCount}/{sf.length}</span>
+                      <span className="text-[6px] text-gray-500">{doneCount}/{sf.length}</span>
                     </div>
                   </div>
                 </button>
@@ -948,7 +948,7 @@ function StoryboardEngine({ project, setSection }) {
 
           {/* Tools */}
           <div className="border-t border-white/5 px-3 py-2">
-            <p className="text-[7px] font-black uppercase tracking-widest text-gray-700 mb-1.5">Tools</p>
+            <p className="text-[7px] font-black uppercase tracking-widest text-gray-500 mb-1.5">Tools</p>
             {[
               {icon:'🧠', label:'AI Script Analyst'},
               {icon:'👤', label:'Character Reference'},
@@ -958,7 +958,7 @@ function StoryboardEngine({ project, setSection }) {
             ].map(t => (
               <button key={t.label} className="w-full flex items-center gap-1.5 px-1.5 py-1 rounded-lg text-left hover:bg-white/4 transition-all">
                 <span className="text-[10px]">{t.icon}</span>
-                <span className="text-[8px] text-gray-600 hover:text-gray-300 transition-colors">{t.label}</span>
+                <span className="text-[8px] text-[#94A3B8] hover:text-white transition-colors">{t.label}</span>
               </button>
             ))}
           </div>
@@ -966,7 +966,7 @@ function StoryboardEngine({ project, setSection }) {
           {/* Template library */}
           <div className="border-t border-white/5 px-3 py-2">
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-[7px] font-black uppercase tracking-widest text-gray-700">Templates</p>
+              <p className="text-[7px] font-black uppercase tracking-widest text-gray-500">Templates</p>
               <span className="text-[6px] px-1 py-0.5 rounded font-bold" style={{ background:'rgba(16,185,129,0.15)', color:ACCENT }}>NEW</span>
             </div>
             <button onClick={() => setShowTmplLib(p => !p)}
@@ -978,7 +978,7 @@ function StoryboardEngine({ project, setSection }) {
               <div className="mt-1.5 space-y-0.5 max-h-32 overflow-y-auto">
                 {SB3_TEMPLATE_LIB.map(t => (
                   <button key={t} onClick={() => setShowTmplLib(false)}
-                    className="w-full text-left px-2 py-1 rounded-lg text-[8px] text-gray-600 hover:text-white hover:bg-white/4 transition-all">
+                    className="w-full text-left px-2 py-1 rounded-lg text-[8px] text-[#94A3B8] hover:text-white hover:bg-white/4 transition-all">
                     {t}
                   </button>
                 ))}
@@ -988,7 +988,7 @@ function StoryboardEngine({ project, setSection }) {
 
           {/* Import / Export */}
           <div className="border-t border-white/5 px-3 py-2 flex gap-1.5">
-            <button className="flex-1 py-1 rounded-lg text-[8px] font-bold border border-white/10 text-gray-600 hover:text-white transition-colors">
+            <button className="flex-1 py-1 rounded-lg text-[8px] font-bold border border-white/10 text-[#94A3B8] hover:text-white transition-colors">
               Import
             </button>
             <button onClick={() => setSection('export')}
@@ -1006,16 +1006,16 @@ function StoryboardEngine({ project, setSection }) {
           <div className="flex items-center gap-2 px-4 h-9 border-b border-white/6 flex-shrink-0" style={{ background:'rgba(0,0,0,0.2)' }}>
             <button onClick={() => setMainView('frames')}
               className="px-3 py-1 rounded-lg text-[9px] font-bold transition-all"
-              style={mainView === 'frames' ? { background:A_SOFT, color:'#6EE7B7' } : { color:'#4B5563' }}>
+              style={mainView === 'frames' ? { background:A_SOFT, color:'#6EE7B7', fontWeight:600 } : { color:'#94A3B8', transition:'color 150ms ease' }}>
               Storyboard Frames
             </button>
             <button onClick={() => setMainView('detailed')}
               className="px-3 py-1 rounded-lg text-[9px] font-bold transition-all"
-              style={mainView === 'detailed' ? { background:A_SOFT, color:'#6EE7B7' } : { color:'#4B5563' }}>
+              style={mainView === 'detailed' ? { background:A_SOFT, color:'#6EE7B7', fontWeight:600 } : { color:'#94A3B8', transition:'color 150ms ease' }}>
               Detailed View
             </button>
             <div className="flex-1"/>
-            <button className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[8px] font-bold border border-white/10 text-gray-500 hover:text-white hover:border-white/20 transition-all">
+            <button className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[8px] font-bold border border-white/10 text-[#94A3B8] hover:text-white hover:border-white/20 transition-all">
               <FiPlus size={9}/> Add Frame
             </button>
             <button onClick={generateAll}
@@ -1032,12 +1032,12 @@ function StoryboardEngine({ project, setSection }) {
               <div className="flex-shrink-0 px-4 pt-3 pb-2">
                 <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none">
                   <button onClick={prevFrame} disabled={activeFrame === 0}
-                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center border border-white/10 text-gray-600 hover:text-white hover:border-white/25 transition-all disabled:opacity-30">
+                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center border border-white/10 text-[#94A3B8] hover:text-white hover:border-white/25 transition-all disabled:opacity-30">
                     <FiChevronLeft size={14}/>
                   </button>
                   {frames.map((f, i) => <FrameCard key={f.key} frame={f} idx={i} large={i === activeFrame}/>)}
                   <button onClick={nextFrame} disabled={activeFrame === frames.length - 1}
-                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center border border-white/10 text-gray-600 hover:text-white hover:border-white/25 transition-all disabled:opacity-30">
+                    className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center border border-white/10 text-[#94A3B8] hover:text-white hover:border-white/25 transition-all disabled:opacity-30">
                     <FiChevronRight size={14}/>
                   </button>
                 </div>
@@ -1045,7 +1045,7 @@ function StoryboardEngine({ project, setSection }) {
 
               {/* Film strip */}
               <div className="flex-shrink-0 px-4 pb-2 border-b border-white/6">
-                <p className="text-[7px] font-black uppercase tracking-widest text-gray-700 mb-1.5">
+                <p className="text-[7px] font-black uppercase tracking-widest text-gray-500 mb-1.5">
                   Film Strip — {tmpl?.icon} {tmpl?.label} · {frames.length} Frames
                 </p>
                 <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1">
@@ -1064,7 +1064,7 @@ function StoryboardEngine({ project, setSection }) {
                         <div className="w-full h-full flex items-center justify-center relative">
                           <span style={{ fontSize: 18, opacity: isDone ? 0.5 : 0.12 }}>{f.emoji}</span>
                           <span className="absolute top-0.5 left-0.5 text-[6px] font-black leading-none"
-                            style={{ color: isAct ? '#6EE7B7' : '#4B5563' }}>
+                            style={{ color: isAct ? '#6EE7B7' : '#94A3B8' }}>
                             {f.num.toString().padStart(2,'0')}
                           </span>
                         </div>
@@ -1076,7 +1076,7 @@ function StoryboardEngine({ project, setSection }) {
 
               {/* Collapsible detail cards */}
               <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
-                <p className="text-[7px] font-black uppercase tracking-widest text-gray-600 mb-2">
+                <p className="text-[7px] font-black uppercase tracking-widest text-[#94A3B8] mb-2">
                   Scene {sc.num < 10 ? `0${sc.num}` : sc.num} · {sc.title} · Frame {(activeFrame+1).toString().padStart(2,'0')} of {frames.length}
                 </p>
                 {SB3_DETAIL_CARDS.map(card => {
@@ -1088,7 +1088,7 @@ function StoryboardEngine({ project, setSection }) {
                         className="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-white/3 transition-all">
                         <span className="text-sm">{card.icon}</span>
                         <span className="text-[10px] font-bold text-white flex-1">{card.label}</span>
-                        <span className="text-gray-700 text-[9px]">{open ? '▲' : '▼'}</span>
+                        <span className="text-gray-500 text-[9px]">{open ? '▲' : '▼'}</span>
                       </button>
                       {open && (
                         <div className="px-3 pb-3 border-t border-white/5">
@@ -1096,8 +1096,8 @@ function StoryboardEngine({ project, setSection }) {
                             <div className="pt-2 space-y-1.5">
                               {rows.map(([k, v]) => (
                                 <div key={k} className="p-2 rounded-lg bg-white/3">
-                                  <p className="text-[7px] font-black uppercase tracking-widest text-gray-700 mb-0.5">{k}</p>
-                                  <p className="text-[8px] text-gray-400">{v}</p>
+                                  <p className="text-[7px] font-black uppercase tracking-widest text-gray-500 mb-0.5">{k}</p>
+                                  <p className="text-[8px] text-gray-300">{v}</p>
                                 </div>
                               ))}
                               <button onClick={() => setSection('export')}
@@ -1111,14 +1111,14 @@ function StoryboardEngine({ project, setSection }) {
                               {rows.map(([k, v]) => (
                                 <div key={k} className="p-2 rounded-lg bg-white/3">
                                   <div className="flex items-center justify-between mb-0.5">
-                                    <p className="text-[7px] font-black uppercase tracking-widest text-gray-700">{k}</p>
+                                    <p className="text-[7px] font-black uppercase tracking-widest text-gray-500">{k}</p>
                                     <button onClick={() => copyText(v)}
                                       className="text-[7px] font-bold transition-all"
-                                      style={{ color: copied === v.slice(0,16) ? '#6EE7B7' : '#4B5563' }}>
+                                      style={{ color: copied === v.slice(0,16) ? '#6EE7B7' : '#94A3B8' }}>
                                       {copied === v.slice(0,16) ? '✓' : <FiCopy size={8}/>}
                                     </button>
                                   </div>
-                                  <p className="text-[8px] text-gray-400 font-mono leading-relaxed break-words">{v}</p>
+                                  <p className="text-[8px] text-gray-300 font-mono leading-relaxed break-words">{v}</p>
                                 </div>
                               ))}
                             </div>
@@ -1126,8 +1126,8 @@ function StoryboardEngine({ project, setSection }) {
                             <div className="pt-2 grid grid-cols-2 gap-1.5">
                               {rows.map(([k, v]) => (
                                 <div key={k} className="p-2 rounded-lg bg-white/3">
-                                  <p className="text-[7px] font-black uppercase tracking-widest text-gray-700 mb-0.5">{k}</p>
-                                  <p className="text-[8px] text-gray-400 leading-relaxed">{v}</p>
+                                  <p className="text-[7px] font-black uppercase tracking-widest text-gray-500 mb-0.5">{k}</p>
+                                  <p className="text-[8px] text-gray-300 leading-relaxed">{v}</p>
                                 </div>
                               ))}
                             </div>
@@ -1191,7 +1191,7 @@ function StoryboardEngine({ project, setSection }) {
 
           {/* ── Bottom bar ── */}
           <div className="flex items-center gap-1.5 px-4 py-2 border-t border-white/6 flex-shrink-0" style={{ background:'rgba(0,0,0,0.3)' }}>
-            <button className="text-[8px] text-gray-700 hover:text-gray-400 transition-colors">⌨️ Shortcuts</button>
+            <button className="text-[8px] text-[#94A3B8] hover:text-white transition-colors">⌨️ Shortcuts</button>
             <div className="w-px h-4 bg-white/8"/>
             {[
               { label:'New Scene',     fn:()=>{} },
@@ -1203,17 +1203,17 @@ function StoryboardEngine({ project, setSection }) {
               { label:'Lock Scene',    fn:()=>{} },
             ].map(a => (
               <button key={a.label} onClick={a.fn}
-                className="px-2 py-1 rounded-lg text-[8px] font-semibold border border-white/8 text-gray-600 hover:text-white hover:border-white/20 transition-all">
+                className="px-2 py-1 rounded-lg text-[8px] font-semibold border border-white/8 text-[#94A3B8] hover:text-white hover:border-white/20 transition-all">
                 {a.label}
               </button>
             ))}
             <div className="ml-auto flex items-center gap-2">
-              <p className="text-[7px] font-bold text-gray-700">SCENE PROGRESS</p>
+              <p className="text-[7px] font-bold text-gray-500">SCENE PROGRESS</p>
               <div className="w-24 h-1.5 rounded-full bg-white/8">
                 <div className="h-full rounded-full transition-all"
                   style={{ width:`${(frames.filter(f=>genDone.has(f.key)).length / Math.max(frames.length,1))*100}%`, background:ACCENT }}/>
               </div>
-              <span className="text-[7px] font-mono text-gray-600">
+              <span className="text-[7px] font-mono text-gray-400">
                 {frames.filter(f=>genDone.has(f.key)).length}/{frames.length}
               </span>
             </div>
@@ -1226,18 +1226,18 @@ function StoryboardEngine({ project, setSection }) {
           <div className="px-3 pt-3 pb-2 border-b border-white/5 flex-shrink-0">
             <div className="flex items-center gap-2">
               <span className="text-sm">🤖</span>
-              <p className="text-[8px] font-black uppercase tracking-widest text-gray-600">AI Actions</p>
+              <p className="text-[8px] font-black uppercase tracking-widest text-[#94A3B8]">AI Actions</p>
             </div>
           </div>
           <div className="flex-1 overflow-y-auto py-2 px-2">
-            <p className="text-[7px] font-black uppercase tracking-widest text-gray-700 px-1 mb-2">Quick Actions</p>
+            <p className="text-[7px] font-black uppercase tracking-widest text-gray-500 px-1 mb-2">Quick Actions</p>
             <div className="space-y-0.5">
               {SB3_AI_ACTIONS.map(a => (
                 <button key={a.id} onClick={() => flashAction(a.id, a.section)}
                   className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-left transition-all border"
                   style={actionFlash === a.id
                     ? { background:A_SOFT, borderColor:A_BORDER, color:'#6EE7B7' }
-                    : { borderColor:'transparent', color:'#6B7280' }}>
+                    : { borderColor:'transparent', color:'#94A3B8', transition:'color 150ms ease' }}>
                   <span className="text-sm">{a.icon}</span>
                   <span className="text-[9px] font-semibold">{a.label}</span>
                   {actionFlash === a.id && <FiRefreshCw size={8} className="animate-spin ml-auto" style={{ color:ACCENT }}/>}

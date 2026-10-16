@@ -27,12 +27,12 @@ const SIDEBAR_NAV = [
     ],
   },
   {
-    id: 'editor', label: 'Editor', icon: FiEdit3,
+    id: 'director', label: 'Director', icon: FiEdit3,
     children: [
-      { label: 'Film Editor',    path: '/film-studio',         icon: '🎞️' },
-      { label: 'Script Editor',  path: '/film-studio',         icon: '📝' },
-      { label: 'Storyboard',     path: '/film-studio',         icon: '🖼️' },
-      { label: 'Timeline',       path: '/film-studio',         icon: '📅' },
+      { label: 'Director Dashboard',  path: '/film-studio/hub/director',    icon: '🎬' },
+      { label: 'Production Planner',  path: '/film-studio/hub/production',  icon: '📋' },
+      { label: 'Shot Planner',        path: '/film-studio/hub/shots',       icon: '🎥' },
+      { label: 'EOF Video Studio',    path: '/film-studio/hub/clip-trimmer',icon: '✂️' },
     ],
   },
   {

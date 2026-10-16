@@ -21,5 +21,12 @@
       "port": 3000,
       "autoPort": false
     }
+    ,
+    {
+      "name": "eos-video-doll",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "5200", "C:/Users/dhous/eof-digital-library/eos-video-doll"],
+      "port": 5200
+    }
   ]
 }

@@ -60,6 +60,10 @@ import RadioWidgetPage from './pages/RadioWidgetPage';
 import StreamingWidgetPage from './pages/StreamingWidgetPage';
 import GriotCentralHub from './pages/GriotCentralHub';
 import FilmStudioHub from './pages/FilmStudioHub';
+import ClipTrimmerPage from './pages/ClipTrimmerPage';
+import DirectorDashboard from './pages/DirectorDashboard';
+import ProductionPlanner from './pages/ProductionPlanner';
+import ShotPlanner from './pages/ShotPlanner';
 import FilmStudioAppLayout from './layouts/FilmStudioAppLayout';
 import MusicStudioAppLayout from './layouts/MusicStudioAppLayout';
 import GriotArchitectureDoc from './pages/GriotArchitectureDoc';
@@ -196,6 +200,10 @@ function App() {
           <Route path="/film-studio" element={<FilmEditorApp />} />
           <Route path="/film-studio/hub" element={<FilmStudioAppLayout />}>
             <Route index element={<FilmStudioHub />} />
+            <Route path="director"   element={<DirectorDashboard />} />
+            <Route path="production" element={<ProductionPlanner />} />
+            <Route path="shots"      element={<ShotPlanner />} />
+            <Route path="clip-trimmer" element={<ClipTrimmerPage />} />
             <Route path="widgets" element={<FilmStudioWidgetPage />} />
             <Route path="roster" element={<FilmAgentRoster />} />
           </Route>

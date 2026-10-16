@@ -72,8 +72,8 @@ export default function FacelessVideosAppLayout() {
           <button key={t.section} onClick={() => goSection(t.section)}
             className="px-3 py-1.5 text-[10px] font-semibold whitespace-nowrap rounded-md transition-all flex-shrink-0 relative"
             style={activeSection === t.section && !isChildRoute
-              ? { color:'#6EE7B7', background: A_SOFT }
-              : { color:'#5B6470' }}>
+              ? { color:'#6EE7B7', background: A_SOFT, fontWeight:700 }
+              : { color:'#94A3B8', transition:'color 150ms ease' }}>
             {t.label}
             {activeSection === t.section && !isChildRoute && (
               <div className="absolute bottom-0 left-2 right-2 h-px rounded-full" style={{ background: ACCENT }} />
@@ -96,8 +96,8 @@ export default function FacelessVideosAppLayout() {
 
               {/* Navigator header */}
               <div className="flex items-center justify-between px-3 h-9 border-b border-white/6 flex-shrink-0">
-                <span className="text-[9px] font-black uppercase tracking-widest text-gray-600">Project</span>
-                <button onClick={() => setLeftOpen(false)} className="text-gray-700 hover:text-gray-400 transition-colors">
+                <span className="text-[9px] font-black uppercase tracking-widest text-[#94A3B8]">Project</span>
+                <button onClick={() => setLeftOpen(false)} className="text-gray-500 hover:text-gray-300 transition-colors">
                   <FiChevronLeft size={12}/>
                 </button>
               </div>
@@ -110,17 +110,17 @@ export default function FacelessVideosAppLayout() {
                     <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: ACCENT }}>Active Project</p>
                   </div>
                   <p className="text-[11px] font-bold text-white leading-tight truncate">{proj.title}</p>
-                  <p className="text-[8px] text-gray-700 font-mono">{proj.id}</p>
+                  <p className="text-[8px] text-gray-500 font-mono">{proj.id}</p>
                 </div>
 
                 {/* Scene tree */}
                 <div className="px-3 mb-3">
-                  <p className="text-[8px] font-black uppercase tracking-widest text-gray-700 mb-1.5">Scenes</p>
+                  <p className="text-[8px] font-black uppercase tracking-widest text-gray-500 mb-1.5">Scenes</p>
                   {proj.scenes?.map(sc => (
                     <button key={sc.id} onClick={() => goSection('breakdown')}
                       className="w-full flex items-center gap-1.5 py-1 px-1.5 rounded-lg text-left hover:bg-white/4 transition-all group">
                       <span className="text-[10px]">{sc.emoji}</span>
-                      <span className="text-[9px] text-gray-600 group-hover:text-gray-300 transition-colors truncate">
+                      <span className="text-[9px] text-[#94A3B8] group-hover:text-white transition-colors truncate">
                         {sc.num} · {sc.title}
                       </span>
                     </button>
@@ -129,15 +129,15 @@ export default function FacelessVideosAppLayout() {
 
                 {/* Asset nav */}
                 <div className="px-3">
-                  <p className="text-[8px] font-black uppercase tracking-widest text-gray-700 mb-1.5">Assets</p>
+                  <p className="text-[8px] font-black uppercase tracking-widest text-gray-500 mb-1.5">Assets</p>
                   {PROJ_NAV_ITEMS.map(item => (
                     <button key={item.id} onClick={() => goSection(item.section)}
                       className="w-full flex items-center gap-2 py-1.5 px-1.5 rounded-lg text-left transition-all hover:bg-white/4 group"
                       style={activeSection === item.section && !isChildRoute
-                        ? { background: A_SOFT, color:'#6EE7B7' }
+                        ? { background: A_SOFT, color:'#6EE7B7', boxShadow:`inset 2px 0 0 ${ACCENT}`, fontWeight:600 }
                         : {}}>
                       <span className="text-[10px]">{item.icon}</span>
-                      <span className="text-[10px] text-gray-600 group-hover:text-gray-300 transition-colors"
+                      <span className="text-[10px] text-[#94A3B8] group-hover:text-white transition-colors"
                         style={activeSection === item.section && !isChildRoute ? { color:'#6EE7B7' } : {}}>
                         {item.label}
                       </span>
@@ -150,7 +150,7 @@ export default function FacelessVideosAppLayout() {
               <div className="px-3 py-2.5 border-t border-white/5 flex-shrink-0">
                 <button onClick={() => goSection('integrations')}
                   className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-white/4 transition-all">
-                  <span className="text-[9px] text-gray-700">Integrations</span>
+                  <span className="text-[9px] text-[#94A3B8]">Integrations</span>
                   <span className="text-[8px] font-bold px-1.5 py-0.5 rounded"
                     style={{ background:'rgba(16,185,129,0.15)', color: ACCENT }}>
                     {connectedCount} connected
@@ -164,7 +164,7 @@ export default function FacelessVideosAppLayout() {
         {/* Left toggle */}
         {!leftOpen && (
           <button onClick={() => setLeftOpen(true)}
-            className="hidden lg:flex flex-col items-center justify-center w-5 border-r border-white/6 text-gray-700 hover:text-gray-400 hover:bg-white/2 transition-all flex-shrink-0">
+            className="hidden lg:flex flex-col items-center justify-center w-5 border-r border-white/6 text-gray-500 hover:text-gray-200 hover:bg-white/2 transition-all flex-shrink-0">
             <FiChevronRight size={10}/>
           </button>
         )}
@@ -177,7 +177,7 @@ export default function FacelessVideosAppLayout() {
         {/* Right toggle when collapsed */}
         {!rightOpen && (
           <button onClick={() => setRightOpen(true)}
-            className="hidden lg:flex flex-col items-center justify-center w-5 border-l border-white/6 text-gray-700 hover:text-gray-400 hover:bg-white/2 transition-all flex-shrink-0">
+            className="hidden lg:flex flex-col items-center justify-center w-5 border-l border-white/6 text-gray-500 hover:text-gray-200 hover:bg-white/2 transition-all flex-shrink-0">
             <FiChevronLeft size={10}/>
           </button>
         )}
@@ -192,14 +192,14 @@ export default function FacelessVideosAppLayout() {
               style={{ background:'#0d0d0d', borderLeft:'1px solid rgba(255,255,255,0.06)' }}>
 
               <div className="flex items-center justify-between px-3 h-9 border-b border-white/6 flex-shrink-0">
-                <span className="text-[9px] font-black uppercase tracking-widest text-gray-600">AI Actions</span>
-                <button onClick={() => setRightOpen(false)} className="text-gray-700 hover:text-gray-400 transition-colors">
+                <span className="text-[9px] font-black uppercase tracking-widest text-[#94A3B8]">AI Actions</span>
+                <button onClick={() => setRightOpen(false)} className="text-gray-500 hover:text-gray-200 transition-colors">
                   <FiChevronRight size={12}/>
                 </button>
               </div>
 
               <div className="flex-1 overflow-y-auto py-2 px-2">
-                <p className="text-[8px] font-black uppercase tracking-widest text-gray-700 px-1 mb-2">Quick Actions</p>
+                <p className="text-[8px] font-black uppercase tracking-widest text-gray-500 px-1 mb-2">Quick Actions</p>
                 <div className="space-y-0.5">
                   {AI_ACTIONS.map(a => (
                     <motion.button key={a.id}
@@ -208,7 +208,7 @@ export default function FacelessVideosAppLayout() {
                       className="w-full flex items-center gap-2 px-2 py-2 rounded-xl text-left transition-all text-[10px] font-semibold border"
                       style={actionFlash === a.id
                         ? { background: A_SOFT, borderColor: A_BORDER, color:'#6EE7B7' }
-                        : { borderColor:'transparent', color:'#6B7280' }}>
+                        : { borderColor:'transparent', color:'#94A3B8', transition:'color 150ms ease' }}>
                       <span>{a.icon}</span>
                       <span>{a.label}</span>
                       {actionFlash === a.id && (
@@ -252,8 +252,8 @@ export default function FacelessVideosAppLayout() {
                   <button key={t.section} onClick={() => goSection(t.section)}
                     className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-all mb-0.5"
                     style={activeSection === t.section && !isChildRoute
-                      ? { background: A_SOFT, color:'#6EE7B7' }
-                      : { color:'#6B7280' }}>
+                      ? { background: A_SOFT, color:'#6EE7B7', fontWeight:700 }
+                      : { color:'#94A3B8', transition:'color 150ms ease' }}>
                     <span className="w-1.5 h-1.5 rounded-full flex-shrink-0"
                       style={{ background: activeSection === t.section && !isChildRoute ? ACCENT : 'rgba(255,255,255,0.1)' }}/>
                     <span className="text-xs font-semibold">{t.label}</span>

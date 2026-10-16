@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EOF Video Studio — Film Editor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ══ TOP NAV ══ -->
+  <header id="top-nav">
+    <div class="nav-left">
+      <div class="nav-logo">
+        <span class="nav-logo-icon">🎬</span>
+        <div class="nav-logo-text">
+          <span class="nav-logo-name" id="app-name">Video Studio</span>
+          <span class="nav-logo-by" id="app-tagline">by EOF Film Studio</span>
+        </div>
+      </div>
+      <div class="nav-toolbar">
+        <button class="tool-btn active" id="tool-select" title="Select">↗</button>
+        <button class="tool-btn" id="tool-cut" title="Cut">✂</button>
+        <div class="toolbar-sep"></div>
+        <button class="tool-btn" id="btn-undo" title="Undo">↩</button>
+        <button class="tool-btn" id="btn-redo" title="Redo">↪</button>
+        <div class="toolbar-sep"></div>
+        <button class="tool-btn" id="btn-doll" title="Editor Doll — AI Assistant">🤖</button>
+      </div>
+    </div>
+    <div class="nav-center">
+      <span id="project-name" class="project-name">Untitled Project</span>
+    </div>
+    <div class="nav-right">
+      <button class="nav-action-btn" id="btn-save">💾 Save</button>
+      <button class="nav-action-btn primary" id="btn-export-top">⬇ Export</button>
+      <div class="nav-avatar">U</div>
+    </div>
+  </header>
+
+  <!-- ══ SHELL ══ -->
+  <div id="shell">
+
+    <!-- LEFT SIDEBAR -->
+    <aside id="sidebar">
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-label">EDITOR</div>
+        <a class="sidebar-item active" href="#" data-view="editor">
+          <span class="sidebar-icon">✂️</span>
+          <span class="sidebar-label">Clip Trimmer</span>
+        </a>
+        <a class="sidebar-item" href="#" data-view="multitrack">
+          <span class="sidebar-icon">🎞️</span>
+          <span class="sidebar-label">Multi-Track</span>
+        </a>
+        <a class="sidebar-item" href="#" data-view="color">
+          <span class="sidebar-icon">🎨</span>
+          <span class="sidebar-label">Color Grade</span>
+          <span class="sidebar-soon">Soon</span>
+        </a>
+        <a class="sidebar-item" href="#" data-view="effects">
+          <span class="sidebar-icon">✨</span>
+          <span class="sidebar-label">Effects</span>
+          <span class="sidebar-soon">Soon</span>
+        </a>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-section-label">ASSETS</div>
+        <a class="sidebar-item" href="#" data-view="audio">
+          <span class="sidebar-icon">🎵</span>
+          <span class="sidebar-label">Audio</span>
+          <span class="sidebar-soon">Soon</span>
+        </a>
+        <a class="sidebar-item" href="#" data-view="overlays">
+          <span class="sidebar-icon">🖼️</span>
+          <span class="sidebar-label">Overlays</span>
+          <span class="sidebar-soon">Soon</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a class="sidebar-item" href="#" data-view="settings">
+          <span class="sidebar-icon">⚙️</span>
+          <span class="sidebar-label">Settings</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ══ EDITOR WORKSPACE ══ -->
+    <div id="editor">
+
+      <!-- ── VIEW: CLIP TRIMMER (default) ── -->
+      <div id="view-editor" class="workspace-view active">
+        <div id="editor-top">
+
+          <!-- Media Library -->
+          <div id="panel-media">
+            <div class="panel-header">
+              <span class="panel-title">MEDIA</span>
+              <button id="btn-add-media" class="panel-add-btn">+ Add</button>
+              <input type="file" id="video-input" accept="video/*" multiple />
+            </div>
+            <div id="media-list">
+              <div id="media-empty">
+                <span class="media-empty-icon">📁</span>
+                <p>Click <b>+ Add</b> to import<br>a video clip</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview -->
+          <div id="panel-preview">
+            <div id="preview-screen">
+              <div id="preview-placeholder">
+                <span class="preview-icon">🎬</span>
+                <p>Import a clip to start editing</p>
+              </div>
+              <video id="video-player" style="display:none"></video>
+              <div id="preview-badge" class="hidden">▶ PLAYING</div>
+            </div>
+            <div id="transport">
+              <button id="btn-skip-start" class="transport-btn">⏮</button>
+              <button id="btn-play" class="transport-btn play">▶</button>
+              <button id="btn-skip-end" class="transport-btn">⏭</button>
+              <span id="timecode" class="timecode">0:00 / 0:00</span>
+              <div class="transport-spacer"></div>
+              <button id="btn-preview-trim" class="transport-action hidden">▶ Preview Trim</button>
+            </div>
+            <!-- Keyboard shortcut strip -->
+            <div id="shortcut-strip">
+              <span class="kbd-hint"><kbd>Space</kbd> Play/Pause</span>
+              <span class="kbd-hint"><kbd>I</kbd> Set In</span>
+              <span class="kbd-hint"><kbd>O</kbd> Set Out</span>
+              <span class="kbd-hint"><kbd>C</kbd> Split</span>
+            </div>
+          </div>
+
+          <!-- Properties -->
+          <div id="panel-props">
+            <div class="panel-header">
+              <span class="panel-title">CLIP INFO</span>
+            </div>
+            <div id="props-content">
+              <div id="props-empty">
+                <p class="props-hint">Select a clip to see its properties</p>
+              </div>
+              <div id="props-detail" class="hidden">
+                <div class="prop-row"><span class="prop-label">File</span><span id="prop-name" class="prop-val">—</span></div>
+                <div class="prop-row"><span class="prop-label">Duration</span><span id="prop-duration" class="prop-val">—</span></div>
+                <div class="prop-row"><span class="prop-label">Size</span><span id="prop-size" class="prop-val">—</span></div>
+                <div class="prop-divider"></div>
+                <div class="prop-row"><span class="prop-label">Trim In</span><span id="prop-trim-in" class="prop-val accent">0:00</span></div>
+                <div class="prop-row"><span class="prop-label">Trim Out</span><span id="prop-trim-out" class="prop-val accent">0:00</span></div>
+                <div class="prop-row"><span class="prop-label">New Length</span><span id="prop-trim-dur" class="prop-val accent">0:00</span></div>
+                <div class="prop-divider"></div>
+                <button id="btn-export-props" class="export-btn">⬇ Export Trimmed Clip</button>
+              </div>
+            </div>
+            <div id="export-progress-wrap" class="hidden">
+              <p id="export-status">Preparing…</p>
+              <div id="export-track"><div id="export-bar"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TIMELINE (Clip Trimmer) -->
+        <div id="panel-timeline">
+          <div id="timeline-header">
+            <span class="panel-title">TIMELINE</span>
+            <div id="timeline-zoom">
+              <button class="zoom-btn" id="zoom-out">−</button>
+              <span id="zoom-label">100%</span>
+              <button class="zoom-btn" id="zoom-in">+</button>
+            </div>
+          </div>
+          <div id="timeline-body">
+            <div class="track-row">
+              <div class="track-label">V1</div>
+              <div class="track-lane" id="track-lane-v1">
+                <div id="track-empty-hint" class="track-hint">Add a clip to begin</div>
+                <div id="clip-block" class="hidden">
+                  <div class="clip-inner"><span id="clip-block-name">Clip</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="track-row ruler-row">
+              <div class="track-label"></div>
+              <div id="timeline-track-wrap">
+                <div id="timeline-track">
+                  <div id="playhead"></div>
+                  <div id="trim-region"></div>
+                  <div id="handle-start" class="trim-handle"><div class="handle-cap"></div></div>
+                  <div id="handle-end" class="trim-handle"><div class="handle-cap"></div></div>
+                </div>
+                <div id="ruler-labels">
+                  <span id="ruler-start">0:00</span>
+                  <span id="ruler-mid"></span>
+                  <span id="ruler-end">0:00</span>
+                </div>
+                <div id="trim-readout" class="hidden">
+                  <span id="trim-in-label">In: 0:00</span>
+                  <span id="trim-dur-label">Dur: 0:00</span>
+                  <span id="trim-out-label">Out: 0:00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VIEW: MULTI-TRACK ── -->
+      <div id="view-multitrack" class="workspace-view hidden">
+        <div class="mt-layout">
+
+          <!-- Top: media + preview -->
+          <div class="mt-top">
+            <div class="mt-media">
+              <div class="panel-header">
+                <span class="panel-title">MEDIA</span>
+                <button id="btn-add-mt" class="panel-add-btn">+ Add</button>
+              </div>
+              <div id="mt-media-list">
+                <div id="mt-empty">
+                  <span class="media-empty-icon">📁</span>
+                  <p>Import clips, then drag<br>to tracks below</p>
+                </div>
+              </div>
+            </div>
+            <div class="mt-preview">
+              <div class="mt-screen">
+                <div id="mt-placeholder">
+                  <span class="preview-icon">🎞️</span>
+                  <p>Place clips on tracks to preview</p>
+                </div>
+                <video id="mt-player" style="display:none"></video>
+              </div>
+              <div class="mt-transport">
+                <button id="mt-btn-start" class="transport-btn">⏮</button>
+                <button id="mt-btn-play" class="transport-btn play">▶</button>
+                <button id="mt-btn-end" class="transport-btn">⏭</button>
+                <span id="mt-timecode" class="timecode">0:00 / 0:00</span>
+                <div class="transport-spacer"></div>
+                <span class="mt-badge">Multi-Track Preview plays V1</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom: multi-track timeline -->
+          <div class="mt-timeline">
+            <div class="mt-tl-header">
+              <span class="panel-title">TRACKS</span>
+              <div class="mt-tl-actions">
+                <button class="mt-track-btn" id="mt-add-video">＋ Video</button>
+                <button class="mt-track-btn audio" id="mt-add-audio">＋ Audio</button>
+              </div>
+            </div>
+            <div id="mt-track-list">
+              <!-- Tracks rendered by JS -->
+            </div>
+            <div class="mt-drop-hint" id="mt-drop-hint">
+              Drag clips from the media library onto a track
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VIEW: SETTINGS / WHITE-LABEL ── -->
+      <div id="view-settings" class="workspace-view hidden">
+        <div class="settings-scroll">
+          <div class="settings-container">
+            <div class="settings-hero">
+              <h2 class="settings-title">⚙️ White-Label Settings</h2>
+              <p class="settings-sub">Configure branding, AI provider, and deployment options.</p>
+            </div>
+
+            <!-- Live Preview Card -->
+            <div class="settings-preview-card" id="settings-preview">
+              <div class="sprev-logo">
+                <span class="sprev-icon">🎬</span>
+                <div>
+                  <div class="sprev-name" id="sprev-name">Video Studio</div>
+                  <div class="sprev-tag" id="sprev-tag">by EOF Film Studio</div>
+                </div>
+              </div>
+              <div class="sprev-label">LIVE PREVIEW</div>
+            </div>
+
+            <div class="settings-grid">
+              <!-- Branding -->
+              <div class="settings-section">
+                <h3 class="settings-section-title">🎨 BRANDING</h3>
+                <div class="setting-row">
+                  <label class="setting-label">App Name</label>
+                  <input id="wl-app-name" class="setting-input" type="text" placeholder="Video Studio" />
+                </div>
+                <div class="setting-row">
+                  <label class="setting-label">Tagline</label>
+                  <input id="wl-tagline" class="setting-input" type="text" placeholder="by EOF Film Studio" />
+                </div>
+                <div class="setting-row">
+                  <label class="setting-label">Accent Color</label>
+                  <div class="color-picker-row">
+                    <input id="wl-accent" class="setting-color" type="color" value="#EF4444" />
+                    <span id="wl-accent-hex" class="color-hex">#EF4444</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Deployment -->
+              <div class="settings-section">
+                <h3 class="settings-section-title">🚀 DEPLOYMENT</h3>
+                <div class="setting-row">
+                  <label class="setting-label">Edition</label>
+                  <select id="wl-edition" class="setting-select">
+                    <option value="eof">EOF Video Studio</option>
+                    <option value="griot">Griot AI Film Studio</option>
+                    <option value="edu">Educational Edition</option>
+                    <option value="church">Church / Ministry</option>
+                    <option value="creator">Creator Edition</option>
+                    <option value="agency">Marketing Agency</option>
+                    <option value="indie">Independent Filmmaker</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+                <div class="setting-row">
+                  <label class="setting-label">Workspace</label>
+                  <input id="wl-workspace" class="setting-input" type="text" placeholder="My Studio" />
+                </div>
+              </div>
+
+              <!-- AI Provider -->
+              <div class="settings-section">
+                <h3 class="settings-section-title">🤖 AI PROVIDER</h3>
+                <div class="setting-row">
+                  <label class="setting-label">Primary Model</label>
+                  <select id="wl-ai-model" class="setting-select">
+                    <option value="claude">Claude (Anthropic)</option>
+                    <option value="gpt4o">GPT-4o (OpenAI)</option>
+                    <option value="gemini">Gemini (Google)</option>
+                    <option value="local">Local / Open-Source</option>
+                  </select>
+                </div>
+                <div class="setting-row">
+                  <label class="setting-label">API Key</label>
+                  <input id="wl-api-key" class="setting-input" type="password" placeholder="sk-…" />
+                </div>
+              </div>
+
+              <!-- Open-Source Engines -->
+              <div class="settings-section">
+                <h3 class="settings-section-title">⚙️ ENGINES</h3>
+                <div class="engine-toggle-list">
+                  <label class="engine-toggle"><input type="checkbox" id="eng-ffmpeg" checked /> <span>FFmpeg</span> <span class="eng-badge active">Active</span></label>
+                  <label class="engine-toggle"><input type="checkbox" id="eng-whisper" /> <span>Whisper (captions)</span> <span class="eng-badge">Optional</span></label>
+                  <label class="engine-toggle"><input type="checkbox" id="eng-comfy" /> <span>ComfyUI (AI images)</span> <span class="eng-badge">Optional</span></label>
+                  <label class="engine-toggle"><input type="checkbox" id="eng-ocio" /> <span>OpenColorIO</span> <span class="eng-badge">Optional</span></label>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-actions">
+              <button id="btn-settings-save" class="settings-save-btn">✅ Save &amp; Apply</button>
+              <button id="btn-settings-reset" class="settings-reset-btn">↺ Reset Defaults</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VIEW: COMING SOON (Color / Effects / Audio / Overlays) ── -->
+      <div id="view-soon" class="workspace-view hidden">
+        <div class="soon-container">
+          <span class="soon-icon" id="soon-icon">🎨</span>
+          <h2 class="soon-title" id="soon-title">Color Grade</h2>
+          <p class="soon-desc">Professional color grading with LUT management, HDR workflows, AI color matching, and film emulation.<br><br>Coming in EOF Video Studio v0.3.</p>
+          <div class="soon-pills">
+            <span class="soon-pill">LUT Manager</span>
+            <span class="soon-pill">AI Color Match</span>
+            <span class="soon-pill">Film Emulation</span>
+            <span class="soon-pill">Skin Tone Balance</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /editor -->
+  </div><!-- /shell -->
+
+  <!-- ══ EDITOR DOLL PANEL (floating) ══ -->
+  <div id="doll-panel" class="hidden">
+    <div class="doll-header">
+      <div>
+        <div class="doll-title">🤖 Editor Doll</div>
+        <div class="doll-sub">AI Editing Assistant</div>
+      </div>
+      <button id="doll-close">×</button>
+    </div>
+    <div id="doll-body">
+      <div id="doll-empty">
+        <span style="font-size:2rem;opacity:0.25">🤖</span>
+        <p>Import a clip to get<br>AI editing suggestions</p>
+      </div>
+      <div id="doll-loaded" class="hidden">
+        <div class="doll-section">CLIP ANALYSIS</div>
+        <div id="doll-analysis"></div>
+        <div class="doll-section" style="margin-top:12px">SUGGESTIONS</div>
+        <div id="doll-suggestions"></div>
+        <button id="btn-auto-edit" class="doll-auto-btn">⚡ Apply Best Cut</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

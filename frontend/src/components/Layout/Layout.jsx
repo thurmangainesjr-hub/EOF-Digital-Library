@@ -3,26 +3,44 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import {
-  FiHome, FiBook, FiFolder, FiEdit3, FiStar, FiUser,
+  FiHome, FiBook, FiFolder, FiEdit3, FiStar,
   FiLogOut, FiMenu, FiX, FiCommand, FiGlobe, FiPlay,
-  FiBell, FiChevronRight, FiThermometer, FiSmartphone
+  FiBell, FiChevronRight, FiThermometer, FiSmartphone, FiAward,
+  FiRadio, FiMonitor, FiCpu, FiUsers, FiGrid
 } from 'react-icons/fi';
+import UniversityWidget from '../University/UniversityWidget';
+
+// Emoji-based icon component for apps that use emoji identities
+function EmojiIcon({ emoji }) {
+  return <span className="text-base leading-none">{emoji}</span>;
+}
 
 const NAV_ITEMS = [
-  { path: '/',               icon: FiHome,    label: 'Dashboard',      group: 'main' },
-  { path: '/library',        icon: FiBook,    label: 'Library',        group: 'main' },
-  { path: '/bookshelves',    icon: FiFolder,  label: 'My Bookshelves', group: 'main' },
-  { path: '/story-time',     icon: FiPlay,    label: 'Story Time',     group: 'main' },
-  { path: '/gutenberg',      icon: FiGlobe,   label: 'Gutenberg',      group: 'explore' },
-  { path: '/command-center', icon: FiCommand, label: 'Command Center', group: 'explore' },
-  { path: '/membership',     icon: FiStar,       label: 'Membership',     group: 'account' },
+  // EOF Library
+  { path: '/',               icon: FiHome,    label: 'Dashboard',       group: 'library' },
+  { path: '/library',        icon: FiBook,    label: 'Library',         group: 'library' },
+  { path: '/bookshelves',    icon: FiFolder,  label: 'My Bookshelves',  group: 'library' },
+  { path: '/story-time',     icon: FiPlay,    label: 'Story Time',      group: 'library' },
+  // EOF Platform apps
+  { path: '/ecosystem',      icon: FiGlobe,   label: 'Ecosystem',       group: 'apps' },
+  { path: '/griot',          icon: FiCpu,     label: 'Griot AI',        group: 'apps' },
+  { path: '/university',     icon: FiAward,   label: 'DIY University',  group: 'apps' },
+  { path: '/creator-academy',icon: FiUsers,   label: 'Creator Academy', group: 'apps' },
+  { path: '/streaming',      icon: FiMonitor, label: 'EOF Streaming',   group: 'apps' },
+  { path: '/radio',          icon: FiRadio,   label: 'EOF Radio',       group: 'apps' },
+  // Discover
+  { path: '/gutenberg',      icon: FiGlobe,   label: 'Gutenberg',       group: 'explore' },
+  { path: '/command-center', icon: FiCommand, label: 'Command Center',  group: 'explore' },
+  // Account
+  { path: '/widgets',        icon: FiGrid,        label: 'Widgets',         group: 'account' },
+  { path: '/membership',     icon: FiStar,        label: 'Membership',      group: 'account' },
   { path: '/thermal',        icon: FiThermometer, label: 'Thermal Monitor', group: 'account' },
   { path: '/preview',        icon: FiSmartphone,  label: 'Test Lab',        group: 'account' },
 ];
 
 const CREATOR_ITEM = { path: '/creator', icon: FiEdit3, label: 'Creator Studio', group: 'explore' };
 
-const GROUP_LABELS = { main: 'Navigate', explore: 'Discover', account: 'Account' };
+const GROUP_LABELS = { library: 'EOF Library', apps: 'EOF Platform', explore: 'Discover', account: 'Account' };
 
 // ── EOF Logo mark ────────────────────────────────────────────────────────────
 function EOFLogo({ collapsed = false }) {
@@ -185,8 +203,15 @@ function TopBar({ onOpenDrawer, user, onLogout, currentPath }) {
     '/story-time':     'Story Time',
     '/gutenberg':      'Gutenberg',
     '/command-center': 'Command Center',
-    '/creator':        'Creator Studio',
-    '/membership':     'Membership',
+    '/creator':          'Creator Studio',
+    '/membership':       'Membership',
+    '/university':       'DIY University',
+    '/ecosystem':        'EOF Ecosystem',
+    '/griot':            'Griot AI',
+    '/streaming':        'EOF Streaming',
+    '/radio':            'EOF Radio',
+    '/creator-academy':  'Creator Academy',
+    '/widgets':          'Widget Gallery',
   };
   const title = Object.entries(PAGE_TITLES).find(([k]) =>
     currentPath === k || (k !== '/' && currentPath.startsWith(k))
@@ -291,6 +316,9 @@ function Layout() {
       >
         <Outlet />
       </main>
+
+      {/* University floating widget */}
+      <UniversityWidget />
     </div>
   );
 }

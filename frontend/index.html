@@ -71,6 +71,8 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- ffmpeg.wasm v0.11 — loaded globally so ClipTrimmerPage can use window.FFmpeg -->
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

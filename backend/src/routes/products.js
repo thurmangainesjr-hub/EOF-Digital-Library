@@ -172,13 +172,17 @@ router.get('/:id/content', optionalAuth, async (req, res) => {
 // Create product (creator only)
 router.post('/', requireCreator, async (req, res) => {
   try {
-    const { title, description, type, price, genres, adaptationAllowed, adaptationTerms, adaptationFee } = req.body;
+    const { title, author, description, type, price, genres, adaptationAllowed, adaptationTerms, adaptationFee } = req.body;
+
+    // Author is required; default to the creator's public name
+    const profile = await prisma.creatorProfile.findUnique({ where: { id: req.user.creatorProfileId } });
 
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
     const product = await prisma.product.create({
       data: {
         title,
+        author: author || profile.displayName,
         slug: `${slug}-${Date.now()}`,
         description,
         type: type || 'EBOOK',

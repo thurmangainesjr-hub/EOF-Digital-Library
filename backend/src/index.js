@@ -109,8 +109,8 @@ app.use((req, res) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
+// Start server (tests start their own on a free port)
+if (process.env.NODE_ENV !== 'test') app.listen(PORT, () => {
   console.log('');
   console.log('╔══════════════════════════════════════════════╗');
   console.log('║     EOF DIGITAL LIBRARY API                  ║');

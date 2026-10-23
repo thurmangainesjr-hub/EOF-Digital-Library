@@ -4,12 +4,10 @@
  * Main entry point for the backend services
  */
 
+// Load environment variables before the route modules read them
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config();
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -41,7 +39,12 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5174',
   credentials: true
 }));
-app.use(express.json({ limit: '10mb' }));
+// The Stripe webhook needs the raw body to check its signature, so skip JSON parsing there
+const jsonParser = express.json({ limit: '10mb' });
+app.use((req, res, next) => {
+  if (req.originalUrl.startsWith('/api/memberships/webhook')) return next();
+  return jsonParser(req, res, next);
+});
 
 // Rate limiting
 app.use(apiRateLimit);

@@ -4,9 +4,10 @@
 
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
+import { getSecret } from '../lib/secrets.js';
 
 const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'eof-dev-secret';
+const JWT_SECRET = getSecret('JWT_SECRET', 'eof-dev-secret');
 
 // Require authentication
 export function requireAuth(req, res, next) {

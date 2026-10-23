@@ -52,6 +52,14 @@ router.get('/config', (req, res) => {
 
 // Demo mode subscription (when Stripe not configured)
 router.post('/demo-subscribe', requireAuth, async (req, res) => {
+  // Free demo membership is for local testing only
+  if (stripe || process.env.NODE_ENV === 'production') {
+    return res.status(403).json({
+      success: false,
+      error: 'Demo membership is disabled. Use checkout to subscribe.'
+    });
+  }
+
   try {
     // Update membership to MEMBER in demo mode
     const membership = await prisma.membership.upsert({

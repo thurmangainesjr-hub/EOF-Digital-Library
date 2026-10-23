@@ -9,12 +9,13 @@ import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaClient } from '@prisma/client';
 import { handleValidation } from '../middleware/validation.js';
+import { getSecret } from '../lib/secrets.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'eof-dev-secret';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'eof-refresh-secret';
+const JWT_SECRET = getSecret('JWT_SECRET', 'eof-dev-secret');
+const JWT_REFRESH_SECRET = getSecret('JWT_REFRESH_SECRET', 'eof-refresh-secret');
 
 // Register
 router.post('/register',

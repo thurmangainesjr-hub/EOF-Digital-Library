@@ -8,7 +8,7 @@
 import express from 'express';
 
 const router = express.Router();
-const GUTENDEX_API = 'https://gutendex.com';
+const GUTENDEX_API = process.env.GUTENDEX_API_URL || 'https://gutendex.com';
 
 // Cache for API responses (simple in-memory cache)
 const cache = new Map();
@@ -93,67 +93,60 @@ router.get('/books/:id', async (req, res) => {
   }
 });
 
+// Find the best text link for a Gutenberg book.
+// Priority: plain text UTF-8 > plain text > HTML
+function pickContentUrl(book, format) {
+  const formats = book.formats || {};
+  if (format && formats[format]) return formats[format];
+
+  const preferredFormats = [
+    'text/plain; charset=utf-8',
+    'text/plain; charset=us-ascii',
+    'text/plain',
+    'text/html; charset=utf-8',
+    'text/html'
+  ];
+  for (const fmt of preferredFormats) {
+    if (formats[fmt]) return formats[fmt];
+  }
+  return null;
+}
+
+// Book details plus its cleaned text. Used by the reader and by Griot adaptations.
+// Returns null when the book has no readable format.
+export async function getGutenbergBookText(id, format) {
+  const book = await fetchWithCache(`${GUTENDEX_API}/books/${id}`);
+  const contentUrl = pickContentUrl(book, format);
+  if (!contentUrl) return null;
+
+  const contentResponse = await fetch(contentUrl);
+  if (!contentResponse.ok) {
+    throw new Error('Failed to fetch content');
+  }
+  const content = await contentResponse.text();
+
+  return {
+    book: transformBook(book),
+    // Remove Gutenberg headers/footers for reading
+    content: cleanGutenbergText(content),
+    format: contentUrl.includes('html') ? 'html' : 'text',
+    sourceUrl: contentUrl
+  };
+}
+
 // Get book content (text)
 router.get('/books/:id/content', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { format } = req.query;
+    const result = await getGutenbergBookText(req.params.id, req.query.format);
 
-    // First get book metadata
-    const url = `${GUTENDEX_API}/books/${id}`;
-    const book = await fetchWithCache(url);
-
-    // Find the best text format
-    const formats = book.formats || {};
-    let contentUrl = null;
-
-    // Priority: plain text UTF-8 > plain text > HTML
-    const preferredFormats = [
-      'text/plain; charset=utf-8',
-      'text/plain; charset=us-ascii',
-      'text/plain',
-      'text/html; charset=utf-8',
-      'text/html'
-    ];
-
-    if (format && formats[format]) {
-      contentUrl = formats[format];
-    } else {
-      for (const fmt of preferredFormats) {
-        if (formats[fmt]) {
-          contentUrl = formats[fmt];
-          break;
-        }
-      }
-    }
-
-    if (!contentUrl) {
+    if (!result) {
       return res.status(404).json({
         success: false,
         error: 'No readable content format available'
       });
     }
 
-    // Fetch the content
-    const contentResponse = await fetch(contentUrl);
-    if (!contentResponse.ok) {
-      throw new Error('Failed to fetch content');
-    }
-
-    const content = await contentResponse.text();
-
-    // Clean up the content (remove Gutenberg headers/footers for reading)
-    const cleanedContent = cleanGutenbergText(content);
-
-    res.json({
-      success: true,
-      data: {
-        book: transformBook(book),
-        content: cleanedContent,
-        format: contentUrl.includes('html') ? 'html' : 'text',
-        sourceUrl: contentUrl
-      }
-    });
+    res.json({ success: true, data: result });
   } catch (error) {
     console.error('Gutenberg content error:', error);
     res.status(500).json({

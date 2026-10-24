@@ -7,6 +7,7 @@
 import express from 'express';
 import { requireAuth, requireMember } from '../middleware/auth.js';
 import prisma from '../lib/prisma.js';
+import { getGutenbergBookText } from './gutenberg.js';
 
 const router = express.Router();
 
@@ -46,106 +47,208 @@ router.get('/status', async (req, res) => {
   }
 });
 
-// Export book to Griot AI for adaptation
+// Most text we send to Griot in one go
+const MAX_SOURCE_CHARS = 50000;
+
+// Griot answers with sample text when it has no AI key
+const DEMO_MARKER = '[Demo Mode Active]';
+
+// Raised when Griot AI is not running or answers with an error
+class GriotUnavailableError extends Error {}
+
+async function callGriot(path, body, authorization) {
+  let response;
+  try {
+    response = await fetch(`${GRIOT_API_URL}${path}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': authorization || ''
+      },
+      body: JSON.stringify(body)
+    });
+  } catch (error) {
+    throw new GriotUnavailableError(`Griot AI is not running at ${GRIOT_API_URL}`);
+  }
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new GriotUnavailableError(data.error || data.message || `Griot AI error ${response.status}`);
+  }
+  return data;
+}
+
+// The script is the last thing the Griot chain wrote
+function scriptFromChain(result) {
+  const outputs = { ...(result?.outputs || {}) };
+  delete outputs.input;
+  const values = Object.values(outputs).filter(v => typeof v === 'string');
+  return values[values.length - 1] || '';
+}
+
+// Publishing a book does not give anyone adaptation rights. A user may adapt a book only when
+// it is public domain, they wrote it, or the author approved their adaptation request.
+async function adaptationRightsFor(user, product) {
+  if (['GUTENBERG', 'PUBLIC_DOMAIN'].includes(product.source)) return 'public-domain';
+  if (product.creator?.userId === user.id) return 'author';
+
+  const approved = await prisma.adaptationRequest.findFirst({
+    where: {
+      userId: user.id,
+      productId: product.id,
+      status: { in: ['APPROVED', 'IN_PROGRESS', 'COMPLETED'] }
+    }
+  });
+  return approved ? 'approved-request' : null;
+}
+
+// Find the book, check rights and collect its text.
+// Library books use their id; Project Gutenberg books use "gutenberg-<id>".
+async function loadSource(productId, user, pastedText) {
+  if (productId.startsWith('gutenberg-')) {
+    const gutenbergId = productId.slice('gutenberg-'.length);
+    if (!/^\d+$/.test(gutenbergId)) return { error: 404, message: 'Book not found' };
+    const result = await getGutenbergBookText(gutenbergId);
+    if (!result) return { error: 404, message: 'This Gutenberg book has no readable text' };
+    return {
+      source: {
+        productId: null,
+        gutenbergId,
+        title: result.book.title,
+        author: result.book.author,
+        genres: result.book.genres || [],
+        description: result.book.description || ''
+      },
+      text: result.content,
+      rights: 'public-domain'
+    };
+  }
+
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    include: {
+      creator: true,
+      genres: { include: { genre: true } }
+    }
+  });
+  if (!product) return { error: 404, message: 'Book not found' };
+
+  const rights = await adaptationRightsFor(user, product);
+  if (!rights) {
+    return {
+      error: 403,
+      message: 'You need the author\'s approval to adapt this book. Send an adaptation request first.'
+    };
+  }
+
+  let text = '';
+  if (product.gutenbergId) {
+    const result = await getGutenbergBookText(product.gutenbergId).catch(() => null);
+    text = result?.content || '';
+  }
+  // Authors can paste their manuscript; there is no manuscript upload yet
+  if (!text && pastedText && rights === 'author') text = pastedText;
+  if (!text) text = product.description || '';
+
+  return {
+    source: {
+      productId: product.id,
+      gutenbergId: product.gutenbergId,
+      title: product.title,
+      author: product.author,
+      genres: product.genres.map(g => g.genre?.name).filter(Boolean),
+      description: product.description || ''
+    },
+    text,
+    rights
+  };
+}
+
+// Send a book to Griot AI and get a draft script (or other adaptation) back
 router.post('/export/:productId', requireMember, async (req, res) => {
   try {
     const { productId } = req.params;
-    const { adaptationType, options = {} } = req.body;
+    const { adaptationType = 'screenplay', options = {}, text: pastedText } = req.body;
 
-    // Get book details
-    const product = await prisma.product.findUnique({
-      where: { id: productId },
-      include: {
-        genres: {
-          include: { genre: true }
-        }
-      }
-    });
+    const loaded = await loadSource(productId, req.user, pastedText);
+    if (loaded.error) {
+      return res.status(loaded.error).json({ success: false, error: loaded.message });
+    }
+    const { source, text, rights } = loaded;
 
-    if (!product) {
-      return res.status(404).json({
+    if (!text.trim()) {
+      return res.status(400).json({
         success: false,
-        error: 'Book not found'
+        error: 'This book has no text yet. Paste the manuscript text to adapt it.'
       });
     }
+    const content = text.substring(0, MAX_SOURCE_CHARS);
 
-    // Get book content if available
-    let content = '';
-    if (product.gutenbergId) {
-      // Fetch from Gutenberg
-      try {
-        const gutenbergRes = await fetch(
-          `${req.protocol}://${req.get('host')}/api/gutenberg/books/${product.gutenbergId}/content`
-        );
-        if (gutenbergRes.ok) {
-          const gutenbergData = await gutenbergRes.json();
-          content = gutenbergData.data?.content || '';
-        }
-      } catch (e) {
-        console.log('Could not fetch Gutenberg content:', e.message);
-      }
-    }
-
-    // Create project data for Griot AI
-    const projectData = {
-      title: `${product.title} - ${adaptationType} Adaptation`,
+    // 1. Book in: create a Griot project for this book
+    const project = await callGriot('/api/projects/import-book', {
+      title: `${source.title} - ${adaptationType} Adaptation`,
       sourceBook: {
-        id: product.id,
-        title: product.title,
-        author: product.author,
-        description: product.description,
-        genres: product.genres.map(g => g.genre?.name || g.name),
-        gutenbergId: product.gutenbergId,
-        content: content.substring(0, 50000) // Limit content size
+        id: source.productId || `gutenberg-${source.gutenbergId}`,
+        title: source.title,
+        author: source.author,
+        description: source.description,
+        genres: source.genres,
+        gutenbergId: source.gutenbergId,
+        content
       },
       adaptationType,
       options,
       canon: {
-        projectTitle: product.title,
-        genre: product.genres[0]?.genre?.name || 'Fiction',
+        projectTitle: source.title,
+        genre: source.genres[0] || 'Fiction',
         sourceType: 'book',
-        originalAuthor: product.author
+        originalAuthor: source.author
       }
-    };
+    }, req.headers.authorization);
 
-    // Send to Griot AI
-    const griotResponse = await fetch(`${GRIOT_API_URL}/api/projects/import-book`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': req.headers.authorization || ''
-      },
-      body: JSON.stringify(projectData)
-    });
+    // 2. Script out: run Griot's adaptation chain on the text
+    const chain = await callGriot('/api/chains/adapt', {
+      content,
+      adaptationType,
+      bookTitle: source.title,
+      author: source.author
+    }, req.headers.authorization);
 
-    if (!griotResponse.ok) {
-      const error = await griotResponse.json().catch(() => ({ message: 'Unknown error' }));
-      throw new Error(error.message || 'Failed to export to Griot AI');
-    }
+    const scriptText = scriptFromChain(chain.data);
+    const isDemo = scriptText.includes(DEMO_MARKER);
 
-    const griotData = await griotResponse.json();
-
-    // Record the adaptation in our database
-    await prisma.adaptation.create({
+    const adaptation = await prisma.adaptation.create({
       data: {
-        productId: product.id,
         userId: req.user.id,
-        griotProjectId: griotData.projectId,
+        productId: source.productId,
+        gutenbergId: source.gutenbergId,
+        sourceTitle: source.title,
+        sourceAuthor: source.author,
         type: adaptationType,
-        status: 'IN_PROGRESS',
-        metadata: JSON.stringify(options)
+        isDemo,
+        griotProjectId: project.projectId,
+        scriptText,
+        metadata: JSON.stringify({ options, rights, sourceChars: content.length })
       }
     });
 
     res.json({
       success: true,
       data: {
-        projectId: griotData.projectId,
-        griotUrl: `${process.env.GRIOT_FRONTEND_URL || 'http://localhost:5173'}/workspace/${griotData.projectId}`,
-        message: 'Book exported to Griot AI successfully'
+        adaptationId: adaptation.id,
+        projectId: project.projectId,
+        griotUrl: `${process.env.GRIOT_FRONTEND_URL || 'http://localhost:5173'}/workspace/${project.projectId}`,
+        script: scriptText,
+        status: adaptation.status,
+        isDemo,
+        message: isDemo
+          ? 'Griot AI has no AI key set, so this is sample text, not a real script'
+          : 'Draft script ready for the author to review'
       }
     });
   } catch (error) {
+    if (error instanceof GriotUnavailableError) {
+      return res.status(503).json({ success: false, error: error.message });
+    }
     console.error('Export error:', error);
     res.status(500).json({
       success: false,
@@ -218,9 +321,10 @@ router.get('/my-adaptations', requireAuth, async (req, res) => {
       orderBy: { createdAt: 'desc' }
     });
 
+    // The list leaves out the script text; open one adaptation to read it
     res.json({
       success: true,
-      data: { adaptations }
+      data: { adaptations: adaptations.map(({ scriptText, ...rest }) => rest) }
     });
   } catch (error) {
     console.error('Get adaptations error:', error);
@@ -228,6 +332,22 @@ router.get('/my-adaptations', requireAuth, async (req, res) => {
       success: false,
       error: 'Failed to get adaptations'
     });
+  }
+});
+
+// Read one adaptation, including its script
+router.get('/adaptations/:id', requireAuth, async (req, res) => {
+  try {
+    const adaptation = await prisma.adaptation.findFirst({
+      where: { id: req.params.id, userId: req.user.id }
+    });
+    if (!adaptation) {
+      return res.status(404).json({ success: false, error: 'Adaptation not found' });
+    }
+    res.json({ success: true, data: { adaptation } });
+  } catch (error) {
+    console.error('Get adaptation error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get adaptation' });
   }
 });
 

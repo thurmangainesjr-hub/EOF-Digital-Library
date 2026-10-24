@@ -18,6 +18,8 @@ function Adapt() {
   const [selectedType, setSelectedType] = useState(null);
   const [step, setStep] = useState(1);
   const [preview, setPreview] = useState(null);
+  const [manuscript, setManuscript] = useState('');
+  const [result, setResult] = useState(null);
 
   // Get book details
   const { data: book, isLoading: bookLoading } = useQuery({
@@ -72,13 +74,14 @@ function Adapt() {
       const productId = source === 'gutenberg' ? `gutenberg-${bookId}` : bookId;
       const res = await api.post(`/griot/export/${productId}`, {
         adaptationType: selectedType?.id,
-        options: {}
+        options: {},
+        text: manuscript || undefined
       });
       return res.data.data;
     },
     onSuccess: (data) => {
-      // Redirect to Griot AI
-      window.open(data.griotUrl, '_blank');
+      // Show the draft script that Griot sent back
+      setResult(data);
     }
   });
 
@@ -351,6 +354,60 @@ function Adapt() {
               </pre>
             </div>
 
+            {source !== 'gutenberg' && !result && (
+              <div className="card mb-6">
+                <label className="block text-white font-semibold mb-2" htmlFor="manuscript">
+                  Your manuscript text (optional, authors only)
+                </label>
+                <p className="text-gray-400 text-sm mb-3">
+                  If you wrote this book, paste its text here and Griot AI will adapt it.
+                  Otherwise the book description is used.
+                </p>
+                <textarea
+                  id="manuscript"
+                  value={manuscript}
+                  onChange={(e) => setManuscript(e.target.value)}
+                  rows={6}
+                  className="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-gray-200 text-sm"
+                  placeholder="Chapter 1..."
+                />
+              </div>
+            )}
+
+            {exportMutation.isError && (
+              <div className="card mb-6 border border-red-500/40 flex items-start gap-3">
+                <FiAlertCircle className="text-red-400 mt-1 flex-shrink-0" />
+                <p className="text-red-300 text-sm">
+                  {exportMutation.error?.response?.data?.error || 'Could not send the book to Griot AI'}
+                </p>
+              </div>
+            )}
+
+            {result && (
+              <div className="card mb-6">
+                <h3 className="font-serif text-xl text-white mb-2">Draft from Griot AI</h3>
+                {result.isDemo && (
+                  <p className="text-yellow-400 text-sm mb-3 flex items-center gap-2">
+                    <FiAlertCircle /> {result.message}
+                  </p>
+                )}
+                <p className="text-gray-400 text-sm mb-3">
+                  This is a draft for the author to review. It does not give anyone adaptation rights.
+                </p>
+                <pre className="text-gray-300 whitespace-pre-wrap font-mono text-sm leading-relaxed max-h-[32rem] overflow-y-auto">
+                  {result.script}
+                </pre>
+                <a
+                  href={result.griotUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary inline-flex items-center gap-2 mt-4"
+                >
+                  <FiExternalLink /> Keep working in Griot AI
+                </a>
+              </div>
+            )}
+
             <div className="flex gap-4">
               <button
                 onClick={() => setStep(2)}
@@ -366,11 +423,11 @@ function Adapt() {
                 >
                   {exportMutation.isPending ? (
                     <>
-                      <FiLoader className="animate-spin" /> Exporting...
+                      <FiLoader className="animate-spin" /> Griot AI is writing...
                     </>
                   ) : (
                     <>
-                      <FiExternalLink /> Open in Griot AI
+                      <FiZap /> {result ? 'Write it again' : 'Send to Griot AI'}
                     </>
                   )}
                 </button>

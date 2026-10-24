@@ -201,27 +201,27 @@ router.post('/export-to-griot', requireMember, async (req, res) => {
       });
     }
 
-    // Create project in Griot AI
-    const griotResponse = await fetch(`${GRIOT_API_URL}/api/projects`, {
+    // Create project in Griot AI (import-book accepts any adaptation type)
+    const griotResponse = await fetch(`${GRIOT_API_URL}/api/projects/import-book`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.GRIOT_API_KEY}`
       },
       body: JSON.stringify({
-        type: griotProjectType || request.targetFormat,
+        title: `Adaptation: ${request.product.title}`,
+        sourceBook: {
+          id: request.product.id,
+          title: request.product.title,
+          author: request.product.author,
+          description: request.product.description
+        },
+        adaptationType: griotProjectType || request.targetFormat,
+        options: { includeCharacters, includeWorldBuilding, eofRequestId: request.id },
         canon: {
           projectTitle: `Adaptation: ${request.product.title}`,
-          genre: 'adaptation',
-          sourceWork: {
-            title: request.product.title,
-            creator: request.product.creator.displayName,
-            eofProductId: request.product.id,
-            eofRequestId: request.id
-          }
-        },
-        characters: includeCharacters ? [] : undefined, // Would extract from product
-        importedFrom: 'eof-digital-library'
+          originalAuthor: request.product.creator?.displayName
+        }
       })
     });
 
@@ -229,7 +229,8 @@ router.post('/export-to-griot', requireMember, async (req, res) => {
       throw new Error('Failed to create Griot AI project');
     }
 
-    const griotProject = await griotResponse.json();
+    const { projectId } = await griotResponse.json();
+    const griotProject = { id: projectId };
 
     // Update request with Griot project ID
     await prisma.adaptationRequest.update({

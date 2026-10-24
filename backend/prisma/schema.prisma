@@ -34,6 +34,7 @@ model User {
   readingSessions   ReadingSession[]
   adaptationPrefs   AdaptationPreference[]
   adaptationReqs    AdaptationRequest[]
+  adaptations       Adaptation[]
   legalAcceptances  LegalAcceptance[]
   bookshelves       Bookshelf[]
 
@@ -159,6 +160,7 @@ model Product {
   orders                Order[]
   readingSessions       ReadingSession[]
   adaptationRequests    AdaptationRequest[]
+  adaptations           Adaptation[]
   bookshelfItems        BookshelfItem[]
 
   @@index([slug])
@@ -365,6 +367,33 @@ model AdaptationRequest {
 // =====================================
 // LEGAL & COMPLIANCE
 // =====================================
+
+// A script or other draft that Griot AI wrote from a book.
+// It stays a DRAFT until the author approves it; it never grants rights.
+model Adaptation {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId       String?
+  product         Product?  @relation(fields: [productId], references: [id])
+  gutenbergId     String?
+
+  sourceTitle     String
+  sourceAuthor    String
+  type            String    // screenplay, audiobook, ...
+  status          String    @default("DRAFT") // DRAFT, APPROVED, DISCARDED
+  isDemo          Boolean   @default(false)   // true when Griot had no AI key and returned sample text
+
+  griotProjectId  String?
+  scriptText      String?
+  metadata        String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([productId])
+}
 
 model LegalAcceptance {
   id              String    @id @default(uuid())

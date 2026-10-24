@@ -35,6 +35,24 @@ const OS_STATS = [
   { label: 'Live Now',     value: ACTIVE_DIV,             icon: FiCheckCircle, color: '#10B981' },
 ];
 
+// Standalone apps that run on this PC (started by their own shortcut)
+const LOCAL_APPS = [
+  {
+    id: 'image-forge',
+    name: 'EOF Image Forge',
+    emoji: '🎨',
+    color: ACCENT,
+    desc: 'Book covers, character art and talking puppets',
+    status: 'LOCAL · BUILD',
+    url: 'http://localhost:5190',
+    bars: [
+      { label: 'Development', value: 53 },
+      { label: 'Business readiness', value: 8 },
+    ],
+    next: 'merge PR #7 (chat studio), test real pictures, finish the webcam puppet test.',
+  },
+];
+
 // Status appearance
 const STATUS_STYLE = {
   active:      { dot: '#10B981', label: 'ACTIVE',      bg: 'rgba(16,185,129,0.08)',  border: 'rgba(16,185,129,0.2)' },
@@ -313,6 +331,50 @@ export default function EOFCentralHub() {
                   <span className="text-[9px] font-bold" style={{ color: ACCENT }}>Q{p.quality}</span>
                 </div>
               </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Local Apps ────────────────────────────────────────────────────── */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-bold tracking-widest uppercase text-gray-500">Local Apps</h2>
+            <span className="text-[10px] text-gray-600">{LOCAL_APPS.length} on this PC</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {LOCAL_APPS.map(app => (
+              <div key={app.id}
+                className="rounded-xl border px-4 py-3 space-y-2"
+                style={{ background: `${app.color}08`, borderColor: `${app.color}25` }}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl flex-shrink-0">{app.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-white">{app.name}</p>
+                    <p className="text-[9px] text-gray-500 truncate">{app.desc}</p>
+                  </div>
+                  <span className="text-[8px] font-bold tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0"
+                    style={{ color: '#FCD34D', background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.25)' }}>
+                    {app.status}
+                  </span>
+                </div>
+                {app.bars.map(bar => (
+                  <div key={bar.label}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] text-gray-500">{bar.label}</span>
+                      <span className="text-[9px] font-bold" style={{ color: app.color }}>{bar.value}%</span>
+                    </div>
+                    <div className="h-1 rounded-full mt-1" style={{ background: 'rgba(255,255,255,0.07)' }}>
+                      <div className="h-full rounded-full" style={{ width: `${bar.value}%`, background: app.color }} />
+                    </div>
+                  </div>
+                ))}
+                <p className="text-[9px] text-gray-500 leading-relaxed">Next: {app.next}</p>
+                <a href={app.url} target="_blank" rel="noreferrer"
+                  className="inline-flex text-[10px] font-bold items-center gap-1 px-3 py-1.5 rounded-lg border transition-all hover:brightness-110"
+                  style={{ borderColor: `${app.color}30`, color: app.color, background: `${app.color}08` }}>
+                  Open <FiArrowRight size={9} />
+                </a>
+              </div>
             ))}
           </div>
         </section>

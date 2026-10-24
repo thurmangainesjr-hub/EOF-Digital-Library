@@ -106,7 +106,7 @@ router.post('/request', requireMember, async (req, res) => {
       },
       include: {
         product: { select: { title: true } },
-        user: { select: { name: true, email: true } }
+        user: { select: { displayName: true, email: true } }
       }
     });
 

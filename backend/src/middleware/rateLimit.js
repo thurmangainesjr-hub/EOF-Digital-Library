@@ -5,6 +5,8 @@
 const rateLimitStore = new Map();
 
 export function apiRateLimit(req, res, next) {
+  if (process.env.NODE_ENV === 'test') return next();
+
   const key = req.user?.id || req.ip;
   const now = Date.now();
   const windowMs = 60000; // 1 minute
@@ -35,7 +37,7 @@ export function apiRateLimit(req, res, next) {
 }
 
 // Cleanup old entries
-setInterval(() => {
+const cleanup = setInterval(() => {
   const now = Date.now();
   for (const [key, record] of rateLimitStore.entries()) {
     if (now > record.resetAt + 60000) {
@@ -43,5 +45,8 @@ setInterval(() => {
     }
   }
 }, 60000);
+
+// Don't keep the process alive just for this timer
+cleanup.unref();
 
 export default { apiRateLimit };

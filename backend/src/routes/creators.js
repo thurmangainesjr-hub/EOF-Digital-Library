@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
       where: { verified: true },
       include: {
         _count: { select: { products: true } },
-        user: { select: { name: true } }
+        user: { select: { displayName: true } }
       },
       orderBy: { totalSales: 'desc' },
       take: 50
@@ -60,10 +60,13 @@ router.post('/profile', requireAuth, async (req, res) => {
   try {
     const { displayName, bio, website, socialLinks } = req.body;
 
+    // The token has no name, so fall back to the account's display name
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+
     const profile = await prisma.creatorProfile.create({
       data: {
         userId: req.user.id,
-        displayName: displayName || req.user.name,
+        displayName: displayName || user.displayName,
         bio,
         website,
         socialLinks
